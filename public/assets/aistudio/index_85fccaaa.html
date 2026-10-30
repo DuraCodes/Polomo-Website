@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>POLOMO • Public Speaking &amp; Confidence</title>
+  <meta name="description" content="POLOMO is a practical confidence and exposure platform for people who freeze when speaking in front of others." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ---------- Design tokens (from the Figma file) ---------- */
+    :root {
+      --ink: #111118;
+      --blue: #2727e6;
+      --page: #f0f6ff;
+      --page-alt: #e5f0ff;
+      --card-sky: #e1edff;
+      --pink: #ffcfd6;
+      --green: #16ab59;
+      --orange: #ff7715;
+      --orange-deep: #ff660f;
+      --yellow: #ffe314;
+      --white: #ffffff;
+
+      --font-display: "Architects Daughter", "Comic Sans MS", cursive;
+      --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+      --gutter: clamp(20px, 11.25vw, 216px);   /* 216px at 1920 wide */
+      --radius-pill: 48px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    h1, h2, p { margin: 0; }
+
+    :focus-visible {
+      outline: 3px solid var(--blue);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    /* ---------- Announcement banner ---------- */
+    .banner {
+      position: relative;
+      height: 32px;
+      background: var(--blue);
+      color: var(--white);
+      overflow: hidden;
+    }
+    .banner[hidden] { display: none; }
+    .banner__track {
+      display: flex;
+      width: max-content;
+      height: 100%;
+      align-items: center;
+      animation: marquee 60s linear infinite;
+    }
+    .banner__item {
+      flex: none;
+      padding: 0 32px;
+      font-family: var(--font-display);
+      font-size: 12px;
+      line-height: 16.2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+
+    .banner__close-wrap {
+      position: absolute;
+      inset: 0 0 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 0 3px 0 48px;
+      background: linear-gradient(to left, var(--blue) 50%, rgba(39, 39, 230, 0));
+    }
+    .banner__close {
+      display: grid;
+      place-items: center;
+      width: 28.8px;
+      height: 28.8px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+    .banner__close span {
+      display: grid;
+      place-items: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--white);
+    }
+
+    /* ---------- Header (floating pill) ---------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: 0;
+    }
+    .site-header__inner {
+      width: min(100% - 48px, 1488px);
+      margin: 0 auto;
+      padding-top: 16px;
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      height: 48px;
+      border-radius: 24px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      background: rgba(255, 255, 255, 0.35);
+      box-shadow: 0 3.2px 4px rgba(18, 18, 151, 0.13);
+    }
+    .nav__home {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      margin: 0 8px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex: none;
+    }
+    .nav__links, .nav__actions { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; }
+    .nav__actions { margin-left: auto; padding-right: 16px; }
+    .nav a {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 0 11.2px;
+      font-family: var(--font-display);
+      font-size: 24px;
+      line-height: 24px;
+      letter-spacing: -0.48px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .nav a.is-underlined { text-decoration: underline; text-underline-position: from-font; }
+    .nav a:hover { text-decoration: underline; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 838px;
+      padding: clamp(150px, 12.5vw, 229px) 24px 64px;
+      background: linear-gradient(to bottom, var(--white), var(--page));
+      text-align: center;
+    }
+    .hero__shapes {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 1920px;
+      height: 838px;
+      transform: translateX(-50%) scale(var(--shape-scale, 1));
+      transform-origin: top center;
+      pointer-events: none;
+    }
+    .shape { position: absolute; display: block; }
+    .shape--circle { border-radius: 50%; }
+
+    .hero__content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 684px;
+      margin: 0 auto;
+    }
+    .hero__logo {
+      display: grid;
+      place-items: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+    .hero h1 {
+      margin-top: 16px;
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: clamp(32px, 2.4vw + 8px, 46px);
+      line-height: 1.2;
+      text-wrap: balance;
+    }
+    .hero__lede {
+      margin-top: 16px;
+      font-family: var(--font-display);
+      font-size: clamp(20px, 1.25vw + 4px, 24px);
+      line-height: 30px;
+      letter-spacing: -0.16px;
+    }
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    /* ---------- Buttons ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7.2px;
+      padding: 3.6px 14.4px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-display);
+      font-size: 24px;
+      line-height: 32.4px;
+      letter-spacing: -0.48px;
+      color: var(--white);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn--primary { background: var(--blue); }
+    .btn--dark { background: var(--ink); }
+    .btn svg { width: 30px; height: 17px; flex: none; }
+
+    /* ---------- Content sections ---------- */
+    main { padding-bottom: 120px; }
+    .stack { display: flex; flex-direction: column; gap: 48px; }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 64px var(--gutter);
+      line-height: 1.4;
+    }
+    .section h2 {
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: clamp(34px, 2vw + 14px, 52px);
+    }
+    .section p {
+      font-size: clamp(18px, 0.6vw + 12px, 28px);
+      max-width: 1488px;
+    }
+    .section--alt    { background: var(--page-alt); }
+    .section--yellow { background: var(--yellow); }
+    .section--orange { background: var(--orange-deep); }
+
+    /* ---------- Approach cards ---------- */
+    .approach-wrap { padding: 0 var(--gutter); }
+    .approach {
+      overflow: hidden;
+      border-radius: 24px;
+      background: var(--pink);
+    }
+    .approach__head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 24px 24px 0;
+    }
+    .approach__head h2 {
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: clamp(30px, 1.4vw + 16px, 42px);
+      line-height: 1.1;
+      letter-spacing: -0.16px;
+    }
+    .approach__cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      padding: 40px 24px 64px;
+    }
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 704px;
+      padding: 22px;
+      border-radius: 15px;
+      font-family: var(--font-display);
+      transform: rotate(var(--tilt, 0deg));
+    }
+    .card--sky    { --tilt: -2deg;   background: var(--card-sky); color: var(--ink); }
+    .card--green  { --tilt: 3deg;    background: var(--green);    color: var(--white); }
+    .card--orange { --tilt: -1.5deg; background: var(--orange);   color: var(--ink); }
+
+    .card__title {
+      font-weight: 400;
+      font-size: clamp(36px, 2.4vw + 10px, 52px);
+      line-height: 1.1;
+      letter-spacing: -0.35px;
+      padding: 51px 37px 0 13px;
+    }
+    .card--green  .card__title { font-size: clamp(32px, 2vw + 10px, 44px); padding-top: 0; }
+    .card--orange .card__title { font-size: clamp(38px, 2.6vw + 10px, 55px); padding-top: 0; }
+    .card__text {
+      margin-top: 24px;
+      padding: 0 7px;
+      font-size: 19px;
+      line-height: 1.25;
+      letter-spacing: -0.13px;
+    }
+    .card__dot {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+    .card__body { display: flex; flex-direction: column; }
+    .pill {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 32px;
+      padding: 3px 12px;
+      border-radius: 36px;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 22px;
+      letter-spacing: -0.33px;
+      text-decoration: none;
+      transition: transform 0.15s ease;
+    }
+    .pill:hover { transform: translateY(-2px); }
+    .pill svg { width: 26px; height: 11px; }
+
+    /* ---------- Footer ---------- */
+    .site-footer {
+      padding: 64px var(--gutter);
+      background: var(--page-alt);
+      font-family: var(--font-display);
+      font-size: clamp(34px, 2vw + 14px, 52px);
+      line-height: 1.4;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1280px) { .hero__shapes { --shape-scale: 0.7; } }
+    @media (max-width: 900px)  { .hero__shapes { --shape-scale: 0.5; } }
+    @media (max-width: 560px)  { .hero__shapes { --shape-scale: 0.35; } }
+
+    @media (max-width: 1100px) {
+      .approach__cards { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; gap: 48px; }
+      .card { min-height: 560px; }
+    }
+    @media (max-width: 720px) {
+      .nav a { font-size: 18px; padding: 0 8px; }
+      .nav__links a:nth-child(n+3) { display: none; }
+      .btn { font-size: 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .banner__track { animation: none; }
+      .btn, .pill { transition: none; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Announcement banner -->
+  <div class="banner" id="banner" role="region" aria-label="Announcement">
+    <div class="banner__track" id="bannerTrack">
+      <span class="banner__item">Stop learning about public speaking — start doing it with POLOMO!</span>
+    </div>
+    <div class="banner__close-wrap">
+      <button class="banner__close" id="bannerClose" type="button" aria-label="Close announcement">
+        <span>
+          <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="#2727e6" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+            <path d="M1 1l7 7M8 1L1 8" />
+          </svg>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <nav class="nav" aria-label="Main">
+        <a class="nav__home" href="#top" aria-label="POLOMO home">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M8.5 14c1 1.6 2.2 2.3 3.5 2.3s2.5-.7 3.5-2.3" />
+            <circle cx="9" cy="10" r=".6" fill="#fff" />
+            <circle cx="15" cy="10" r=".6" fill="#fff" />
+          </svg>
+        </a>
+        <ul class="nav__links">
+          <li><a class="is-underlined" href="#catalog">Catalog</a></li>
+          <li><a class="is-underlined" href="#about">About</a></li>
+        </ul>
+        <ul class="nav__actions">
+          <li>
+            <a href="#search" aria-label="Search">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111118" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <circle cx="10.5" cy="10.5" r="6.5" />
+                <path d="M15.5 15.5L21 21" />
+              </svg>
+            </a>
+          </li>
+          <li><a href="#cart">Cart</a></li>
+          <li><a class="is-underlined" href="#signin">Sign in</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="stack">
+
+      <!-- Hero -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero__shapes" aria-hidden="true">
+          <span class="shape shape--circle" style="left:-258px; top:-101px; width:312px; height:312px; background:#2727e6;"></span>
+          <svg class="shape" style="left:284px; top:-49px; width:356px; height:378px;" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,0 100,38 81,100 19,100 0,38" fill="#ffe35c"/></svg>
+          <span class="shape shape--circle" style="left:1418px; top:-49px; width:343px; height:343px; background:#8fd4ee;"></span>
+          <span class="shape" style="left:1621px; top:327px; width:370px; height:370px; background:#ffe35c; transform:rotate(14deg);"></span>
+          <svg class="shape" style="left:62px; top:288px; width:322px; height:353px;" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,0 100,48 12,100" fill="#16ab59"/></svg>
+          <svg class="shape" id="star" style="left:1373px; top:667px; width:352px; height:344px;" viewBox="-50 -50 100 100"><polygon fill="#ffb8c6"/></svg>
+          <span class="shape shape--circle" style="left:-228px; top:744px; width:313px; height:313px; background:#ffb8c6;"></span>
+          <span class="shape shape--circle" style="left:242px; top:643px; width:343px; height:343px; background:#ff4d4d;"></span>
+          <span class="shape shape--circle" style="left:470px; top:715px; width:190px; height:190px; background:#111118;"></span>
+        </div>
+
+        <div class="hero__content">
+          <span class="hero__logo" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M8.5 14c1 1.6 2.2 2.3 3.5 2.3s2.5-.7 3.5-2.3" />
+              <circle cx="9" cy="10" r=".6" fill="#fff" />
+              <circle cx="15" cy="10" r=".6" fill="#fff" />
+            </svg>
+          </span>
+          <h1 id="hero-title">POLOMO: Stop Learning About Public Speaking. Start Speaking.</h1>
+          <p class="hero__lede">We don't teach communication theory.</p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#get-started">
+              Get started
+              <svg viewBox="0 0 30 17" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 8.5h27M21 1.5l7 7-7 7"/></svg>
+            </a>
+            <a class="btn btn--dark" href="#about">Learn more</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- What we do -->
+      <section class="section" id="about">
+        <h2>What We Do</h2>
+        <p>POLOMO is a practical confidence and exposure platform built for people who freeze, sweat, or feel deeply uncomfortable when speaking in front of others.</p>
+        <p>We don't teach communication theory. We don't host traditional lectures where you sit quietly and take notes. Instead, we provide an active environment where you step into the spotlight, face your hesitation, and build genuine stage presence through real-world repetition.</p>
+      </section>
+
+      <!-- How we do it -->
+      <section class="section">
+        <h2>How We Do It</h2>
+        <p>Confidence isn't built by listening; it’s built by doing. Our approach replaces textbooks with active desensitization and high-frequency execution:</p>
+      </section>
+
+      <!-- Our approach -->
+      <div class="approach-wrap" id="catalog">
+        <section class="approach" aria-labelledby="approach-title">
+          <div class="approach__head">
+            <h2 id="approach-title">Our approach</h2>
+            <a class="btn btn--primary" id="get-started" href="#get-started">
+              Get started
+              <svg viewBox="0 0 30 17" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 8.5h27M21 1.5l7 7-7 7"/></svg>
+            </a>
+          </div>
+
+          <div class="approach__cards">
+            <article class="card card--sky">
+              <span class="card__dot" aria-hidden="true"></span>
+              <div class="card__body">
+                <h3 class="card__title">Daily Speaking Reps</h3>
+                <p class="card__text">You get micro-opportunities to speak every single day. This constant frequency builds instant habit and eliminates overthinking.</p>
+              </div>
+              <a class="pill" href="#daily-reps">Daily reps
+                <svg viewBox="0 0 26 11" fill="none" stroke="#111118" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5h23M19 1l5 4.5-5 4.5"/></svg>
+              </a>
+            </article>
+
+            <article class="card card--green">
+              <div class="card__body">
+                <h3 class="card__title">Progressive Exposure Pods</h3>
+                <p class="card__text">You are placed into small, supportive peer groups led by dedicated facilitators, ensuring you are never thrown into the deep end alone.</p>
+              </div>
+              <a class="pill" href="#pods">Join a pod
+                <svg viewBox="0 0 26 11" fill="none" stroke="#111118" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5h23M19 1l5 4.5-5 4.5"/></svg>
+              </a>
+            </article>
+
+            <article class="card card--orange">
+              <div class="card__body">
+                <h3 class="card__title">Real-World and Virtual Stages</h3>
+                <p class="card__text">You practice across both virtual environments and physical spaces—stepping onto real stages, managing eye contact, and projecting your voice in front of live audiences.</p>
+              </div>
+              <a class="pill" href="#stages">Real stages
+                <svg viewBox="0 0 26 11" fill="none" stroke="#111118" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5h23M19 1l5 4.5-5 4.5"/></svg>
+              </a>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <!-- Why we do it -->
+      <section class="section section--alt">
+        <h2>Why We Do It (The POLOMO Philosophy)</h2>
+        <p>Traditional public-speaking courses fail because they treat speaking like an academic subject. They teach you about structure, body language, and voice modulation, but they leave you paralyzed the moment all eyes turn toward you.</p>
+        <p>The Problem: Knowing how a bicycle works doesn’t stop you from falling when you first ride one. You have to get on the bike.</p>
+        <p>Our Belief: You don’t become comfortable speaking by studying communication. You become comfortable by actually speaking—over and over again—until the fear loses its grip.</p>
+      </section>
+
+      <!-- Immediate feedback -->
+      <section class="section section--yellow">
+        <h2>Immediate Feedback</h2>
+        <p>Constructive, real-time feedback helps you course-correct your posture, pacing, and presence instantly.</p>
+      </section>
+
+      <!-- Who it's for -->
+      <section class="section">
+        <h2>Who POLOMO Is For</h2>
+        <p>Students &amp; Graduates</p>
+      </section>
+
+      <!-- Final CTA -->
+      <section class="section section--orange">
+        <h2>Start Speaking.</h2>
+        <p>You don’t become comfortable speaking by studying communication. You become comfortable by actually speaking—over and over again—until the fear loses its grip.</p>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">POLOMO</footer>
+
+  <script>
+    // Marquee: repeat the banner message so the loop is seamless (two identical halves).
+    (function () {
+      var track = document.getElementById('bannerTrack');
+      var item = track.firstElementChild;
+      var copies = 12; // must be even
+      for (var i = 1; i < copies; i++) {
+        var clone = item.cloneNode(true);
+        if (i > 0) clone.setAttribute('aria-hidden', 'true');
+        track.appendChild(clone);
+      }
+    })();
+
+    // Dismiss the announcement banner.
+    document.getElementById('bannerClose').addEventListener('click', function () {
+      document.getElementById('banner').hidden = true;
+    });
+
+    // Pink starburst: build a 14-point star polygon.
+    (function () {
+      var points = [], spikes = 14, outer = 48, inner = 30;
+      for (var i = 0; i < spikes * 2; i++) {
+        var r = i % 2 === 0 ? outer : inner;
+        var a = (Math.PI * i) / spikes - Math.PI / 2;
+        points.push((r * Math.cos(a)).toFixed(2) + ',' + (r * Math.sin(a)).toFixed(2));
+      }
+      document.querySelector('#star polygon').setAttribute('points', points.join(' '));
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "POLOMO • Public Speaking & Confidence",
+  "description": "A practical confidence and exposure platform for people who freeze when speaking in front of others.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
