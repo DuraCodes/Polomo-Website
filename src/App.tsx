@@ -213,7 +213,7 @@ export default function App() {
             </ul>
             <div className="nav__actions">
               <a
-                className="btn btn--primary nav__btn"
+                className="btn btn--primary nav__btn hidden md:inline-flex"
                 href="#cohort"
                 onClick={() => setMenuChecked(false)}
               >
