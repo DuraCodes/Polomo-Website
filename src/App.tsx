@@ -16,7 +16,9 @@ import {
 } from "@/components/ui/card";
 import { ExposureRoadmapTeaser, ExposureRoadmapModal } from './components/ExposureRoadmap';
 import { FAQTeaserBar, BrutalistFAQModal } from './components/BrutalistFAQ';
-import { CohortApplicationForm } from './components/CohortApplicationForm';
+import { CohortCalloutCard } from './components/CohortCalloutCard';
+import { WhatsAppCommunityCard } from './components/WhatsAppCommunityCard';
+import { ApplyPage } from './pages/ApplyPage';
 import { BrutalistFooter } from './components/BrutalistFooter';
 import { DiagnosticModal } from './components/DiagnosticModal';
 
@@ -27,6 +29,39 @@ export default function App() {
   const [roadmapModalOpen, setRoadmapModalOpen] = useState(false);
   const [faqModalOpen, setFaqModalOpen] = useState(false);
   const [diagnosticModalOpen, setDiagnosticModalOpen] = useState(false);
+
+  // Client-side lightweight routing
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const p = window.location.pathname;
+      const h = window.location.hash;
+      return p === '/apply' || h === '#/apply' || h === '#apply' ? '/apply' : '/';
+    }
+    return '/';
+  });
+
+  const navigate = (path: string) => {
+    if (typeof window !== 'undefined') {
+      if (path === '/apply') {
+        window.history.pushState({}, '', '/apply');
+      } else {
+        window.history.pushState({}, '', '/');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setCurrentPath(path);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const p = window.location.pathname;
+      const h = window.location.hash;
+      const isApply = p === '/apply' || h === '#/apply' || h === '#apply';
+      setCurrentPath(isApply ? '/apply' : '/');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Scrollspy to accurately detect active section for navbar underline
   useEffect(() => {
@@ -81,6 +116,11 @@ export default function App() {
     }
     return points.join(' ');
   }, []);
+
+  // If user navigated to /apply, render the dedicated distraction-free ApplyPage
+  if (currentPath === '/apply') {
+    return <ApplyPage onBack={() => navigate('/')} />;
+  }
 
   return (
     <>
@@ -212,13 +252,13 @@ export default function App() {
               </li>
             </ul>
             <div className="nav__actions">
-              <a
+              <button
+                type="button"
                 className="btn btn--primary nav__btn hidden md:inline-flex"
-                href="#cohort"
-                onClick={() => setMenuChecked(false)}
+                onClick={() => navigate('/apply')}
               >
                 Join Cohort
-              </a>
+              </button>
               <button
                 type="button"
                 className={`chm-27__plate nav__plate-toggle ${menuChecked ? 'is-checked' : ''}`}
@@ -274,7 +314,7 @@ export default function App() {
                   <div className="chm-27__row"><a href="#roadmap" onClick={(e) => { e.preventDefault(); setMenuChecked(false); setRoadmapModalOpen(true); }}><b>02</b>EXPOSURE ROADMAP<span aria-hidden="true">↗</span></a></div>
                   <div className="chm-27__row"><a href="#who-it-is-for" onClick={() => setMenuChecked(false)}><b>03</b>WHO IT'S FOR<span aria-hidden="true">→</span></a></div>
                   <div className="chm-27__row"><a href="#faq" onClick={(e) => { e.preventDefault(); setMenuChecked(false); setFaqModalOpen(true); }}><b>04</b>FAQ INQUIRIES<span aria-hidden="true">↗</span></a></div>
-                  <div className="chm-27__row"><a href="#cohort" onClick={() => setMenuChecked(false)}><b>05</b>APPLY FOR COHORT<span aria-hidden="true">→</span></a></div>
+                  <div className="chm-27__row"><button type="button" onClick={() => { setMenuChecked(false); navigate('/apply'); }} className="w-full text-left bg-transparent border-none p-0 cursor-pointer font-inherit text-inherit"><b>05</b>APPLY FOR COHORT<span aria-hidden="true">→</span></button></div>
                   <div className="chm-27__foot">
                     <div className="chm-27__badge">
                       ZERO THEORY<br />ACTIVE EXPOSURE<br />DAILY SPEAKING REPS
@@ -410,10 +450,14 @@ export default function App() {
               <p className="hero__lede">We don't teach communication theory.</p>
 
               <div className="hero__actions">
-                <a className="btn btn--primary" href="#cohort">
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  onClick={() => navigate('/apply')}
+                >
                   <span>Get started</span>
                   <ArrowRight className="size-4 stroke-[2.5]" />
-                </a>
+                </button>
                 <a className="btn btn--dark" href="#about">
                   <span>Learn more</span>
                 </a>
@@ -452,10 +496,14 @@ export default function App() {
             <section className="approach" aria-labelledby="approach-title">
               <div className="approach__head">
                 <h2 id="approach-title">Our approach</h2>
-                <a className="btn btn--dark" href="#cohort">
+                <button
+                  type="button"
+                  className="btn btn--dark"
+                  onClick={() => navigate('/apply')}
+                >
                   <span>Get started</span>
                   <ArrowRight className="size-4 stroke-[2.5]" />
-                </a>
+                </button>
               </div>
 
               <div className="approach__cards">
@@ -506,91 +554,103 @@ export default function App() {
               Traditional public-speaking courses fail because they treat speaking like an academic subject. They teach you about structure, body language, and voice modulation, but they leave you paralyzed the moment all eyes turn toward you.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6 max-w-[620px] mx-auto w-full">
-              {/* Card 1: The Problem (Solid Coral-Red #FF3B30 - Compact ~30% Reduced) */}
-              <Card
-                variant="coral"
-                size="xs"
-                className="relative flex flex-col justify-between shadow-2xl h-full md:[transform:rotate(-1.2deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200"
-              >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 max-w-[840px] mx-auto w-full">
+              {/* Card 1: The Problem (Warm Paper Slab with Electric Red Accent) */}
+              <article className="relative flex flex-col justify-between bg-[#FAF8F5] border-3 border-black text-[#0A0A0C] rounded-2xl p-6 sm:p-8 shadow-[8px_8px_0_#FF3366] md:[transform:rotate(-1.5deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                <span
+                  className="card__dot"
+                  aria-hidden="true"
+                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#FF3366', border: '2px solid #000' }}
+                />
                 <div>
-                  <CardHeader className="space-y-1 pb-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white">
-                        The Problem
-                      </span>
-                    </div>
-                    <CardTitle className="text-lg sm:text-[19px] text-white">The Academic Trap</CardTitle>
-                    <CardDescription className="text-white font-medium text-[13px] leading-relaxed mt-0.5" style={{ color: '#FFFFFF' }}>
-                      Why studying lectures and theory never eliminates the stage freeze.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-1 pb-1">
-                    <ul className="grid gap-2 py-1 text-[13px] text-white font-medium">
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[2.5]" />
-                        <span>Treats performance anxiety like an intellectual puzzle, not a physiological reaction.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[2.5]" />
-                        <span>Knowing how a bicycle works doesn’t stop you from falling when you first ride it.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[2.5]" />
-                        <span>Sitting passively taking notes creates false confidence that vanishes under live scrutiny.</span>
-                      </li>
-                    </ul>
-                  </CardContent>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#FF3366] text-white border border-black shadow-[1px_1px_0_#000]">
+                      The Obstacle
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#0A0A0C] tracking-tight mb-1">
+                    The Academic Trap
+                  </h3>
+                  <p className="text-neutral-700 font-medium text-sm leading-relaxed mb-4">
+                    Why studying lectures and communication theory never eliminates the stage freeze.
+                  </p>
+                  
+                  <ul className="space-y-2.5 text-sm text-[#0A0A0C] font-semibold list-none p-0 m-0">
+                    <li className="flex items-start gap-2.5">
+                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                      <span>Treats performance anxiety like an intellectual puzzle, not a physiological reaction.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                      <span>Knowing how a bicycle works doesn’t stop you from falling when you first ride it.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                      <span>Sitting passively taking notes creates false confidence that vanishes under live scrutiny.</span>
+                    </li>
+                  </ul>
                 </div>
-                <CardFooter className="pt-3">
-                  <a className="pill" href="#about" style={{ marginTop: 0, padding: '6px 14px', fontSize: '13px', minHeight: '32px' }}>
-                    The Theory Trap &rarr;
-                  </a>
-                </CardFooter>
-              </Card>
 
-              {/* Card 2: Our Belief (Solid Arctic White - Compact ~30% Reduced) */}
-              <Card
-                variant="white"
-                size="xs"
-                className="relative flex flex-col justify-between shadow-2xl h-full md:[transform:rotate(1.2deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200"
-              >
-                <span className="card__dot" aria-hidden="true" style={{ top: '16px', right: '16px', width: '22px', height: '22px' }} />
-                <div>
-                  <CardHeader className="space-y-1 pb-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FF0000] text-white">
-                        Our Belief
-                      </span>
-                    </div>
-                    <CardTitle className="text-lg sm:text-[19px] text-[#111118]">Active Desensitization</CardTitle>
-                    <CardDescription className="text-[#111118] font-medium text-[13px] leading-relaxed mt-0.5" style={{ color: '#111118' }}>
-                      Confidence is a physical reflex built exclusively through repetition.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-1 pb-1">
-                    <ul className="grid gap-2 py-1 text-[13px] text-[#111118] font-medium">
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-[#111118] stroke-[2.5]" />
-                        <span>You get on the bike: speak frequently in low-stakes rooms until panic recedes.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-[#111118] stroke-[2.5]" />
-                        <span>Physical immersion retrains the nervous system to stay steady under eye contact.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-[#111118] stroke-[2.5]" />
-                        <span>Immediate real-world reps replace textbooks with instinctive stage command.</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </div>
-                <CardFooter className="pt-3">
-                  <a className="btn btn--primary" href="#get-started" style={{ fontSize: '13px', padding: '6px 14px', minHeight: '32px', marginTop: 0 }}>
-                    Experience The Protocol &rarr;
+                <div className="pt-6">
+                  <a
+                    className="pill cursor-pointer"
+                    href="#about"
+                    style={{ marginTop: 0 }}
+                  >
+                    <span>The Theory Trap</span>
+                    <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </a>
-                </CardFooter>
-              </Card>
+                </div>
+              </article>
+
+              {/* Card 2: Our Belief (Arctic White Slab with Cyber Gold Accent) */}
+              <article className="relative flex flex-col justify-between bg-white border-3 border-black text-[#111118] rounded-2xl p-6 sm:p-8 shadow-[8px_8px_0_#FFE500] md:[transform:rotate(1.5deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                <span
+                  className="card__dot"
+                  aria-hidden="true"
+                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#FFE500', border: '2px solid #000' }}
+                />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-[#FFE500]">
+                      Our Belief
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#111118] tracking-tight mb-1">
+                    Active Desensitization
+                  </h3>
+                  <p className="text-zinc-700 font-normal text-sm leading-relaxed mb-4">
+                    Confidence is a physical reflex built exclusively through repetition.
+                  </p>
+
+                  <ul className="space-y-2.5 text-sm text-[#111118] font-medium list-none p-0 m-0">
+                    <li className="flex items-start gap-2.5">
+                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                      <span>You get on the bike: speak frequently in low-stakes rooms until panic recedes.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                      <span>Physical immersion retrains the nervous system to stay steady under eye contact.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                      <span>Immediate real-world reps replace textbooks with instinctive stage command.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="pt-6">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/apply')}
+                    className="pill cursor-pointer"
+                    style={{ marginTop: 0 }}
+                  >
+                    <span>Experience Protocol</span>
+                    <ArrowRight className="size-3.5 stroke-[2.5]" />
+                  </button>
+                </div>
+              </article>
             </div>
           </section>
 
@@ -600,7 +660,7 @@ export default function App() {
             <p>Constructive, real-time feedback helps you course-correct your posture, pacing, and presence instantly.</p>
           </section>
 
-          {/* Who it's for */}
+          {/* Who it's for (Expanded to 3 Pop-Neobrutalist Feature Cards Matching Our Approach) */}
           <section className="section" id="who-it-is-for">
             <span id="drops" style={{ display: 'block', position: 'relative', top: '-80px', visibility: 'hidden' }} />
             <h2>Who POLOMO Is For</h2>
@@ -608,135 +668,155 @@ export default function App() {
               Designed specifically for high-stakes communicators who need real-world performance reflexes, not lecture slides:
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 max-w-[800px] mx-auto w-full">
-              {/* Persona 1: Students & Graduates (Solid Arctic Cyan #8FD4EE - Compact ~30% Reduced) */}
-              <Card
-                variant="cyan"
-                size="xs"
-                className="relative flex flex-col justify-between shadow-2xl h-full md:[transform:rotate(-1.2deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200"
-              >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 max-w-[1100px] mx-auto w-full">
+              
+              {/* Persona 1: Students & Graduates (Periwinkle Sky #C7D2FE) */}
+              <article className="relative flex flex-col justify-between bg-[#C7D2FE] border-3 border-black text-[#111118] rounded-2xl p-6 sm:p-7 shadow-[6px_6px_0_#000] md:[transform:rotate(-1.5deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                <span
+                  className="card__dot"
+                  aria-hidden="true"
+                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#FF0000' }}
+                />
                 <div>
-                  <CardHeader className="space-y-1 pb-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#111118] text-white">
-                        Academia &amp; Entry
-                      </span>
-                    </div>
-                    <CardTitle className="text-lg sm:text-[19px] text-[#111118]">Students &amp; Graduates</CardTitle>
-                    <CardDescription className="text-[#111118] font-medium text-[13px] leading-relaxed mt-0.5" style={{ color: '#111118' }}>
-                      Project defenses, seminar presentations, and high-pressure job interviews.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-1 pb-1">
-                    <ul className="grid gap-2 py-1 text-[13px] text-[#111118] font-medium">
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-[#111118] stroke-[2.5]" />
-                        <span>Defend thesis and capstone projects without vocal trembling.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-[#111118] stroke-[2.5]" />
-                        <span>Conquer interview jitters and answer behavioral curveballs calmly.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-[#111118] stroke-[2.5]" />
-                        <span>Eliminate memory blanking when presenting to professors.</span>
-                      </li>
-                    </ul>
-                  </CardContent>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
+                      Academia &amp; Entry
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#111118] tracking-tight mb-1">
+                    Students &amp; Graduates
+                  </h3>
+                  <p className="text-[#181820] font-normal text-sm leading-relaxed mb-4">
+                    Thesis defenses, capstone presentations, and high-pressure job interviews.
+                  </p>
+
+                  <ul className="space-y-2 text-xs sm:text-sm text-[#111118] font-medium list-none p-0 m-0">
+                    <li className="flex items-start gap-2">
+                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                      <span>Defend thesis and capstone without vocal trembling.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                      <span>Conquer interview jitters and answer curveball prompts.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                      <span>Eliminate memory blanking in front of professors.</span>
+                    </li>
+                  </ul>
                 </div>
-                <CardFooter className="pt-3">
-                  <a className="pill" href="#cohort" style={{ marginTop: 0, padding: '7px 14px', fontSize: '13px' }}>
+
+                <div className="pt-6">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/apply')}
+                    className="pill cursor-pointer"
+                    style={{ marginTop: 0 }}
+                  >
                     <span>Student track</span>
                     <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </a>
-                </CardFooter>
-              </Card>
-
-              {/* Persona 2: Professionals & Seekers (Solid Cyber Canary Yellow #FFE500 - Compact ~30% Reduced) */}
-              <Card
-                variant="yellow"
-                size="xs"
-                className="relative flex flex-col justify-between shadow-2xl h-full md:[transform:rotate(1.2deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200"
-              >
-                <div>
-                  <CardHeader className="space-y-1 pb-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#111118] text-white">
-                        Career &amp; Visibility
-                      </span>
-                    </div>
-                    <CardTitle className="text-lg sm:text-[19px] text-[#111118]">Professionals &amp; Seekers</CardTitle>
-                    <CardDescription className="text-[#111118] font-medium text-[13px] leading-relaxed mt-0.5" style={{ color: '#111118' }}>
-                      Commanding team meetings, leadership reviews, and unscripted Q&amp;A.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-1 pb-1">
-                    <ul className="grid gap-2 py-1 text-[13px] text-[#111118] font-medium">
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-[#111118] stroke-[2.5]" />
-                        <span>Stop staying muted in meetings when you have valuable solutions.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-[#111118] stroke-[2.5]" />
-                        <span>Pitch ideas seamlessly to executive stakeholders with presence.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-[#111118] stroke-[2.5]" />
-                        <span>Handle unexpected challenge questions without flushing or retreating.</span>
-                      </li>
-                    </ul>
-                  </CardContent>
+                  </button>
                 </div>
-                <CardFooter className="pt-3">
-                  <a className="pill" href="#cohort" style={{ marginTop: 0, padding: '7px 14px', fontSize: '13px' }}>
+              </article>
+
+              {/* Persona 2: Professionals & Seekers (Solar Canary #FFE500) */}
+              <article className="relative flex flex-col justify-between bg-[#FFE500] border-3 border-black text-[#111118] rounded-2xl p-6 sm:p-7 shadow-[6px_6px_0_#000] md:[transform:rotate(2deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                <span
+                  className="card__dot"
+                  aria-hidden="true"
+                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#111118' }}
+                />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
+                      Career &amp; Visibility
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#111118] tracking-tight mb-1">
+                    Professionals &amp; Seekers
+                  </h3>
+                  <p className="text-[#181820] font-normal text-sm leading-relaxed mb-4">
+                    Commanding team meetings, leadership reviews, and unscripted Q&amp;A.
+                  </p>
+
+                  <ul className="space-y-2 text-xs sm:text-sm text-[#111118] font-medium list-none p-0 m-0">
+                    <li className="flex items-start gap-2">
+                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                      <span>Stop staying muted in meetings when you have solutions.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                      <span>Pitch ideas seamlessly to executive stakeholders.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                      <span>Handle tough challenge questions without retreating.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="pt-6">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/apply')}
+                    className="pill cursor-pointer"
+                    style={{ marginTop: 0 }}
+                  >
                     <span>Join a pod</span>
                     <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </a>
-                </CardFooter>
-              </Card>
-
-              {/* Persona 3: Founders & Creators (Solid Hot Strawberry Pink #FF4071 - Compact ~30% Reduced) */}
-              <Card
-                variant="pink"
-                size="xs"
-                className="relative flex flex-col justify-between shadow-2xl h-full md:[transform:rotate(-1deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200"
-              >
-                <div>
-                  <CardHeader className="space-y-1 pb-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white">
-                        Pitches &amp; Stages
-                      </span>
-                    </div>
-                    <CardTitle className="text-lg sm:text-[19px] text-white">Founders &amp; Creators</CardTitle>
-                    <CardDescription className="text-white font-medium text-[13px] leading-relaxed mt-0.5" style={{ color: '#FFFFFF' }}>
-                      Investor pitches, demo days, podcasts, and live audience scrutiny.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-1 pb-1">
-                    <ul className="grid gap-2 py-1 text-[13px] text-white font-medium">
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[2.5]" />
-                        <span>Pitch your business with undeniable conviction and energy.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[2.5]" />
-                        <span>Own the stage whether addressing 10 or 1,000 live listeners.</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[2.5]" />
-                        <span>Navigate harsh investor critique and public scrutiny with poise.</span>
-                      </li>
-                    </ul>
-                  </CardContent>
+                  </button>
                 </div>
-                <CardFooter className="pt-3">
-                  <a className="pill" href="#cohort" style={{ marginTop: 0, padding: '7px 14px', fontSize: '13px' }}>
+              </article>
+
+              {/* Persona 3: Founders & Creators (Electric Berry / Coral #FF3366) */}
+              <article className="relative flex flex-col justify-between bg-[#FF3366] border-3 border-black text-white rounded-2xl p-6 sm:p-7 shadow-[6px_6px_0_#000] md:[transform:rotate(-1.2deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                <span
+                  className="card__dot"
+                  aria-hidden="true"
+                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#FFFFFF' }}
+                />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
+                      Pitches &amp; Stages
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-1">
+                    Founders &amp; Creators
+                  </h3>
+                  <p className="text-white/90 font-normal text-sm leading-relaxed mb-4">
+                    Investor pitches, demo days, podcasts, and live auditorium scrutiny.
+                  </p>
+
+                  <ul className="space-y-2 text-xs sm:text-sm text-white font-medium list-none p-0 m-0">
+                    <li className="flex items-start gap-2">
+                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
+                      <span>Pitch your company with undeniable conviction and fire.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
+                      <span>Own the stage whether addressing 10 or 1,000 live listeners.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
+                      <span>Navigate harsh investor critique and public scrutiny calmly.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="pt-6">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/apply')}
+                    className="pill cursor-pointer"
+                    style={{ marginTop: 0 }}
+                  >
                     <span>Explore stages</span>
                     <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </a>
-                </CardFooter>
-              </Card>
+                  </button>
+                </div>
+              </article>
+
             </div>
 
             {/* Reassurance Note */}
@@ -750,8 +830,16 @@ export default function App() {
           {/* Brutalist FAQ Compact Callout Bar */}
           <FAQTeaserBar onOpenModal={() => setFaqModalOpen(true)} />
 
-          {/* Cohort Intake Application Form Terminal */}
-          <CohortApplicationForm />
+          {/* Zero-Risk WhatsApp Practice Community */}
+          <WhatsAppCommunityCard
+            onBookDiagnostic={() => setDiagnosticModalOpen(true)}
+          />
+
+          {/* Cohort Application High-Impact Callout Card (replaces heavy on-page form) */}
+          <CohortCalloutCard
+            onApply={() => navigate('/apply')}
+            onOpenDiagnostic={() => setDiagnosticModalOpen(true)}
+          />
 
         </div>
       </main>
@@ -761,12 +849,14 @@ export default function App() {
         onOpenRoadmap={() => setRoadmapModalOpen(true)}
         onOpenFaq={() => setFaqModalOpen(true)}
         onOpenDiagnostic={() => setDiagnosticModalOpen(true)}
+        onApply={() => navigate('/apply')}
       />
 
       {/* 4-Stage Exposure Roadmap Modal */}
       <ExposureRoadmapModal
         isOpen={roadmapModalOpen}
         onClose={() => setRoadmapModalOpen(false)}
+        onApply={() => navigate('/apply')}
       />
 
       {/* Brutalist FAQ Modal */}

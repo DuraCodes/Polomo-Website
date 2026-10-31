@@ -96,60 +96,59 @@ export const PHASES: StagePhase[] = [
   }
 ];
 
-// 1. Compact On-Page Teaser Strip (reduces ~500px of vertical space)
+// 1. Compact On-Page Teaser Strip (HyperUI Connected Steps + Neobrutalism Spec)
 export const ExposureRoadmapTeaser: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
   return (
     <section className="section" id="roadmap" aria-labelledby="roadmap-title">
-      <div className="border-3 border-white bg-[#101018] rounded-2xl p-5 sm:p-7 shadow-[8px_8px_0_#8FD4EE] relative overflow-hidden">
-        {/* Background Halftone Grid */}
+      <div className="border-[2.5px] border-black bg-white rounded-3xl p-6 sm:p-8 shadow-[7px_7px_0_#000] relative overflow-hidden">
+        
+        {/* Subtle Warm Graph Accent */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-20"
-          style={{
-            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.2) 1.2px, transparent 1.3px)',
-            backgroundSize: '16px 16px'
-          }}
+          className="absolute -right-16 -top-16 w-60 h-60 rounded-full bg-[#C7D2FE]/40 pointer-events-none blur-3xl"
+          aria-hidden="true"
         />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded bg-[#FF0000] text-white border border-white">
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="flex-1 w-full">
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <span className="text-[11px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-[#00E575] text-black border-2 border-black shadow-[2px_2px_0_#000]">
                 4-Stage Protocol
               </span>
-              <span className="text-xs font-semibold text-zinc-400">
+              <span className="text-xs font-bold text-neutral-600">
                 Biological Exposure Ladder
               </span>
             </div>
-            <h3 id="roadmap-title" className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight m-0">
+            
+            <h3 id="roadmap-title" className="text-2xl sm:text-3xl font-black text-[#0A0A0C] tracking-tight m-0">
               The Exposure Roadmap
             </h3>
-            <p className="text-zinc-300 text-sm mt-1 max-w-xl leading-relaxed">
+            <p className="text-neutral-700 text-sm font-medium mt-1.5 max-w-xl leading-relaxed">
               How we retrain your nervous system from private 60-second micro-reps to commanding a live auditorium.
             </p>
 
-            {/* 4-Step Mini Pipeline Preview */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5">
+            {/* HyperUI-Style Connected Step Sequence */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
               {PHASES.map((p) => {
                 const Icon = p.icon;
                 return (
                   <div
                     key={p.id}
                     onClick={onOpenModal}
-                    className="p-2.5 rounded-lg border-2 border-white/20 bg-black/50 hover:border-white transition-all cursor-pointer group flex flex-col justify-between"
+                    className="p-3.5 rounded-2xl border-2 border-black bg-[#FAF8F5] hover:bg-white transition-all cursor-pointer group flex flex-col justify-between shadow-[3px_3px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                   >
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center justify-between mb-2">
                       <span
-                        className="text-[10px] font-black px-1.5 py-0.5 rounded border border-black"
-                        style={{ background: p.badgeColor, color: '#111118' }}
+                        className="text-[10px] font-black px-2 py-0.5 rounded-full border border-black shadow-[1px_1px_0_#000]"
+                        style={{ background: p.badgeColor, color: '#0A0A0C' }}
                       >
                         {p.step}
                       </span>
-                      <Icon className="size-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+                      <Icon className="size-4 text-neutral-700 group-hover:text-black transition-colors" />
                     </div>
-                    <span className="text-xs font-bold text-white leading-tight block truncate">
+                    <span className="text-xs font-black text-[#0A0A0C] leading-snug block truncate">
                       {p.badge}
                     </span>
-                    <span className="text-[10px] text-zinc-400 block mt-0.5">
+                    <span className="text-[11px] text-neutral-500 font-bold block mt-1">
                       {p.stakes}
                     </span>
                   </div>
@@ -158,17 +157,17 @@ export const ExposureRoadmapTeaser: React.FC<{ onOpenModal: () => void }> = ({ o
             </div>
           </div>
 
-          {/* Trigger Button */}
-          <div className="shrink-0 w-full md:w-auto">
+          {/* Trigger Button - Neobrutalism.dev Pill CTA */}
+          <div className="shrink-0 w-full lg:w-auto">
             <button
               type="button"
               onClick={onOpenModal}
-              className="btn btn--primary text-sm font-bold py-3 px-6 shadow-[4px_4px_0_#FFF] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none w-full md:w-auto flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full lg:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-full border-2 border-black bg-black text-white hover:bg-[#FF3366] font-extrabold text-sm shadow-[4px_4px_0_#FFE500] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
               style={{ margin: 0 }}
             >
-              <Layers className="size-4" />
-              <span>Inspect Full Protocol &amp; Drills</span>
-              <ArrowRight className="size-4" />
+              <Layers className="size-4 stroke-[2.5]" />
+              <span>Inspect Protocol &amp; Drills</span>
+              <ArrowRight className="size-4 stroke-[2.5]" />
             </button>
           </div>
         </div>
@@ -177,10 +176,11 @@ export const ExposureRoadmapTeaser: React.FC<{ onOpenModal: () => void }> = ({ o
   );
 };
 
-// 2. Full Interactive Roadmap Modal (neobrutalism.dev dialog spec)
-export const ExposureRoadmapModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
+// 2. Full Interactive Roadmap Modal (Neobrutalism.dev Dialog Spec)
+export const ExposureRoadmapModal: React.FC<{ isOpen: boolean; onClose: () => void; onApply?: () => void }> = ({
   isOpen,
-  onClose
+  onClose,
+  onApply
 }) => {
   const [activePhaseIndex, setActivePhaseIndex] = useState<number>(0);
   const activePhase = PHASES[activePhaseIndex];
@@ -211,7 +211,7 @@ export const ExposureRoadmapModal: React.FC<{ isOpen: boolean; onClose: () => vo
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-roadmap-title"
@@ -220,16 +220,16 @@ export const ExposureRoadmapModal: React.FC<{ isOpen: boolean; onClose: () => vo
       }}
     >
       <div
-        className="relative w-full max-w-4xl border-3 border-white bg-[#12121a] rounded-2xl shadow-[10px_10px_0_#8FD4EE] overflow-hidden my-auto max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-150"
+        className="relative w-full max-w-4xl border-[3px] border-black bg-white rounded-3xl shadow-[10px_10px_0_#000] overflow-hidden my-auto max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Window Bar */}
-        <header className="flex items-center justify-between p-4 sm:p-5 border-b-3 border-white bg-[#181824] shrink-0">
+        <header className="flex items-center justify-between p-4 sm:p-5 border-b-[2.5px] border-black bg-[#FAF8F5] shrink-0">
           <div className="flex items-center gap-2.5">
-            <span className="text-[11px] font-black uppercase tracking-widest px-2.5 py-1 rounded bg-[#FF0000] text-white border border-white">
-              PROTOCOL SPEC
+            <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#00E575] text-black border-2 border-black shadow-[2px_2px_0_#000]">
+              Protocol Spec
             </span>
-            <span id="modal-roadmap-title" className="text-base sm:text-lg font-black text-white tracking-tight">
+            <span id="modal-roadmap-title" className="text-base sm:text-lg font-black text-[#0A0A0C] tracking-tight">
               4-Stage Biological Exposure Roadmap
             </span>
           </div>
@@ -237,18 +237,18 @@ export const ExposureRoadmapModal: React.FC<{ isOpen: boolean; onClose: () => vo
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-white bg-[#FF0000] text-white font-black text-xs cursor-pointer shadow-[3px_3px_0_#FFF] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none hover:bg-[#e60000] transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border-2 border-black bg-white hover:bg-neutral-100 text-black font-extrabold text-xs cursor-pointer shadow-[2px_2px_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
             aria-label="Close roadmap modal"
           >
             <X className="size-4 stroke-[3]" />
-            <span>CLOSE</span>
+            <span>Close</span>
           </button>
         </header>
 
         {/* Modal Scrollable Body */}
-        <div className="p-5 sm:p-7 overflow-y-auto flex-1 space-y-6">
-          {/* Phase Selector Tabs */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+        <div className="p-5 sm:p-7 overflow-y-auto flex-1 space-y-6 bg-white">
+          {/* Phase Selector Tabs (Neobrutalism Tab Matrix) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {PHASES.map((phase, idx) => {
               const isActive = idx === activePhaseIndex;
               const Icon = phase.icon;
@@ -257,80 +257,76 @@ export const ExposureRoadmapModal: React.FC<{ isOpen: boolean; onClose: () => vo
                   key={phase.id}
                   type="button"
                   onClick={() => setActivePhaseIndex(idx)}
-                  className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl border-2 border-black text-left transition-all cursor-pointer ${
                     isActive
-                      ? 'border-white bg-[#1c1c28] translate-x-[2px] translate-y-[2px]'
-                      : 'border-white/20 bg-black/40 hover:border-white/60'
+                      ? 'bg-[#FFE500] shadow-[4px_4px_0_#000] translate-x-[1px] translate-y-[1px]'
+                      : 'bg-[#FAF8F5] hover:bg-neutral-100 shadow-[2px_2px_0_#000]'
                   }`}
-                  style={{
-                    boxShadow: isActive ? `4px 4px 0 ${phase.shadowColor}` : 'none'
-                  }}
                 >
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1.5">
                     <span
-                      className="text-[10px] font-black px-1.5 py-0.5 rounded border border-black"
-                      style={{ background: phase.badgeColor, color: '#111118' }}
+                      className="text-[10px] font-black px-2 py-0.5 rounded-full border border-black bg-white text-black"
                     >
                       PHASE {phase.step}
                     </span>
-                    <Icon className="size-3.5 text-white" />
+                    <Icon className="size-4 text-black" />
                   </div>
-                  <span className="text-xs font-bold text-white block truncate">{phase.badge}</span>
-                  <span className="text-[10px] text-zinc-400 block">{phase.stakes}</span>
+                  <span className="text-xs font-black text-[#0A0A0C] block truncate">{phase.badge}</span>
+                  <span className="text-[11px] text-neutral-600 font-bold block mt-0.5">{phase.stakes}</span>
                 </button>
               );
             })}
           </div>
 
           {/* Active Phase Details Card */}
-          <div className="border-2 border-white/40 bg-black/50 rounded-xl p-5 sm:p-6 space-y-5">
+          <div className="border-2 border-black bg-[#FAF8F5] rounded-3xl p-5 sm:p-7 space-y-5 shadow-[4px_4px_0_#000]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <span className="text-xs font-bold text-[#8FD4EE] uppercase tracking-wider block mb-1">
+                <span className="text-xs font-extrabold text-[#FF3366] uppercase tracking-wider block mb-1">
                   Step {activePhase.step} of 04
                 </span>
-                <h4 className="text-xl sm:text-2xl font-black text-white m-0">
+                <h4 className="text-xl sm:text-2xl font-black text-[#0A0A0C] m-0">
                   {activePhase.title}
                 </h4>
               </div>
-              <span className="text-xs font-black px-3 py-1 rounded bg-[#FFE500] text-black border border-black">
+              <span className="text-xs font-black px-3.5 py-1 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#000]">
                 {activePhase.repsTarget}
               </span>
             </div>
 
             {/* Target Alert Callout */}
-            <div className="border-l-4 border-[#FF0000] bg-[#FF0000]/10 p-3.5 rounded-r-lg">
-              <span className="text-[11px] font-black uppercase tracking-wider text-[#FF0000] block mb-1 flex items-center gap-1.5">
-                <ShieldAlert className="size-3.5" />
+            <div className="border-2 border-black bg-white p-4 rounded-2xl shadow-[3px_3px_0_#000]">
+              <span className="text-[11px] font-black uppercase tracking-wider text-black block mb-1 flex items-center gap-1.5">
+                <ShieldAlert className="size-4 text-[#FF3366]" />
                 Physiological Target
               </span>
-              <p className="text-xs sm:text-sm font-medium text-zinc-200 leading-relaxed m-0">
+              <p className="text-xs sm:text-sm font-semibold text-neutral-700 leading-relaxed m-0">
                 {activePhase.nervousSystemGoal}
               </p>
             </div>
 
             {/* Schedule & Environment Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                <span className="text-zinc-400 block text-[10px] font-bold uppercase mb-0.5">Cadence &amp; Time</span>
-                <span className="text-white font-bold">{activePhase.frequency}</span>
+              <div className="p-3.5 bg-white rounded-2xl border-2 border-black shadow-[2px_2px_0_#000]">
+                <span className="text-neutral-500 block text-[10px] font-black uppercase mb-1">Cadence &amp; Time</span>
+                <span className="text-[#0A0A0C] font-extrabold text-sm">{activePhase.frequency}</span>
               </div>
-              <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                <span className="text-zinc-400 block text-[10px] font-bold uppercase mb-0.5">Environment</span>
-                <span className="text-white font-bold">{activePhase.environment}</span>
+              <div className="p-3.5 bg-white rounded-2xl border-2 border-black shadow-[2px_2px_0_#000]">
+                <span className="text-neutral-500 block text-[10px] font-black uppercase mb-1">Environment</span>
+                <span className="text-[#0A0A0C] font-extrabold text-sm">{activePhase.environment}</span>
               </div>
             </div>
 
             {/* Tactical Drills */}
             <div>
-              <span className="text-xs font-black uppercase tracking-wider text-white block mb-2.5 flex items-center gap-1.5">
-                <Sparkles className="size-3.5 text-[#FFE500]" />
+              <span className="text-xs font-black uppercase tracking-wider text-black block mb-3 flex items-center gap-1.5">
+                <Sparkles className="size-4 text-black" />
                 Tactical Drills Executed
               </span>
-              <ul className="space-y-2">
+              <ul className="space-y-2.5 m-0 p-0 list-none">
                 {activePhase.weeklyDrills.map((drill, dIdx) => (
-                  <li key={dIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-zinc-200">
-                    <span className="size-4 rounded bg-[#00E575] text-[#111118] font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5 border border-black">
+                  <li key={dIdx} className="flex items-start gap-3 text-xs sm:text-sm text-neutral-800 font-bold bg-white p-3 rounded-xl border-2 border-black shadow-[2px_2px_0_#000]">
+                    <span className="size-5 rounded-full bg-[#00E575] text-black font-black text-xs flex items-center justify-center shrink-0 border border-black">
                       ✓
                     </span>
                     <span>{drill}</span>
@@ -342,28 +338,29 @@ export const ExposureRoadmapModal: React.FC<{ isOpen: boolean; onClose: () => vo
         </div>
 
         {/* Modal Footer Bridge to Application */}
-        <footer className="p-4 sm:p-5 border-t-3 border-white bg-[#181824] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-          <span className="text-xs text-zinc-400 font-medium">
+        <footer className="p-4 sm:p-5 border-t-[2.5px] border-black bg-[#FAF8F5] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <span className="text-xs text-neutral-600 font-semibold">
             Next cohort begins with Phase 01 calibration exercises.
           </span>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               type="button"
               onClick={onClose}
-              className="btn btn--dark text-xs font-bold py-2 px-4 cursor-pointer"
-              style={{ margin: 0 }}
+              className="text-xs font-bold py-2.5 px-5 rounded-full border-2 border-black bg-white hover:bg-neutral-100 text-black shadow-[2px_2px_0_#000] cursor-pointer"
             >
               Close Roadmap
             </button>
-            <a
-              href="#cohort"
-              onClick={onClose}
-              className="btn btn--primary text-xs font-bold py-2 px-5 flex items-center gap-1.5 w-full sm:w-auto justify-center"
-              style={{ margin: 0 }}
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                if (onApply) onApply();
+              }}
+              className="text-xs font-extrabold py-2.5 px-6 rounded-full border-2 border-black bg-black text-white hover:bg-[#FF3366] shadow-[3px_3px_0_#FFE500] flex items-center gap-1.5 w-full sm:w-auto justify-center cursor-pointer transition-all"
             >
               <span>Apply For Cohort</span>
-              <ArrowRight className="size-3.5" />
-            </a>
+              <ArrowRight className="size-3.5 stroke-[2.5]" />
+            </button>
           </div>
         </footer>
       </div>

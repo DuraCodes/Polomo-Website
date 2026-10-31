@@ -5,12 +5,14 @@ interface BrutalistFooterProps {
   onOpenRoadmap: () => void;
   onOpenFaq: () => void;
   onOpenDiagnostic: () => void;
+  onApply?: () => void;
 }
 
 export const BrutalistFooter: React.FC<BrutalistFooterProps> = ({
   onOpenRoadmap,
   onOpenFaq,
   onOpenDiagnostic,
+  onApply,
 }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -44,8 +46,9 @@ export const BrutalistFooter: React.FC<BrutalistFooterProps> = ({
             </p>
 
             <div className="pt-2">
-              <a
-                href="#cohort"
+              <button
+                type="button"
+                onClick={onApply || (() => { const el = document.getElementById('cohort'); el?.scrollIntoView({ behavior: 'smooth' }); })}
                 className="btn btn--primary"
                 style={{
                   fontSize: '14px',
@@ -53,11 +56,12 @@ export const BrutalistFooter: React.FC<BrutalistFooterProps> = ({
                   boxShadow: '4px 4px 0px 0px #FFFFFF',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
+                  cursor: 'pointer',
                 }}
               >
                 <span>Join Next Cohort</span>
                 <ArrowRight className="size-4 stroke-[3]" />
-              </a>
+              </button>
             </div>
           </div>
 
@@ -110,12 +114,13 @@ export const BrutalistFooter: React.FC<BrutalistFooterProps> = ({
                   </button>
                 </li>
                 <li>
-                  <a
-                    href="#cohort"
-                    className="text-zinc-300 hover:text-white hover:underline underline-offset-4 decoration-[#8FD4EE] decoration-2 transition-colors block py-0.5"
+                  <button
+                    type="button"
+                    onClick={onApply || (() => { const el = document.getElementById('cohort'); el?.scrollIntoView({ behavior: 'smooth' }); })}
+                    className="text-zinc-300 hover:text-white hover:underline underline-offset-4 decoration-[#8FD4EE] decoration-2 transition-colors text-left bg-transparent border-none p-0 font-medium text-sm cursor-pointer block py-0.5"
                   >
-                    Cohort Intake Form ↓
-                  </a>
+                    Cohort Intake Terminal ↗
+                  </button>
                 </li>
               </ul>
             </div>
