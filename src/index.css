@@ -972,9 +972,7 @@ main {
     height: 32px;
   }
   .nav__btn {
-    font-size: 13px !important;
-    padding: 7px 14px !important;
-    min-height: 34px !important;
+    display: none !important;
   }
   .hero {
     min-height: auto;
@@ -994,12 +992,6 @@ main {
   }
   .nav__logo {
     height: 28px;
-  }
-  .nav__btn {
-    font-size: 12px !important;
-    padding: 6px 12px !important;
-    min-height: 32px !important;
-    letter-spacing: -0.2px !important;
   }
   .nav__plate-toggle {
     min-height: 34px;
