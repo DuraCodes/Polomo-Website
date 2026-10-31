@@ -154,10 +154,10 @@ h1, h2, h3, p {
   border-radius: 26px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  background: rgba(18, 18, 24, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7);
-  padding: 0 8px;
+  background: rgba(18, 18, 24, 0.9);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  padding: 0 12px 0 8px;
 }
 .nav__home {
   background: transparent;
@@ -194,6 +194,7 @@ h1, h2, h3, p {
   margin: 0 0 0 auto;
   padding: 0;
   gap: 8px;
+  padding-right: 4px;
 }
 .nav a {
   display: flex;
@@ -223,16 +224,32 @@ h1, h2, h3, p {
   text-decoration-thickness: 2.5px;
 }
 .nav__btn {
-  font-size: 13.5px !important;
+  font-size: 13px !important;
   line-height: 1.2 !important;
-  padding: 8px 16px !important;
+  padding: 7px 16px !important;
   min-height: 36px !important;
-  letter-spacing: 0px !important;
-  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  font-weight: 700 !important;
   display: inline-flex !important;
   align-items: center !important;
   width: auto !important;
   max-width: none !important;
+  border-radius: 9999px !important;
+  border: 2px solid #FFFFFF !important;
+  background: var(--accent-red) !important;
+  color: #FFFFFF !important;
+  box-shadow: 2px 2px 0px 0px #FFFFFF !important;
+  transition: transform 0.08s ease, box-shadow 0.08s ease !important;
+  cursor: pointer !important;
+}
+.nav__btn:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0px 0px #FFFFFF !important;
+  background: #e60000 !important;
+}
+.nav__btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 0 0 0 0 #FFFFFF !important;
 }
 /* ---------- Brutalist Bordered Hamburger Menu (chm-27) ---------- */
 .chm-27,
@@ -385,33 +402,74 @@ h1, h2, h3, p {
 .chm-27__row {
   border-bottom: 3px solid var(--ink);
 }
-.chm-27__row a {
+.chm-27__row a,
+.chm-27__row button {
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: 64px;
+  min-height: 60px;
   padding: 0 18px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: .06em;
   color: var(--ink);
   text-decoration: none;
-  transition: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.1s ease, color 0.1s ease;
+  user-select: none;
 }
 .chm-27__row b {
   font-size: 11px;
-  border: 2px solid var(--ink);
-  padding: 2px 6px;
-  color: var(--ink);
+  border: 2px solid #000;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 800;
+  box-shadow: 2px 2px 0 #000;
+}
+.chm-27__row:nth-child(1) b {
+  background: #FF3366;
+  color: #FFFFFF;
+}
+.chm-27__row:nth-child(2) b {
+  background: #C7D2FE;
+  color: #111118;
+}
+.chm-27__row:nth-child(3) b {
+  background: #00E575;
+  color: #111118;
+}
+.chm-27__row:nth-child(4) b {
+  background: #FFE500;
+  color: #111118;
+}
+.chm-27__row:nth-child(5) b {
+  background: #FF9500;
+  color: #111118;
 }
 .chm-27__row span {
   margin-left: auto;
   font-size: 18px;
+  transition: transform 0.1s ease;
 }
 .chm-27__row a:hover,
-.chm-27__row a:focus-visible {
+.chm-27__row a:focus-visible,
+.chm-27__row button:hover,
+.chm-27__row button:focus-visible {
   background: var(--ink);
   color: var(--paper);
+}
+.chm-27__row a:hover span,
+.chm-27__row button:hover span {
+  transform: translateX(4px);
+}
+.chm-27__row a:hover b,
+.chm-27__row a:focus-visible b,
+.chm-27__row button:hover b,
+.chm-27__row button:focus-visible b {
+  border-color: #000;
 }
 .chm-27__row a:hover b,
 .chm-27__row a:focus-visible b {
