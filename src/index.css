@@ -247,10 +247,10 @@ h1, h2, h3, p {
   background: transparent;
   width: 100%;
   box-sizing: border-box;
-  --paper: oklch(0.96 0.01 95);
-  --ink: oklch(0.18 0.01 90);
-  --acc: oklch(0.86 0.17 95);
-  font-family: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  --paper: #121218;
+  --ink: #FFFFFF;
+  --acc: #FF0000;
+  font-family: var(--font-body);
   color: var(--ink);
   display: grid;
   justify-content: center;
@@ -258,13 +258,13 @@ h1, h2, h3, p {
 .chm-27__stage {
   position: relative;
   width: min(400px, 88cqi, 88vw);
-  height: 560px;
+  height: min(560px, 84vh);
   border: 3px solid var(--ink);
-  background: radial-gradient(oklch(0.18 0.01 90 / 0.14) 1.2px, transparent 1.3px) 0 0 / 18px 18px, var(--paper);
+  background: radial-gradient(rgba(255, 255, 255, 0.12) 1.2px, transparent 1.3px) 0 0 / 18px 18px, var(--paper);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 8px 8px 0 var(--ink);
+  box-shadow: 8px 8px 0 var(--accent-red);
 }
 .chm-27__state {
   position: absolute;
@@ -305,12 +305,13 @@ h1, h2, h3, p {
   background: var(--acc);
   cursor: pointer;
   user-select: none;
+  font: inherit;
   box-shadow: 6px 6px 0 var(--ink);
   transition: translate .06s linear, box-shadow .06s linear;
   color: var(--ink);
 }
 .chm-27__plate:hover {
-  background: oklch(0.9 0.19 95);
+  background: #e60000;
 }
 .chm-27__state:focus-visible ~ .chm-27__bar .chm-27__plate {
   outline: 3px solid var(--ink);
@@ -421,6 +422,23 @@ h1, h2, h3, p {
   outline: 3px solid var(--acc);
   outline-offset: -6px;
 }
+.chm-27__foot {
+  flex: 1;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+  background: radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.3px) 0 0 / 18px 18px;
+}
+.chm-27__subtext {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: rgba(255, 255, 255, 0.65);
+  text-transform: uppercase;
+}
 .chm-27__page {
   flex: 1;
   padding: 22px;
@@ -444,13 +462,13 @@ h1, h2, h3, p {
 .chm-27__box {
   height: 150px;
   border: 3px solid var(--ink);
-  background: repeating-linear-gradient(-45deg, var(--paper) 0 12px, oklch(0.18 0.01 90 / 0.12) 12px 24px);
+  background: repeating-linear-gradient(-45deg, var(--paper) 0 12px, rgba(255, 0, 0, 0.18) 12px 24px);
 }
 .chm-27__ticker {
   margin-top: auto;
   border-top: 3px solid var(--ink);
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--accent-red);
+  color: #FFFFFF;
   overflow: hidden;
   padding: 9px 0;
 }
@@ -513,7 +531,7 @@ h1, h2, h3, p {
   cursor: pointer;
 }
 .nav__plate-toggle:hover {
-  background: oklch(0.9 0.19 95);
+  background: #e60000;
 }
 .nav__plate-toggle.is-checked {
   translate: 3px 3px;
@@ -616,42 +634,65 @@ h1, h2, h3, p {
   margin-top: 36px;
 }
 
-/* ---------- Buttons ---------- */
+/* ---------- Neo-Brutalist Buttons (neobrutalism.dev spec) ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 46px;
-  padding: 10px 24px;
-  border-radius: var(--radius-pill);
+  padding: 10px 22px;
+  border-radius: 12px;
+  border: 2px solid #FFFFFF;
   font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: 700;
+  font-size: 15px;
   line-height: 1.3;
   letter-spacing: -0.01em;
-  color: var(--white);
+  color: #FFFFFF;
   text-decoration: none;
   white-space: nowrap;
-  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease;
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
   cursor: pointer;
+  user-select: none;
 }
 .btn:hover {
-  transform: translateY(-2px);
+  transform: translate(1.5px, 1.5px);
+  box-shadow: 2.5px 2.5px 0px 0px #000000;
 }
 .btn:active {
-  transform: translateY(0);
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000000;
 }
 .btn--primary {
   background: var(--accent-red);
+  border-color: #FFFFFF;
+  box-shadow: 4px 4px 0px 0px #FFFFFF;
+}
+.btn--primary:hover {
+  background: #e60000;
+  box-shadow: 2px 2px 0px 0px #FFFFFF;
+}
+.btn--primary:active {
+  box-shadow: 0 0 0 #FFFFFF;
 }
 .btn--dark {
-  background: #181820;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: #14141e;
+  border: 2px solid #FFFFFF;
+  box-shadow: 4px 4px 0px 0px var(--accent-red);
+  color: #FFFFFF;
+}
+.btn--dark:hover {
+  background: #1c1c28;
+  box-shadow: 2px 2px 0px 0px var(--accent-red);
+}
+.btn--dark:active {
+  box-shadow: 0 0 0 var(--accent-red);
 }
 .btn svg {
-  width: 22px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   flex: none;
 }
 
@@ -809,32 +850,41 @@ main {
   display: flex;
   flex-direction: column;
 }
+/* ---------- Neo-Brutalist Action Tags (Replacing generic pills) ---------- */
 .pill {
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 28px;
-  padding: 8px 18px;
-  border-radius: 36px;
-  background: var(--white);
+  margin-top: 24px;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 2px solid #111118;
+  background: #FFFFFF;
   color: #111118;
   font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 13.5px;
   line-height: 1.4;
   letter-spacing: -0.01em;
   text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 3px 3px 0px 0px #111118;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  user-select: none;
+  cursor: pointer;
 }
 .pill:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0px 0px #111118;
+}
+.pill:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 #111118;
 }
 .pill svg {
-  width: 20px;
-  height: 10px;
+  width: 16px;
+  height: 16px;
+  flex: none;
 }
 
 /* ---------- Footer ---------- */

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronRightIcon, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,15 +14,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ExposureRoadmapTeaser, ExposureRoadmapModal } from './components/ExposureRoadmap';
+import { FAQTeaserBar, BrutalistFAQModal } from './components/BrutalistFAQ';
+import { CohortApplicationForm } from './components/CohortApplicationForm';
 
 export default function App() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [menuChecked, setMenuChecked] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
+  const [roadmapModalOpen, setRoadmapModalOpen] = useState(false);
+  const [faqModalOpen, setFaqModalOpen] = useState(false);
 
   // Scrollspy to accurately detect active section for navbar underline
   useEffect(() => {
-    const sectionIds = ['approach', 'about', 'who-it-is-for', 'cohort'];
+    const sectionIds = ['approach', 'roadmap', 'about', 'who-it-is-for', 'faq', 'cohort'];
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const offset = 180;
@@ -143,6 +148,28 @@ export default function App() {
                 </a>
               </li>
               <li>
+                <button
+                  type="button"
+                  onClick={() => setRoadmapModalOpen(true)}
+                  className="cursor-pointer"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    padding: '0 12px',
+                    minHeight: '38px',
+                    font: 'inherit',
+                    fontWeight: 500,
+                    fontSize: '14.5px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Roadmap ↗
+                </button>
+              </li>
+              <li>
                 <a
                   className={activeSection === 'about' ? 'is-underlined' : ''}
                   href="#about"
@@ -158,6 +185,28 @@ export default function App() {
                   Who It's For
                 </a>
               </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setFaqModalOpen(true)}
+                  className="cursor-pointer"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    padding: '0 12px',
+                    minHeight: '38px',
+                    font: 'inherit',
+                    fontWeight: 500,
+                    fontSize: '14.5px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  FAQ ↗
+                </button>
+              </li>
             </ul>
             <div className="nav__actions">
               <a
@@ -167,19 +216,16 @@ export default function App() {
               >
                 Join Cohort
               </a>
-              <label
-                htmlFor="chm27-t"
+              <button
+                type="button"
                 className={`chm-27__plate nav__plate-toggle ${menuChecked ? 'is-checked' : ''}`}
                 aria-label={menuChecked ? 'Close navigation menu' : 'Open navigation menu'}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setMenuChecked((prev) => !prev);
-                }}
+                onClick={() => setMenuChecked((prev) => !prev)}
               >
                 <span className="chm-27__ico" aria-hidden="true"><i></i><i></i><i></i></span>
                 <span className="chm-27__lbl chm-27__lbl--m" aria-hidden="true">MENU</span>
                 <span className="chm-27__lbl chm-27__lbl--c" aria-hidden="true">CLOSE</span>
-              </label>
+              </button>
             </div>
           </nav>
 
@@ -195,7 +241,7 @@ export default function App() {
               }
             }}
           >
-            <section className="chm-27" aria-label="Brutalist bordered menu demo">
+            <section className="chm-27" aria-label="Navigation menu">
               <div className="chm-27__stage">
                 <input
                   type="checkbox"
@@ -205,28 +251,37 @@ export default function App() {
                   onChange={(e) => setMenuChecked(e.target.checked)}
                 />
                 <header className="chm-27__bar">
-                  <span className="chm-27__brand">RAW—GOODS<i className="chm-27__reg" aria-hidden="true">®</i></span>
-                  <label
-                    htmlFor="chm27-t"
+                  <span className="chm-27__brand">POLOMO<i className="chm-27__reg" aria-hidden="true">®</i></span>
+                  <button
+                    type="button"
                     className="chm-27__plate"
-                    onClick={() => setMenuChecked((prev) => !prev)}
+                    aria-label="Close navigation menu"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMenuChecked(false);
+                    }}
                   >
                     <span className="chm-27__ico" aria-hidden="true"><i></i><i></i><i></i></span>
                     <span className="chm-27__lbl chm-27__lbl--m" aria-hidden="true">MENU</span>
                     <span className="chm-27__lbl chm-27__lbl--c" aria-hidden="true">CLOSE</span>
-                  </label>
+                  </button>
                 </header>
                 <nav className="chm-27__menu" aria-label="Site">
-                  <div className="chm-27__row"><a href="#shop" onClick={() => setMenuChecked(false)}><b>01</b>SHOP ALL<span aria-hidden="true">→</span></a></div>
-                  <div className="chm-27__row"><a href="#drops" onClick={() => setMenuChecked(false)}><b>02</b>DROPS<span aria-hidden="true">→</span></a></div>
-                  <div className="chm-27__row"><a href="#manifesto" onClick={() => setMenuChecked(false)}><b>03</b>MANIFESTO<span aria-hidden="true">→</span></a></div>
-                  <div className="chm-27__row"><a href="#faq" onClick={() => setMenuChecked(false)}><b>04</b>FAQ<span aria-hidden="true">→</span></a></div>
+                  <div className="chm-27__row"><a href="#approach" onClick={() => setMenuChecked(false)}><b>01</b>OUR METHOD<span aria-hidden="true">→</span></a></div>
+                  <div className="chm-27__row"><a href="#roadmap" onClick={(e) => { e.preventDefault(); setMenuChecked(false); setRoadmapModalOpen(true); }}><b>02</b>EXPOSURE ROADMAP<span aria-hidden="true">↗</span></a></div>
+                  <div className="chm-27__row"><a href="#who-it-is-for" onClick={() => setMenuChecked(false)}><b>03</b>WHO IT'S FOR<span aria-hidden="true">→</span></a></div>
+                  <div className="chm-27__row"><a href="#faq" onClick={(e) => { e.preventDefault(); setMenuChecked(false); setFaqModalOpen(true); }}><b>04</b>FAQ INQUIRIES<span aria-hidden="true">↗</span></a></div>
+                  <div className="chm-27__row"><a href="#cohort" onClick={() => setMenuChecked(false)}><b>05</b>APPLY FOR COHORT<span aria-hidden="true">→</span></a></div>
+                  <div className="chm-27__foot">
+                    <div className="chm-27__badge">
+                      ZERO THEORY<br />ACTIVE EXPOSURE<br />DAILY SPEAKING REPS
+                    </div>
+                    <span className="chm-27__subtext">
+                      NEXT COHORT ENROLLING • 12 SEATS PER POD
+                    </span>
+                  </div>
                 </nav>
-                <div className="chm-27__page" aria-hidden="true">
-                  <div className="chm-27__badge">EST. 2026<br />NO COOKIES<br />NO TRACKING</div>
-                  <div className="chm-27__box"></div>
-                </div>
-                <div className="chm-27__ticker" aria-hidden="true"><div className="chm-27__tape"><span>FREE SHIPPING OVER $80 ★ PRESS THE PLATE ★ EVERYTHING HAS A BORDER ★&nbsp;</span><span>FREE SHIPPING OVER $80 ★ PRESS THE PLATE ★ EVERYTHING HAS A BORDER ★&nbsp;</span></div></div>
+                <div className="chm-27__ticker" aria-hidden="true"><div className="chm-27__tape"><span>STOP LEARNING, START SPEAKING ★ NEXT COHORT ENROLLING ★ REAL STAGE PRESENCE ★&nbsp;</span><span>STOP LEARNING, START SPEAKING ★ NEXT COHORT ENROLLING ★ REAL STAGE PRESENCE ★&nbsp;</span></div></div>
               </div>
             </section>
           </div>
@@ -353,12 +408,12 @@ export default function App() {
 
               <div className="hero__actions">
                 <a className="btn btn--primary" href="#cohort">
-                  Get started
-                  <svg viewBox="0 0 30 17" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M1 8.5h27M21 1.5l7 7-7 7" />
-                  </svg>
+                  <span>Get started</span>
+                  <ArrowRight className="size-4 stroke-[2.5]" />
                 </a>
-                <a className="btn btn--dark" href="#about">Learn more</a>
+                <a className="btn btn--dark" href="#about">
+                  <span>Learn more</span>
+                </a>
               </div>
             </div>
           </section>
@@ -395,10 +450,8 @@ export default function App() {
               <div className="approach__head">
                 <h2 id="approach-title">Our approach</h2>
                 <a className="btn btn--dark" href="#cohort">
-                  Get started
-                  <svg viewBox="0 0 30 17" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M1 8.5h27M21 1.5l7 7-7 7" />
-                  </svg>
+                  <span>Get started</span>
+                  <ArrowRight className="size-4 stroke-[2.5]" />
                 </a>
               </div>
 
@@ -409,11 +462,9 @@ export default function App() {
                     <h3 className="card__title">Daily Speaking Reps</h3>
                     <p className="card__text">You get micro-opportunities to speak every single day. This constant frequency builds instant habit and eliminates overthinking.</p>
                   </div>
-                  <a className="pill" href="#daily-reps">
-                    Daily reps
-                    <svg viewBox="0 0 26 11" fill="none" stroke="#111118" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M1 5.5h23M19 1l5 4.5-5 4.5" />
-                    </svg>
+                  <a className="pill" href="#cohort">
+                    <span>Daily reps</span>
+                    <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </a>
                 </article>
 
@@ -422,11 +473,9 @@ export default function App() {
                     <h3 className="card__title">Progressive Exposure Pods</h3>
                     <p className="card__text">You are placed into small, supportive peer groups led by dedicated facilitators, ensuring you are never thrown into the deep end alone.</p>
                   </div>
-                  <a className="pill" href="#pods">
-                    Join a pod
-                    <svg viewBox="0 0 26 11" fill="none" stroke="#111118" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M1 5.5h23M19 1l5 4.5-5 4.5" />
-                    </svg>
+                  <a className="pill" href="#cohort">
+                    <span>Join a pod</span>
+                    <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </a>
                 </article>
 
@@ -435,16 +484,17 @@ export default function App() {
                     <h3 className="card__title">Real-World and Virtual Stages</h3>
                     <p className="card__text">You practice across both virtual environments and physical spaces—stepping onto real stages, managing eye contact, and projecting your voice in front of live audiences.</p>
                   </div>
-                  <a className="pill" href="#stages">
-                    Real stages
-                    <svg viewBox="0 0 26 11" fill="none" stroke="#111118" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M1 5.5h23M19 1l5 4.5-5 4.5" />
-                    </svg>
+                  <a className="pill" href="#cohort">
+                    <span>Real stages</span>
+                    <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </a>
                 </article>
               </div>
             </section>
           </div>
+
+          {/* 4-Stage Exposure Roadmap Teaser Strip */}
+          <ExposureRoadmapTeaser onOpenModal={() => setRoadmapModalOpen(true)} />
 
           {/* Why we do it */}
           <section className="section section--alt">
@@ -592,8 +642,9 @@ export default function App() {
                   </CardContent>
                 </div>
                 <CardFooter className="pt-3">
-                  <a className="pill" href="#who-it-is-for" style={{ marginTop: 0, padding: '6px 14px', fontSize: '13px', minHeight: '32px' }}>
-                    Student track &rarr;
+                  <a className="pill" href="#cohort" style={{ marginTop: 0, padding: '7px 14px', fontSize: '13px' }}>
+                    <span>Student track</span>
+                    <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </a>
                 </CardFooter>
               </Card>
@@ -634,8 +685,9 @@ export default function App() {
                   </CardContent>
                 </div>
                 <CardFooter className="pt-3">
-                  <a className="pill" href="#who-it-is-for" style={{ marginTop: 0, padding: '6px 14px', fontSize: '13px', minHeight: '32px' }}>
-                    Join a pod &rarr;
+                  <a className="pill" href="#cohort" style={{ marginTop: 0, padding: '7px 14px', fontSize: '13px' }}>
+                    <span>Join a pod</span>
+                    <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </a>
                 </CardFooter>
               </Card>
@@ -676,8 +728,9 @@ export default function App() {
                   </CardContent>
                 </div>
                 <CardFooter className="pt-3">
-                  <a className="pill" href="#who-it-is-for" style={{ marginTop: 0, padding: '6px 14px', fontSize: '13px', minHeight: '32px' }}>
-                    Explore stages &rarr;
+                  <a className="pill" href="#cohort" style={{ marginTop: 0, padding: '7px 14px', fontSize: '13px' }}>
+                    <span>Explore stages</span>
+                    <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </a>
                 </CardFooter>
               </Card>
@@ -691,20 +744,11 @@ export default function App() {
             </div>
           </section>
 
-          {/* Ready to Step Into the Spotlight? */}
-          <section className="section section--orange" id="cohort">
-            <span id="faq" style={{ display: 'block', position: 'relative', top: '-80px', visibility: 'hidden' }} />
-            <h2>Ready to Step Into the Spotlight?</h2>
-            <p>Stop hiding behind slides and scripts. Join a community of people learning to own the room.</p>
-            <div>
-              <a className="btn" style={{ background: '#FFFFFF', color: '#111118' }} href="#cohort">
-                Secure Your Spot in Our Next Cohort
-                <svg viewBox="0 0 30 17" fill="none" stroke="#111118" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M1 8.5h27M21 1.5l7 7-7 7" />
-                </svg>
-              </a>
-            </div>
-          </section>
+          {/* Brutalist FAQ Compact Callout Bar */}
+          <FAQTeaserBar onOpenModal={() => setFaqModalOpen(true)} />
+
+          {/* Cohort Intake Application Form Terminal */}
+          <CohortApplicationForm />
 
         </div>
       </main>
@@ -728,10 +772,8 @@ export default function App() {
               </p>
               <div style={{ paddingTop: '8px' }}>
                 <a className="btn btn--primary" href="#cohort">
-                  Get started
-                  <svg viewBox="0 0 30 17" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M1 8.5h27M21 1.5l7 7-7 7" />
-                  </svg>
+                  <span>Get started</span>
+                  <ArrowRight className="size-4 stroke-[2.5]" />
                 </a>
               </div>
             </div>
@@ -744,9 +786,9 @@ export default function App() {
               <ul className="site-footer__links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <li><a href="#about">About POLOMO</a></li>
                 <li><a href="#approach">Our Method</a></li>
-                <li><a href="#daily-reps">Daily Speaking Reps</a></li>
-                <li><a href="#pods">Exposure Pods</a></li>
-                <li><a href="#stages">Virtual &amp; Real Stages</a></li>
+                <li><a href="#roadmap" onClick={(e) => { e.preventDefault(); setRoadmapModalOpen(true); }}>Exposure Roadmap ↗</a></li>
+                <li><a href="#faq" onClick={(e) => { e.preventDefault(); setFaqModalOpen(true); }}>Frequently Answered ↗</a></li>
+                <li><a href="#cohort">Apply for Cohort</a></li>
               </ul>
             </div>
 
@@ -794,6 +836,18 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* 4-Stage Exposure Roadmap Modal */}
+      <ExposureRoadmapModal
+        isOpen={roadmapModalOpen}
+        onClose={() => setRoadmapModalOpen(false)}
+      />
+
+      {/* Brutalist FAQ Modal */}
+      <BrutalistFAQModal
+        isOpen={faqModalOpen}
+        onClose={() => setFaqModalOpen(false)}
+      />
     </>
   );
 }
