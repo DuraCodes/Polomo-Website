@@ -21,6 +21,7 @@ import { WhatsAppCommunityCard } from './components/WhatsAppCommunityCard';
 import { ApplyPage } from './pages/ApplyPage';
 import { BrutalistFooter } from './components/BrutalistFooter';
 import { DiagnosticModal } from './components/DiagnosticModal';
+import { AdminControlDrawer } from './components/AdminControlDrawer';
 
 export default function App() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -29,6 +30,13 @@ export default function App() {
   const [roadmapModalOpen, setRoadmapModalOpen] = useState(false);
   const [faqModalOpen, setFaqModalOpen] = useState(false);
   const [diagnosticModalOpen, setDiagnosticModalOpen] = useState(false);
+  const [adminDrawerOpen, setAdminDrawerOpen] = useState(false);
+  const [cohortStatus, setCohortStatus] = useState<'DIAGNOSTIC' | 'OPEN' | 'WAITLIST'>('DIAGNOSTIC');
+  const [capacities, setCapacities] = useState({
+    student: 24,
+    professional: 36,
+    founder: 12,
+  });
 
   // Client-side lightweight routing
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -134,7 +142,11 @@ export default function App() {
                 className="banner__item"
                 aria-hidden={i > 0 ? 'true' : undefined}
               >
-                Public Speaking Mastery — Next Cohort Enrolling Now
+                {cohortStatus === 'WAITLIST'
+                  ? 'Cohort 08 Full — Waitlist Active for Next Batch'
+                  : cohortStatus === 'DIAGNOSTIC'
+                  ? 'Public Speaking Mastery — 1-on-1 Diagnostic Sessions Now Open'
+                  : 'Public Speaking Mastery — Next Cohort Enrolling Now'}
               </span>
             ))}
           </div>
@@ -839,6 +851,7 @@ export default function App() {
           <CohortCalloutCard
             onApply={() => navigate('/apply')}
             onOpenDiagnostic={() => setDiagnosticModalOpen(true)}
+            cohortStatus={cohortStatus}
           />
 
         </div>
@@ -850,6 +863,7 @@ export default function App() {
         onOpenFaq={() => setFaqModalOpen(true)}
         onOpenDiagnostic={() => setDiagnosticModalOpen(true)}
         onApply={() => navigate('/apply')}
+        onOpenAdmin={() => setAdminDrawerOpen(true)}
       />
 
       {/* 4-Stage Exposure Roadmap Modal */}
@@ -869,6 +883,16 @@ export default function App() {
       <DiagnosticModal
         isOpen={diagnosticModalOpen}
         onClose={() => setDiagnosticModalOpen(false)}
+      />
+
+      {/* Admin Mission Control Drawer */}
+      <AdminControlDrawer
+        isOpen={adminDrawerOpen}
+        onClose={() => setAdminDrawerOpen(false)}
+        cohortStatus={cohortStatus}
+        onStatusChange={setCohortStatus}
+        capacities={capacities}
+        onCapacitiesChange={setCapacities}
       />
     </>
   );

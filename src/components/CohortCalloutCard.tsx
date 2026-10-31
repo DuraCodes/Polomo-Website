@@ -4,11 +4,13 @@ import { ArrowRight, Flame, CheckCircle2, Radio } from 'lucide-react';
 interface CohortCalloutCardProps {
   onApply: () => void;
   onOpenDiagnostic: () => void;
+  cohortStatus?: 'DIAGNOSTIC' | 'OPEN' | 'WAITLIST';
 }
 
 export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
   onApply,
   onOpenDiagnostic,
+  cohortStatus = 'OPEN',
 }) => {
   return (
     <section className="section" id="cohort" aria-labelledby="cohort-callout-title">
@@ -24,12 +26,34 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
           
           {/* Header Badges - Minimalist Neobrutalism.dev Pill Tags */}
           <div className="flex flex-wrap items-center gap-2.5 mb-5">
-            <span className="text-xs font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-[#FF3366] text-white border-2 border-black shadow-[2px_2px_0_#000]">
-              Cohort 08 Enrolling
-            </span>
-            <span className="text-xs font-black text-black bg-[#FFE500] px-3.5 py-1 rounded-full border-2 border-black flex items-center gap-1.5 shadow-[2px_2px_0_#000]">
-              <Flame className="size-3.5 text-black" /> Only 4 Pod Seats Remaining
-            </span>
+            {cohortStatus === 'WAITLIST' ? (
+              <>
+                <span className="text-xs font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-[#FF4071] text-white border-2 border-black shadow-[2px_2px_0_#000]">
+                  Cohort 08 At Capacity
+                </span>
+                <span className="text-xs font-black text-black bg-[#FFE500] px-3.5 py-1 rounded-full border-2 border-black flex items-center gap-1.5 shadow-[2px_2px_0_#000]">
+                  Waitlist Active for Next Batch
+                </span>
+              </>
+            ) : cohortStatus === 'DIAGNOSTIC' ? (
+              <>
+                <span className="text-xs font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#000]">
+                  Diagnostic &amp; Intake Phase
+                </span>
+                <span className="text-xs font-black text-white bg-black px-3.5 py-1 rounded-full border-2 border-black flex items-center gap-1.5 shadow-[2px_2px_0_#000]">
+                  <Flame className="size-3.5 text-[#FFE500]" /> 10-Min Free Audits Open
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-xs font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-[#FF3366] text-white border-2 border-black shadow-[2px_2px_0_#000]">
+                  Cohort 08 Enrolling
+                </span>
+                <span className="text-xs font-black text-black bg-[#FFE500] px-3.5 py-1 rounded-full border-2 border-black flex items-center gap-1.5 shadow-[2px_2px_0_#000]">
+                  <Flame className="size-3.5 text-black" /> Only 4 Pod Seats Remaining
+                </span>
+              </>
+            )}
           </div>
 
           {/* Headline */}
