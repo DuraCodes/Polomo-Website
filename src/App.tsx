@@ -101,11 +101,12 @@ export default function App() {
                   className="btn btn--primary"
                   href="#get-started"
                   style={{
-                    fontSize: '16px',
-                    lineHeight: '22px',
-                    padding: '4px 14px',
-                    minHeight: 'auto',
+                    fontSize: '14px',
+                    lineHeight: '1.2',
+                    padding: '8px 18px',
+                    minHeight: '38px',
                     letterSpacing: '0px',
+                    fontWeight: 600,
                   }}
                 >
                   Join Cohort
