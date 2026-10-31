@@ -91,7 +91,7 @@ export const WhatsAppCommunityCard: React.FC<WhatsAppCommunityCardProps> = ({
               href={whatsappInviteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-[#00E575] hover:bg-[#00c965] text-black font-extrabold text-sm uppercase tracking-wider shadow-[4px_4px_0_#FFFFFF] transition-all"
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-[#00E575] hover:bg-[#00c965] text-black font-extrabold text-sm uppercase tracking-wider border-2 border-black shadow-[4px_4px_0_#FFFFFF] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0_#FFFFFF] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all"
             >
               <MessageSquare className="size-4.5 stroke-[2.5]" />
               Enter WhatsApp Community
@@ -101,7 +101,7 @@ export const WhatsAppCommunityCard: React.FC<WhatsAppCommunityCardProps> = ({
             <button
               type="button"
               onClick={onBookDiagnostic}
-              className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-transparent hover:bg-white/10 text-white border-2 border-white font-bold text-sm uppercase tracking-wider transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-[#14141e] hover:bg-[#1c1c28] text-white border-2 border-white font-extrabold text-sm uppercase tracking-wider shadow-[4px_4px_0_#FFE500] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0_#FFE500] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all cursor-pointer"
             >
               Or Book 10-Min 1-on-1 Diagnostic
             </button>

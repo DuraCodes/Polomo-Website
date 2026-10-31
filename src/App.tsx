@@ -17,6 +17,8 @@ import {
 import { ExposureRoadmapTeaser, ExposureRoadmapModal } from './components/ExposureRoadmap';
 import { FAQTeaserBar, BrutalistFAQModal } from './components/BrutalistFAQ';
 import { CohortApplicationForm } from './components/CohortApplicationForm';
+import { BrutalistFooter } from './components/BrutalistFooter';
+import { DiagnosticModal } from './components/DiagnosticModal';
 
 export default function App() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -24,6 +26,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState<string>('');
   const [roadmapModalOpen, setRoadmapModalOpen] = useState(false);
   const [faqModalOpen, setFaqModalOpen] = useState(false);
+  const [diagnosticModalOpen, setDiagnosticModalOpen] = useState(false);
 
   // Scrollspy to accurately detect active section for navbar underline
   useEffect(() => {
@@ -753,89 +756,12 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="site-footer">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '48px', maxWidth: '1488px' }}>
-          {/* Top row: Brand & Navigation columns */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '40px' }}>
-            {/* Brand column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '440px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <img
-                  src="/assets/aistudio/Logo_white_transparent_a0ecbf7f.png"
-                  alt="POLOMO"
-                  style={{ height: '40px', width: 'auto', objectFit: 'contain' }}
-                />
-                <span className="site-footer__brand">POLOMO</span>
-              </div>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', lineHeight: '28px', color: 'var(--ink)' }}>
-                Stop learning about public speaking — start doing it. Real stages, micro-reps, and active exposure.
-              </p>
-              <div style={{ paddingTop: '8px' }}>
-                <a className="btn btn--primary" href="#cohort">
-                  <span>Get started</span>
-                  <ArrowRight className="size-4 stroke-[2.5]" />
-                </a>
-              </div>
-            </div>
-
-            {/* Links column 1: Platform */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 400, margin: 0 }}>
-                Platform
-              </h3>
-              <ul className="site-footer__links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <li><a href="#about">About POLOMO</a></li>
-                <li><a href="#approach">Our Method</a></li>
-                <li><a href="#roadmap" onClick={(e) => { e.preventDefault(); setRoadmapModalOpen(true); }}>Exposure Roadmap ↗</a></li>
-                <li><a href="#faq" onClick={(e) => { e.preventDefault(); setFaqModalOpen(true); }}>Frequently Answered ↗</a></li>
-                <li><a href="#cohort">Apply for Cohort</a></li>
-              </ul>
-            </div>
-
-            {/* Links column 2: Audience Tracks */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 400, margin: 0 }}>
-                Who It's For
-              </h3>
-              <ul className="site-footer__links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <li><a href="#who-it-is-for">Students &amp; Graduates</a></li>
-                <li><a href="#who-it-is-for">Professionals &amp; Job Seekers</a></li>
-                <li><a href="#who-it-is-for">Entrepreneurs &amp; Creators</a></li>
-                <li><a href="#signin">Member Sign In</a></li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom row: Divider, copyright, disclaimer & back to top */}
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '16px',
-              paddingTop: '24px',
-              borderTop: '1px solid rgba(17, 17, 24, 0.15)',
-              fontSize: '14px',
-              fontFamily: 'var(--font-body)',
-              color: 'var(--ink)',
-              opacity: 0.85,
-            }}
-          >
-            <span>&copy; {new Date().getFullYear()} POLOMO. All rights reserved.</span>
-            <span style={{ maxWidth: '520px', fontSize: '13px', lineHeight: '18px' }}>
-              Practical confidence and active desensitization platform. Not medical treatment or psychological therapy.
-            </span>
-            <a
-              href="#top"
-              className="pill"
-              style={{ marginTop: 0 }}
-            >
-              Back to top &uarr;
-            </a>
-          </div>
-        </div>
-      </footer>
+      {/* Bespoke Neo-Brutalist Kinetic Footer */}
+      <BrutalistFooter
+        onOpenRoadmap={() => setRoadmapModalOpen(true)}
+        onOpenFaq={() => setFaqModalOpen(true)}
+        onOpenDiagnostic={() => setDiagnosticModalOpen(true)}
+      />
 
       {/* 4-Stage Exposure Roadmap Modal */}
       <ExposureRoadmapModal
@@ -847,6 +773,12 @@ export default function App() {
       <BrutalistFAQModal
         isOpen={faqModalOpen}
         onClose={() => setFaqModalOpen(false)}
+      />
+
+      {/* 1-on-1 Confidence Diagnostic Booking Modal */}
+      <DiagnosticModal
+        isOpen={diagnosticModalOpen}
+        onClose={() => setDiagnosticModalOpen(false)}
       />
     </>
   );

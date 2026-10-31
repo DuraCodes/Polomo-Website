@@ -256,7 +256,7 @@ export const CohortApplicationForm: React.FC = () => {
                       placeholder="e.g. Jordan Miller"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-black/60 border-2 border-white/30 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000]"
+                      className="w-full bg-black/60 border-2 border-white/30 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#FFE500] focus:shadow-[3px_3px_0_#FFE500] transition-all"
                     />
                   </div>
                   {errors.name && <span className="text-[11px] font-bold text-red-400 mt-1 block">{errors.name}</span>}
@@ -274,7 +274,7 @@ export const CohortApplicationForm: React.FC = () => {
                       placeholder="jordan@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-black/60 border-2 border-white/30 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000]"
+                      className="w-full bg-black/60 border-2 border-white/30 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#FFE500] focus:shadow-[3px_3px_0_#FFE500] transition-all"
                     />
                   </div>
                   {errors.email && <span className="text-[11px] font-bold text-red-400 mt-1 block">{errors.email}</span>}
@@ -337,7 +337,7 @@ export const CohortApplicationForm: React.FC = () => {
                   placeholder="e.g. Master thesis defense in 4 weeks, or weekly product reviews without tremors"
                   value={formData.goal}
                   onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
-                  className="w-full bg-black/60 border-2 border-white/30 rounded-xl py-2.5 px-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF0000] focus:ring-1 focus:ring-[#FF0000]"
+                  className="w-full bg-black/60 border-2 border-white/30 rounded-xl py-2.5 px-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#FFE500] focus:shadow-[3px_3px_0_#FFE500] transition-all"
                 />
               </div>
             </div>

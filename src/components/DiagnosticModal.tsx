@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Calendar, Clock, CheckCircle2, AlertCircle, ArrowRight, MessageSquare, Video } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Clock, CheckCircle2, AlertCircle, ArrowRight, MessageSquare, Video, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { scheduleDiagnosticSession } from '../services/googleCalendar';
 import { appendApplicantToSheet, getStoredSheetId } from '../services/googleSheets';
@@ -31,6 +31,28 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
     meetLink?: string;
     success: boolean;
   } | null>(null);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // Lock body scroll when modal is active
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -113,22 +135,24 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-[520px] my-8 bg-[#121218] border-3 border-white shadow-[8px_8px_0_#FF0000] rounded-none overflow-hidden text-white flex flex-col font-sans">
+      <div className="relative w-full max-w-[540px] my-8 bg-[#12121a] border-3 border-white shadow-[10px_10px_0_#FF0000] rounded-2xl overflow-hidden text-white flex flex-col font-sans">
         
         {/* Header Bar */}
-        <header className="flex items-center justify-between p-4 bg-[#14141c] border-b-3 border-white">
-          <div className="flex items-center gap-2">
+        <header className="flex items-center justify-between p-4 sm:p-5 bg-[#181824] border-b-3 border-white">
+          <div className="flex items-center gap-2.5">
             <span className="font-extrabold text-base tracking-wider text-white">POLOMO</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[#FF0000] text-white">
+            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-[#FF0000] text-white border border-white">
               1-on-1 Diagnostic
             </span>
           </div>
           <button
             type="button"
-            className="flex items-center justify-center h-8 px-3 border-2 border-white bg-[#FF0000] text-white font-bold text-xs uppercase cursor-pointer hover:bg-[#e60000] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-white bg-[#FF0000] text-white font-black text-xs uppercase cursor-pointer shadow-[3px_3px_0_#FFF] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none hover:bg-[#e60000] transition-colors"
             onClick={onClose}
+            aria-label="Close diagnostic modal"
           >
-            Close ✕
+            <X className="size-4 stroke-[3]" />
+            <span>CLOSE</span>
           </button>
         </header>
 
@@ -161,9 +185,9 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
                         key={t.id}
                         type="button"
                         onClick={() => setTrack(t.id as any)}
-                        className={`p-2.5 text-left text-xs font-semibold border-2 transition-all cursor-pointer ${
+                        className={`p-2.5 rounded-lg text-left text-xs font-semibold border-2 transition-all cursor-pointer ${
                           track === t.id
-                            ? 'border-[#FF0000] bg-[#FF0000]/15 text-white shadow-[2px_2px_0_#FF0000]'
+                            ? 'border-[#FF0000] bg-[#FF0000]/20 text-white shadow-[2px_2px_0_#FF0000]'
                             : 'border-white/20 bg-black/40 text-zinc-300 hover:border-white/50'
                         }`}
                       >
@@ -181,7 +205,7 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
                   <select
                     value={fearTrigger}
                     onChange={(e) => setFearTrigger(e.target.value)}
-                    className="w-full bg-[#181822] border-2 border-white/30 text-sm text-white px-3 py-2.5 outline-none focus:border-[#FF0000]"
+                    className="w-full bg-[#181822] border-2 border-white/40 rounded-lg text-sm text-white px-3 py-2.5 outline-none focus:border-[#FFE500] focus:shadow-[3px_3px_0_#FFE500] transition-all"
                   >
                     <option value="My mind blanks the moment all eyes turn to me">My mind blanks the moment all eyes turn to me</option>
                     <option value="My voice trembles, breathing becomes shallow">My voice trembles, breathing becomes shallow</option>
@@ -203,7 +227,7 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
                       placeholder="Jane Doe"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-[#181822] border-2 border-white/30 text-sm text-white px-3 py-2 outline-none focus:border-[#FF0000]"
+                      className="w-full bg-[#181822] border-2 border-white/40 rounded-lg text-sm text-white px-3 py-2 outline-none focus:border-[#FFE500] focus:shadow-[3px_3px_0_#FFE500] transition-all"
                     />
                   </div>
                   <div>
@@ -216,7 +240,7 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
                       placeholder="+1 (555) 000-0000"
                       value={whatsapp}
                       onChange={(e) => setWhatsapp(e.target.value)}
-                      className="w-full bg-[#181822] border-2 border-white/30 text-sm text-white px-3 py-2 outline-none focus:border-[#FF0000]"
+                      className="w-full bg-[#181822] border-2 border-white/40 rounded-lg text-sm text-white px-3 py-2 outline-none focus:border-[#FFE500] focus:shadow-[3px_3px_0_#FFE500] transition-all"
                     />
                   </div>
                 </div>
@@ -231,7 +255,7 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
                     placeholder="jane@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#181822] border-2 border-white/30 text-sm text-white px-3 py-2 outline-none focus:border-[#FF0000]"
+                    className="w-full bg-[#181822] border-2 border-white/40 rounded-lg text-sm text-white px-3 py-2 outline-none focus:border-[#FFE500] focus:shadow-[3px_3px_0_#FFE500] transition-all"
                   />
                 </div>
 
