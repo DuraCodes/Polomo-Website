@@ -90,10 +90,10 @@ export const BrutalistFooter: React.FC<BrutalistFooterProps> = ({
                 </li>
                 <li>
                   <a
-                    href="#roadmap"
+                    href="#who-it-is-for"
                     className="text-zinc-300 hover:text-white hover:underline underline-offset-4 decoration-[#FF0000] decoration-2 transition-colors text-left bg-transparent border-none p-0 font-medium text-sm cursor-pointer block py-0.5"
                   >
-                    4-Stage Roadmap &amp; Drills
+                    Who It's For
                   </a>
                 </li>
                 <li>

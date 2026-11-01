@@ -14,11 +14,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ExposureRoadmapTeaser, ExposureRoadmapModal } from './components/ExposureRoadmap';
-import { FAQTeaserBar, BrutalistFAQModal } from './components/BrutalistFAQ';
+import { ExposureRoadmapModal } from './components/ExposureRoadmap';
+import { BrutalistFAQ } from './components/BrutalistFAQ';
 import { CohortCalloutCard } from './components/CohortCalloutCard';
-import { WhatsAppCommunityCard } from './components/WhatsAppCommunityCard';
-import { ApplyPage } from './pages/ApplyPage';
 import { BrutalistFooter } from './components/BrutalistFooter';
 import { DiagnosticModal } from './components/DiagnosticModal';
 import { AdminControlDrawer } from './components/AdminControlDrawer';
@@ -28,7 +26,6 @@ export default function App() {
   const [menuChecked, setMenuChecked] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
   const [roadmapModalOpen, setRoadmapModalOpen] = useState(false);
-  const [faqModalOpen, setFaqModalOpen] = useState(false);
   const [diagnosticModalOpen, setDiagnosticModalOpen] = useState(false);
   const [adminDrawerOpen, setAdminDrawerOpen] = useState(false);
   const [cohortStatus, setCohortStatus] = useState<'DIAGNOSTIC' | 'OPEN' | 'WAITLIST'>('DIAGNOSTIC');
@@ -37,43 +34,23 @@ export default function App() {
     professional: 36,
     founder: 12,
   });
+  const [selectedTrack, setSelectedTrack] = useState<'student' | 'professional' | 'founder'>('professional');
+  const [activeArchetype, setActiveArchetype] = useState<'student' | 'professional' | 'founder'>('professional');
 
-  // Client-side lightweight routing
-  const [currentPath, setCurrentPath] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const p = window.location.pathname;
-      const h = window.location.hash;
-      return p === '/apply' || h === '#/apply' || h === '#apply' ? '/apply' : '/';
+  const scrollToAdmissions = (track?: 'student' | 'professional' | 'founder') => {
+    if (track) {
+      setSelectedTrack(track);
+      setActiveArchetype(track);
     }
-    return '/';
-  });
-
-  const navigate = (path: string) => {
-    if (typeof window !== 'undefined') {
-      if (path === '/apply') {
-        window.history.pushState({}, '', '/apply');
-      } else {
-        window.history.pushState({}, '', '/');
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setCurrentPath(path);
+    const el = document.getElementById('cohort') || document.getElementById('admissions');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  useEffect(() => {
-    const handlePopState = () => {
-      const p = window.location.pathname;
-      const h = window.location.hash;
-      const isApply = p === '/apply' || h === '#/apply' || h === '#apply';
-      setCurrentPath(isApply ? '/apply' : '/');
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
   // Scrollspy to accurately detect active section for navbar underline
   useEffect(() => {
-    const sectionIds = ['approach', 'roadmap', 'about', 'who-it-is-for', 'faq', 'cohort'];
+    const sectionIds = ['approach', 'who-it-is-for', 'faq', 'cohort'];
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const offset = 180;
@@ -124,11 +101,6 @@ export default function App() {
     }
     return points.join(' ');
   }, []);
-
-  // If user navigated to /apply, render the dedicated distraction-free ApplyPage
-  if (currentPath === '/apply') {
-    return <ApplyPage onBack={() => navigate('/')} />;
-  }
 
   return (
     <>
@@ -204,22 +176,6 @@ export default function App() {
               </li>
               <li>
                 <a
-                  className={activeSection === 'roadmap' ? 'is-underlined' : ''}
-                  href="#roadmap"
-                >
-                  Roadmap
-                </a>
-              </li>
-              <li>
-                <a
-                  className={activeSection === 'about' ? 'is-underlined' : ''}
-                  href="#about"
-                >
-                  About
-                </a>
-              </li>
-              <li>
-                <a
                   className={activeSection === 'who-it-is-for' ? 'is-underlined' : ''}
                   href="#who-it-is-for"
                 >
@@ -239,7 +195,7 @@ export default function App() {
               <button
                 type="button"
                 className="btn btn--primary nav__btn hidden md:inline-flex"
-                onClick={() => navigate('/apply')}
+                onClick={() => scrollToAdmissions()}
               >
                 Join Cohort
               </button>
@@ -295,10 +251,9 @@ export default function App() {
                 </header>
                 <nav className="chm-27__menu" aria-label="Site">
                   <div className="chm-27__row"><a href="#approach" onClick={() => setMenuChecked(false)}><b>01</b>OUR METHOD<span aria-hidden="true">→</span></a></div>
-                  <div className="chm-27__row"><a href="#roadmap" onClick={() => setMenuChecked(false)}><b>02</b>EXPOSURE ROADMAP<span aria-hidden="true">→</span></a></div>
-                  <div className="chm-27__row"><a href="#who-it-is-for" onClick={() => setMenuChecked(false)}><b>03</b>WHO IT'S FOR<span aria-hidden="true">→</span></a></div>
-                  <div className="chm-27__row"><a href="#faq" onClick={() => setMenuChecked(false)}><b>04</b>FAQ INQUIRIES<span aria-hidden="true">→</span></a></div>
-                  <div className="chm-27__row"><button type="button" onClick={() => { setMenuChecked(false); navigate('/apply'); }} className="w-full text-left bg-transparent border-none p-0 cursor-pointer font-inherit text-inherit"><b>05</b>APPLY FOR COHORT<span aria-hidden="true">→</span></button></div>
+                  <div className="chm-27__row"><a href="#who-it-is-for" onClick={() => setMenuChecked(false)}><b>02</b>WHO IT'S FOR<span aria-hidden="true">→</span></a></div>
+                  <div className="chm-27__row"><a href="#faq" onClick={() => setMenuChecked(false)}><b>03</b>FAQ INQUIRIES<span aria-hidden="true">→</span></a></div>
+                  <div className="chm-27__row"><button type="button" onClick={() => { setMenuChecked(false); scrollToAdmissions(); }} className="w-full text-left bg-transparent border-none p-0 cursor-pointer font-inherit text-inherit"><b>04</b>APPLY FOR COHORT<span aria-hidden="true">→</span></button></div>
                   <div className="chm-27__foot">
                     <div className="chm-27__badge">
                       ZERO THEORY<br />ACTIVE EXPOSURE<br />DAILY SPEAKING REPS
@@ -324,11 +279,11 @@ export default function App() {
             <div className="hero__shapes hero__shapes--desktop" aria-hidden="true">
               <span
                 className="shape shape--circle"
-                style={{ left: '-258px', top: '-101px', width: '312px', height: '312px', background: '#FF0000' }}
+                style={{ left: '-120px', top: '-60px', width: '220px', height: '220px', background: '#FF0000', opacity: 0.6 }}
               />
               <svg
                 className="shape"
-                style={{ left: '284px', top: '-49px', width: '356px', height: '378px' }}
+                style={{ left: '20px', top: '-40px', width: '180px', height: '190px', opacity: 0.55 }}
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >
@@ -336,15 +291,15 @@ export default function App() {
               </svg>
               <span
                 className="shape shape--circle"
-                style={{ left: '1418px', top: '-49px', width: '343px', height: '343px', background: '#8fd4ee' }}
+                style={{ right: '-30px', top: '-25px', width: '210px', height: '210px', background: '#8fd4ee', opacity: 0.85 }}
               />
               <span
                 className="shape"
-                style={{ left: '1621px', top: '327px', width: '370px', height: '370px', background: '#FFE500', transform: 'rotate(14deg)' }}
+                style={{ right: '16px', top: '150px', width: '180px', height: '180px', background: '#FFE500', transform: 'rotate(14deg)', opacity: 0.85 }}
               />
               <svg
                 className="shape"
-                style={{ left: '62px', top: '288px', width: '322px', height: '353px' }}
+                style={{ left: '16px', top: '140px', width: '180px', height: '190px', opacity: 0.85 }}
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >
@@ -353,22 +308,22 @@ export default function App() {
               <svg
                 className="shape"
                 id="star"
-                style={{ left: '1373px', top: '667px', width: '352px', height: '344px' }}
+                style={{ right: '80px', top: '280px', width: '160px', height: '160px', opacity: 0.7 }}
                 viewBox="-50 -50 100 100"
               >
                 <polygon fill="#FF4071" points={starPoints} />
               </svg>
               <span
                 className="shape shape--circle"
-                style={{ left: '-228px', top: '744px', width: '313px', height: '313px', background: '#FF4071' }}
+                style={{ left: '-60px', top: '290px', width: '160px', height: '160px', background: '#FF4071', opacity: 0.6 }}
               />
               <span
                 className="shape shape--circle"
-                style={{ left: '242px', top: '643px', width: '343px', height: '343px', background: '#FF3B30' }}
+                style={{ left: '80px', top: '290px', width: '150px', height: '150px', background: '#FF3B30', opacity: 0.5 }}
               />
               <span
                 className="shape shape--circle"
-                style={{ left: '470px', top: '715px', width: '190px', height: '190px', background: '#FFFFFF' }}
+                style={{ left: '210px', top: '320px', width: '80px', height: '80px', background: '#FFFFFF', opacity: 0.7 }}
               />
             </div>
 
@@ -430,8 +385,8 @@ export default function App() {
             </div>
 
             <div className="hero__content">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-[11px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF]">
+              <div className="flex items-center gap-2 mb-2.5 sm:mb-3">
+                <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-3 py-0.5 sm:py-1 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF]">
                   Next Cohort Enrolling · Pods Capped at 4–6 Peers
                 </span>
               </div>
@@ -445,7 +400,7 @@ export default function App() {
                 <button
                   type="button"
                   className="btn btn--primary"
-                  onClick={() => navigate('/apply')}
+                  onClick={() => scrollToAdmissions()}
                 >
                   <span>Apply for Next Cohort</span>
                   <ArrowRight className="size-4 stroke-[3]" />
@@ -461,60 +416,34 @@ export default function App() {
               </div>
 
               {/* Immediate Social Proof & Reassurance Strip (NN/G claim-to-proof adjacency) */}
-              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8 text-xs font-semibold text-zinc-300">
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 mt-4 sm:mt-5 text-[11px] sm:text-xs font-semibold text-zinc-300">
                 <span className="flex items-center gap-1.5">
-                  <ShieldCheck className="size-4 text-[#00E575] stroke-[2.5]" />
+                  <ShieldCheck className="size-3.5 sm:size-4 text-[#00E575] stroke-[2.5]" />
                   <span>100% Judgment-Free Pods</span>
                 </span>
                 <span className="text-zinc-600 hidden sm:inline">·</span>
                 <span className="flex items-center gap-1.5">
-                  <Users className="size-4 text-[#FFE500] stroke-[2.5]" />
+                  <Users className="size-3.5 sm:size-4 text-[#FFE500] stroke-[2.5]" />
                   <span>Curated 4–6 Peers / Facilitator</span>
                 </span>
                 <span className="text-zinc-600 hidden sm:inline">·</span>
                 <span className="flex items-center gap-1.5">
-                  <Sparkles className="size-4 text-[#8FD4EE] stroke-[2.5]" />
+                  <Sparkles className="size-3.5 sm:size-4 text-[#8FD4EE] stroke-[2.5]" />
                   <span>Instant Biological Reset Tools</span>
                 </span>
               </div>
             </div>
           </section>
 
-          {/* What we do */}
-          <section className="section" id="about">
-            <span id="manifesto" style={{ display: 'block', position: 'relative', top: '-80px', visibility: 'hidden' }} />
-            <h2>What We Do</h2>
-            <p>
-              POLOMO is a practical confidence and exposure platform built for people who{' '}
-              <span style={{ background: 'var(--yellow)', color: '#111118', padding: '2px 8px', borderRadius: '6px', fontWeight: 600 }}>
-                freeze, sweat, or feel deeply uncomfortable
-              </span>{' '}
-              when speaking in front of others.
-            </p>
-            <p>
-              <strong style={{ color: 'var(--accent-red)' }}>We don't teach communication theory.</strong> We don't host traditional lectures where you sit quietly and take notes. Instead, we provide an active environment where you step into the spotlight, face your hesitation, and build{' '}
-              <span style={{ color: 'var(--green)', fontWeight: 600 }}>
-                genuine stage presence through real-world repetition.
-              </span>
-            </p>
-          </section>
-
-          {/* How we do it */}
-          <section className="section">
-            <h2>How We Do It</h2>
-            <p>Confidence isn't built by listening; it’s built by doing. Our approach replaces textbooks with active desensitization and high-frequency execution:</p>
-          </section>
-
           {/* Our approach */}
-          <div className="approach-wrap" id="approach">
-            <span id="shop" style={{ display: 'block', position: 'relative', top: '-80px', visibility: 'hidden' }} />
+          <div className="approach-wrap scroll-mt-28" id="approach">
             <section className="approach" aria-labelledby="approach-title">
               <div className="approach__head">
                 <h2 id="approach-title">Our approach</h2>
                 <button
                   type="button"
                   className="btn btn--dark"
-                  onClick={() => navigate('/apply')}
+                  onClick={() => scrollToAdmissions()}
                 >
                   <span>Get started</span>
                   <ArrowRight className="size-4 stroke-[2.5]" />
@@ -559,305 +488,390 @@ export default function App() {
             </section>
           </div>
 
-          {/* 4-Stage Exposure Roadmap Interactive Console (21st.dev + neobrutalism.dev tabs) */}
-          <ExposureRoadmapTeaser
-            onOpenModal={() => setRoadmapModalOpen(true)}
-            onApply={() => navigate('/apply')}
-          />
+          {/* Who it's for - Raw Manila Dossier Board Harmonized with Our Approach Blueprint */}
+          <div className="approach-wrap scroll-mt-28" id="who-it-is-for">
+            <section
+              className="border-[3px] border-black bg-[#FAF7EE] rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:p-7 shadow-[6px_6px_0_#000] relative overflow-hidden"
+              aria-labelledby="who-title"
+            >
+              {/* Dossier Corner Texture / Technical Watermark */}
+              <div className="absolute top-4 right-5 hidden sm:flex items-center gap-1.5 font-mono text-[10px] font-bold text-neutral-400 tracking-widest uppercase pointer-events-none select-none">
+                <span>[SEC // 02-QUAL]</span>
+                <span>•</span>
+                <span>ARCHETYPES</span>
+              </div>
 
-          {/* Why we do it */}
-          <section className="section section--alt">
-            <h2>Why We Do It (The POLOMO Philosophy)</h2>
-            <p>
-              Traditional public-speaking courses fail because they treat speaking like an academic subject. They teach you about structure, body language, and voice modulation, but they leave you paralyzed the moment all eyes turn toward you.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 max-w-[840px] mx-auto w-full">
-              {/* Card 1: The Problem (Warm Paper Slab with Electric Red Accent) */}
-              <article className="relative flex flex-col justify-between bg-[#FAF8F5] border-3 border-black text-[#0A0A0C] rounded-2xl p-6 sm:p-8 shadow-[8px_8px_0_#FF3366] md:[transform:rotate(-1.5deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
-                <span
-                  className="card__dot"
-                  aria-hidden="true"
-                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#FF3366', border: '2px solid #000' }}
-                />
+              {/* Dossier Header - Harmonized with Our Approach compact blueprint */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b-2 border-black/10 mb-4 sm:mb-5">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#FF3366] text-white border border-black shadow-[1px_1px_0_#000]">
-                      The Obstacle
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-[#FFE500] border border-black shadow-[1.5px_1.5px_0_#FFE500]">
+                      ADMISSIONS // CANDIDATE DOSSIER
+                    </span>
+                    <span className="text-[11px] font-bold text-neutral-600 hidden md:inline-block">
+                      12 Seats Per Intake Pod
                     </span>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-[#0A0A0C] tracking-tight mb-1">
-                    The Academic Trap
-                  </h3>
-                  <p className="text-neutral-700 font-medium text-sm leading-relaxed mb-4">
-                    Why studying lectures and communication theory never eliminates the stage freeze.
+                  <h2 id="who-title" className="text-2xl sm:text-3xl lg:text-[34px] font-black text-[#0A0A0C] tracking-tight leading-tight m-0">
+                    Who POLOMO Is For
+                  </h2>
+                  <p className="text-xs sm:text-[13.5px] text-[#27272a] font-medium leading-normal max-w-xl mt-1 mb-0">
+                    Engineered specifically for high-stakes communicators facing real human scrutiny. Select your archetype:
                   </p>
-                  
-                  <ul className="space-y-2.5 text-sm text-[#0A0A0C] font-semibold list-none p-0 m-0">
-                    <li className="flex items-start gap-2.5">
-                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                      <span>Treats performance anxiety like an intellectual puzzle, not a physiological reaction.</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                      <span>Knowing how a bicycle works doesn’t stop you from falling when you first ride it.</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                      <span>Sitting passively taking notes creates false confidence that vanishes under live scrutiny.</span>
-                    </li>
-                  </ul>
                 </div>
 
-                <div className="pt-6">
-                  <a
-                    className="pill cursor-pointer"
-                    href="#about"
-                    style={{ marginTop: 0 }}
-                  >
-                    <span>The Theory Trap</span>
-                    <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </a>
-                </div>
-              </article>
-
-              {/* Card 2: Our Belief (Arctic White Slab with Cyber Gold Accent) */}
-              <article className="relative flex flex-col justify-between bg-white border-3 border-black text-[#111118] rounded-2xl p-6 sm:p-8 shadow-[8px_8px_0_#FFE500] md:[transform:rotate(1.5deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
-                <span
-                  className="card__dot"
-                  aria-hidden="true"
-                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#FFE500', border: '2px solid #000' }}
-                />
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-[#FFE500]">
-                      Our Belief
-                    </span>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-[#111118] tracking-tight mb-1">
-                    Active Desensitization
-                  </h3>
-                  <p className="text-zinc-700 font-normal text-sm leading-relaxed mb-4">
-                    Confidence is a physical reflex built exclusively through repetition.
-                  </p>
-
-                  <ul className="space-y-2.5 text-sm text-[#111118] font-medium list-none p-0 m-0">
-                    <li className="flex items-start gap-2.5">
-                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                      <span>You get on the bike: speak frequently in low-stakes rooms until panic recedes.</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                      <span>Physical immersion retrains the nervous system to stay steady under eye contact.</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                      <span>Immediate real-world reps replace textbooks with instinctive stage command.</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="pt-6">
+                <div className="shrink-0">
                   <button
                     type="button"
-                    onClick={() => navigate('/apply')}
-                    className="pill cursor-pointer"
-                    style={{ marginTop: 0 }}
+                    onClick={() => scrollToAdmissions()}
+                    className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-black hover:bg-[#FF3366] text-white font-black text-xs uppercase tracking-wider rounded-full border-2 border-black shadow-[2px_2px_0_#FFE500] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer"
                   >
-                    <span>Experience Protocol</span>
+                    <span>Assess Your Track</span>
                     <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </button>
                 </div>
-              </article>
-            </div>
-          </section>
+              </div>
 
-          {/* Immediate feedback */}
-          <section className="section section--yellow">
-            <h2>Immediate Feedback</h2>
-            <p>Constructive, real-time feedback helps you course-correct your posture, pacing, and presence instantly.</p>
-          </section>
+              {/* Mobile / Small Screen Segmented Archetype Switcher */}
+              <div className="md:hidden flex p-1 bg-black/10 rounded-xl gap-1 mb-3.5 border-2 border-black">
+                <button
+                  type="button"
+                  onClick={() => setActiveArchetype('student')}
+                  className={`flex-1 py-1.5 px-2 text-xs font-black rounded-lg transition-all cursor-pointer ${
+                    activeArchetype === 'student'
+                      ? 'bg-[#C7D2FE] text-[#111118] border-2 border-black shadow-[2px_2px_0_#000]'
+                      : 'text-neutral-700 hover:text-black border-2 border-transparent'
+                  }`}
+                >
+                  🎓 Students
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveArchetype('professional')}
+                  className={`flex-1 py-1.5 px-2 text-xs font-black rounded-lg transition-all cursor-pointer ${
+                    activeArchetype === 'professional'
+                      ? 'bg-[#FFE500] text-[#111118] border-2 border-black shadow-[2px_2px_0_#000]'
+                      : 'text-neutral-700 hover:text-black border-2 border-transparent'
+                  }`}
+                >
+                  💼 Pros
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveArchetype('founder')}
+                  className={`flex-1 py-1.5 px-2 text-xs font-black rounded-lg transition-all cursor-pointer ${
+                    activeArchetype === 'founder'
+                      ? 'bg-[#FF3366] text-white border-2 border-black shadow-[2px_2px_0_#000]'
+                      : 'text-neutral-700 hover:text-black border-2 border-transparent'
+                  }`}
+                >
+                  🚀 Founders
+                </button>
+              </div>
 
-          {/* Who it's for (Expanded to 3 Pop-Neobrutalist Feature Cards Matching Our Approach) */}
-          <section className="section" id="who-it-is-for">
-            <span id="drops" style={{ display: 'block', position: 'relative', top: '-80px', visibility: 'hidden' }} />
-            <h2>Who POLOMO Is For</h2>
-            <p>
-              Designed specifically for high-stakes communicators who need real-world performance reflexes, not lecture slides:
-            </p>
+              {/* Mobile Single Card View (Active Persona Only) */}
+              <div className="md:hidden">
+                {activeArchetype === 'student' && (
+                  <article className="relative flex flex-col justify-between bg-[#C7D2FE] border-[3px] border-black text-[#111118] rounded-[18px] p-4.5 shadow-[4px_4px_0_#000] animate-in fade-in-50 duration-150">
+                    <span
+                      className="absolute top-3.5 right-3.5 size-6 rounded-full bg-[#FF0000] border-2 border-black"
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white">
+                          Academia &amp; Entry
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-black text-[#111118] tracking-tight mb-1 pr-8">
+                        Students &amp; Graduates
+                      </h3>
+                      <p className="text-[#181820] font-normal text-xs leading-snug mb-2.5">
+                        Thesis defenses, capstone presentations, and high-pressure job interviews.
+                      </p>
+                      <ul className="space-y-1.5 text-xs text-[#111118] font-medium list-none p-0 m-0">
+                        <li className="flex items-start gap-1.5">
+                          <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                          <span>Defend thesis and capstone without vocal trembling.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                          <span>Conquer interview jitters and answer curveball prompts.</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="pt-3.5">
+                      <button
+                        type="button"
+                        onClick={() => scrollToAdmissions('student')}
+                        className="pill cursor-pointer w-full justify-center text-xs py-2"
+                        style={{ marginTop: 0 }}
+                      >
+                        <span>Select Student Track</span>
+                        <ArrowRight className="size-3.5 stroke-[2.5]" />
+                      </button>
+                    </div>
+                  </article>
+                )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 max-w-[1100px] mx-auto w-full">
-              
-              {/* Persona 1: Students & Graduates (Periwinkle Sky #C7D2FE) */}
-              <article className="relative flex flex-col justify-between bg-[#C7D2FE] border-3 border-black text-[#111118] rounded-2xl p-6 sm:p-7 shadow-[6px_6px_0_#000] md:[transform:rotate(-1.5deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
-                <span
-                  className="card__dot"
-                  aria-hidden="true"
-                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#FF0000' }}
-                />
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
-                      Academia &amp; Entry
-                    </span>
+                {activeArchetype === 'professional' && (
+                  <article className="relative flex flex-col justify-between bg-[#FFE500] border-[3px] border-black text-[#111118] rounded-[18px] p-4.5 shadow-[4px_4px_0_#000] animate-in fade-in-50 duration-150">
+                    <span
+                      className="absolute top-3.5 right-3.5 size-6 rounded-full bg-[#111118] border-2 border-black"
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white">
+                          Career &amp; Visibility
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-black text-[#111118] tracking-tight mb-1 pr-8">
+                        Professionals &amp; Seekers
+                      </h3>
+                      <p className="text-[#181820] font-normal text-xs leading-snug mb-2.5">
+                        Commanding team meetings, leadership reviews, and unscripted Q&amp;A.
+                      </p>
+                      <ul className="space-y-1.5 text-xs text-[#111118] font-medium list-none p-0 m-0">
+                        <li className="flex items-start gap-1.5">
+                          <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                          <span>Stop staying muted in meetings when you have solutions.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                          <span>Pitch ideas seamlessly to executive stakeholders.</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="pt-3.5">
+                      <button
+                        type="button"
+                        onClick={() => scrollToAdmissions('professional')}
+                        className="pill cursor-pointer w-full justify-center text-xs py-2"
+                        style={{ marginTop: 0 }}
+                      >
+                        <span>Select Professional Track</span>
+                        <ArrowRight className="size-3.5 stroke-[2.5]" />
+                      </button>
+                    </div>
+                  </article>
+                )}
+
+                {activeArchetype === 'founder' && (
+                  <article className="relative flex flex-col justify-between bg-[#FF3366] border-[3px] border-black text-white rounded-[18px] p-4.5 shadow-[4px_4px_0_#000] animate-in fade-in-50 duration-150">
+                    <span
+                      className="absolute top-3.5 right-3.5 size-6 rounded-full bg-white border-2 border-black"
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white">
+                          Pitches &amp; Stages
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-black text-white tracking-tight mb-1 pr-8">
+                        Founders &amp; Creators
+                      </h3>
+                      <p className="text-white/95 font-normal text-xs leading-snug mb-2.5">
+                        Investor pitches, demo days, podcasts, and live auditorium scrutiny.
+                      </p>
+                      <ul className="space-y-1.5 text-xs text-white font-medium list-none p-0 m-0">
+                        <li className="flex items-start gap-1.5">
+                          <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
+                          <span>Pitch your company with undeniable conviction and fire.</span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
+                          <span>Own the stage whether addressing 10 or 1,000 live listeners.</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="pt-3.5">
+                      <button
+                        type="button"
+                        onClick={() => scrollToAdmissions('founder')}
+                        className="pill cursor-pointer w-full justify-center text-xs py-2"
+                        style={{ marginTop: 0 }}
+                      >
+                        <span>Select Founder Track</span>
+                        <ArrowRight className="size-3.5 stroke-[2.5]" />
+                      </button>
+                    </div>
+                  </article>
+                )}
+              </div>
+
+              {/* Desktop 3-Card Grid - Scaled to match Our Approach compact blueprint */}
+              <div className="hidden md:grid md:grid-cols-3 gap-3.5 lg:gap-4.5 w-full">
+                
+                {/* Persona 1: Students & Graduates */}
+                <article className="relative flex flex-col justify-between bg-[#C7D2FE] border-[3px] border-black text-[#111118] rounded-[18px] p-4 lg:p-5 min-h-[285px] lg:min-h-[295px] shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                  <span
+                    className="card__dot"
+                    aria-hidden="true"
+                    style={{ top: '16px', right: '16px', width: '26px', height: '26px', background: '#FF0000', border: '2px solid #000' }}
+                  />
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white">
+                        Academia &amp; Entry
+                      </span>
+                    </div>
+                    <h3 className="text-lg lg:text-[21px] font-black text-[#111118] tracking-tight mb-1 pr-7 leading-[1.2]">
+                      Students &amp; Graduates
+                    </h3>
+                    <p className="text-[#181820] font-normal text-xs leading-snug mb-2.5">
+                      Thesis defenses, capstone presentations, and high-pressure job interviews.
+                    </p>
+
+                    <ul className="space-y-1 text-xs text-[#111118] font-medium list-none p-0 m-0">
+                      <li className="flex items-start gap-1.5">
+                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                        <span>Defend thesis without vocal trembling.</span>
+                      </li>
+                      <li className="flex items-start gap-1.5">
+                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                        <span>Conquer interview jitters &amp; curveballs.</span>
+                      </li>
+                      <li className="flex items-start gap-1.5">
+                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                        <span>Eliminate sudden mental blanking.</span>
+                      </li>
+                    </ul>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-[#111118] tracking-tight mb-1">
-                    Students &amp; Graduates
-                  </h3>
-                  <p className="text-[#181820] font-normal text-sm leading-relaxed mb-4">
-                    Thesis defenses, capstone presentations, and high-pressure job interviews.
-                  </p>
 
-                  <ul className="space-y-2 text-xs sm:text-sm text-[#111118] font-medium list-none p-0 m-0">
-                    <li className="flex items-start gap-2">
-                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
-                      <span>Defend thesis and capstone without vocal trembling.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
-                      <span>Conquer interview jitters and answer curveball prompts.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
-                      <span>Eliminate memory blanking in front of professors.</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="pt-6">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/apply')}
-                    className="pill cursor-pointer"
-                    style={{ marginTop: 0 }}
-                  >
-                    <span>Student track</span>
-                    <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </button>
-                </div>
-              </article>
-
-              {/* Persona 2: Professionals & Seekers (Solar Canary #FFE500) */}
-              <article className="relative flex flex-col justify-between bg-[#FFE500] border-3 border-black text-[#111118] rounded-2xl p-6 sm:p-7 shadow-[6px_6px_0_#000] md:[transform:rotate(2deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
-                <span
-                  className="card__dot"
-                  aria-hidden="true"
-                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#111118' }}
-                />
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
-                      Career &amp; Visibility
-                    </span>
+                  <div className="pt-3 mt-auto">
+                    <button
+                      type="button"
+                      onClick={() => scrollToAdmissions('student')}
+                      className="pill cursor-pointer text-xs py-1.5 px-3.5"
+                      style={{ marginTop: 0 }}
+                    >
+                      <span>Student track</span>
+                      <ArrowRight className="size-3.5 stroke-[2.5]" />
+                    </button>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-[#111118] tracking-tight mb-1">
-                    Professionals &amp; Seekers
-                  </h3>
-                  <p className="text-[#181820] font-normal text-sm leading-relaxed mb-4">
-                    Commanding team meetings, leadership reviews, and unscripted Q&amp;A.
-                  </p>
+                </article>
 
-                  <ul className="space-y-2 text-xs sm:text-sm text-[#111118] font-medium list-none p-0 m-0">
-                    <li className="flex items-start gap-2">
-                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
-                      <span>Stop staying muted in meetings when you have solutions.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
-                      <span>Pitch ideas seamlessly to executive stakeholders.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
-                      <span>Handle tough challenge questions without retreating.</span>
-                    </li>
-                  </ul>
-                </div>
+                {/* Persona 2: Professionals & Seekers */}
+                <article className="relative flex flex-col justify-between bg-[#FFE500] border-[3px] border-black text-[#111118] rounded-[18px] p-4 lg:p-5 min-h-[285px] lg:min-h-[295px] shadow-[4px_4px_0_#000] lg:[transform:rotate(1.2deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                  <span
+                    className="card__dot"
+                    aria-hidden="true"
+                    style={{ top: '16px', right: '16px', width: '26px', height: '26px', background: '#111118', border: '2px solid #000' }}
+                  />
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white">
+                        Career &amp; Visibility
+                      </span>
+                    </div>
+                    <h3 className="text-lg lg:text-[21px] font-black text-[#111118] tracking-tight mb-1 pr-7 leading-[1.2]">
+                      Professionals &amp; Seekers
+                    </h3>
+                    <p className="text-[#181820] font-normal text-xs leading-snug mb-2.5">
+                      Commanding meetings, executive reviews, and unscripted Q&amp;A.
+                    </p>
 
-                <div className="pt-6">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/apply')}
-                    className="pill cursor-pointer"
-                    style={{ marginTop: 0 }}
-                  >
-                    <span>Join a pod</span>
-                    <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </button>
-                </div>
-              </article>
-
-              {/* Persona 3: Founders & Creators (Electric Berry / Coral #FF3366) */}
-              <article className="relative flex flex-col justify-between bg-[#FF3366] border-3 border-black text-white rounded-2xl p-6 sm:p-7 shadow-[6px_6px_0_#000] md:[transform:rotate(-1.2deg)] hover:md:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
-                <span
-                  className="card__dot"
-                  aria-hidden="true"
-                  style={{ top: '22px', right: '22px', width: '22px', height: '22px', background: '#FFFFFF' }}
-                />
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
-                      Pitches &amp; Stages
-                    </span>
+                    <ul className="space-y-1 text-xs text-[#111118] font-medium list-none p-0 m-0">
+                      <li className="flex items-start gap-1.5">
+                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                        <span>Stop staying muted when you have answers.</span>
+                      </li>
+                      <li className="flex items-start gap-1.5">
+                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                        <span>Pitch ideas to executive stakeholders.</span>
+                      </li>
+                      <li className="flex items-start gap-1.5">
+                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-black stroke-[3]" />
+                        <span>Handle tough pushback with composure.</span>
+                      </li>
+                    </ul>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-1">
-                    Founders &amp; Creators
-                  </h3>
-                  <p className="text-white/90 font-normal text-sm leading-relaxed mb-4">
-                    Investor pitches, demo days, podcasts, and live auditorium scrutiny.
-                  </p>
 
-                  <ul className="space-y-2 text-xs sm:text-sm text-white font-medium list-none p-0 m-0">
-                    <li className="flex items-start gap-2">
-                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
-                      <span>Pitch your company with undeniable conviction and fire.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
-                      <span>Own the stage whether addressing 10 or 1,000 live listeners.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
-                      <span>Navigate harsh investor critique and public scrutiny calmly.</span>
-                    </li>
-                  </ul>
-                </div>
+                  <div className="pt-3 mt-auto">
+                    <button
+                      type="button"
+                      onClick={() => scrollToAdmissions('professional')}
+                      className="pill cursor-pointer text-xs py-1.5 px-3.5"
+                      style={{ marginTop: 0 }}
+                    >
+                      <span>Join a pod</span>
+                      <ArrowRight className="size-3.5 stroke-[2.5]" />
+                    </button>
+                  </div>
+                </article>
 
-                <div className="pt-6">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/apply')}
-                    className="pill cursor-pointer"
-                    style={{ marginTop: 0 }}
-                  >
-                    <span>Explore stages</span>
-                    <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </button>
-                </div>
-              </article>
+                {/* Persona 3: Founders & Creators */}
+                <article className="relative flex flex-col justify-between bg-[#FF3366] border-[3px] border-black text-white rounded-[18px] p-4 lg:p-5 min-h-[285px] lg:min-h-[295px] shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                  <span
+                    className="card__dot"
+                    aria-hidden="true"
+                    style={{ top: '16px', right: '16px', width: '26px', height: '26px', background: '#FFFFFF', border: '2px solid #000' }}
+                  />
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-black text-white">
+                        Pitches &amp; Stages
+                      </span>
+                    </div>
+                    <h3 className="text-lg lg:text-[21px] font-black text-white tracking-tight mb-1 pr-7 leading-[1.2]">
+                      Founders &amp; Creators
+                    </h3>
+                    <p className="text-white/95 font-normal text-xs leading-snug mb-2.5">
+                      Investor pitches, demo days, podcasts, and live auditorium scrutiny.
+                    </p>
 
-            </div>
+                    <ul className="space-y-1 text-xs text-white font-medium list-none p-0 m-0">
+                      <li className="flex items-start gap-1.5">
+                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
+                        <span>Pitch your startup with conviction.</span>
+                      </li>
+                      <li className="flex items-start gap-1.5">
+                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
+                        <span>Command stages of 10 or 1,000 listeners.</span>
+                      </li>
+                      <li className="flex items-start gap-1.5">
+                        <ChevronRightIcon className="mt-0.5 size-3.5 shrink-0 text-white stroke-[3]" />
+                        <span>Navigate harsh investor critique calmly.</span>
+                      </li>
+                    </ul>
+                  </div>
 
-            {/* Reassurance Note */}
-            <div className="border-l-4 border-[#FFE500] bg-[#FFE500]/5 px-5 py-4 rounded-r-xl mt-4">
-              <p className="text-sm leading-relaxed text-zinc-300 m-0">
-                <strong className="text-[#FFE500]">Note:</strong> POLOMO is a practical skill and exposure program. It is designed to build performance confidence through active participation, not medical treatment or psychological therapy.
-              </p>
-            </div>
-          </section>
+                  <div className="pt-3 mt-auto">
+                    <button
+                      type="button"
+                      onClick={() => scrollToAdmissions('founder')}
+                      className="pill cursor-pointer text-xs py-1.5 px-3.5"
+                      style={{ marginTop: 0 }}
+                    >
+                      <span>Explore stages</span>
+                      <ArrowRight className="size-3.5 stroke-[2.5]" />
+                    </button>
+                  </div>
+                </article>
 
-          {/* Brutalist FAQ Compact Callout Bar */}
-          <FAQTeaserBar onOpenModal={() => setFaqModalOpen(true)} />
+              </div>
 
-          {/* Zero-Risk WhatsApp Practice Community */}
-          <WhatsAppCommunityCard
-            onBookDiagnostic={() => setDiagnosticModalOpen(true)}
-          />
+              {/* Dossier Field Note Footer - Compact & Integrated */}
+              <div className="border-2 border-black bg-white rounded-xl px-4 py-2.5 mt-3.5 sm:mt-4 shadow-[2px_2px_0_#000] flex flex-col sm:flex-row sm:items-center gap-2.5">
+                <span className="text-[9.5px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded bg-[#FFE500] text-black border border-black shrink-0 w-max">
+                  PROTOCOL NOTE
+                </span>
+                <p className="text-xs leading-normal text-[#181820] font-medium m-0">
+                  POLOMO is a practical skill and exposure program. It builds performance confidence through active participation, not medical therapy or clinical psychological diagnosis.
+                </p>
+              </div>
+            </section>
+          </div>
 
-          {/* Cohort Application High-Impact Callout Card (replaces heavy on-page form) */}
+          {/* On-Page Brutalist FAQ Accordion */}
+          <BrutalistFAQ />
+
+          {/* Cohort Application High-Impact Admissions Terminal (Unified On-Page Form & Diagnostic) */}
           <CohortCalloutCard
-            onApply={() => navigate('/apply')}
-            onOpenDiagnostic={() => setDiagnosticModalOpen(true)}
             cohortStatus={cohortStatus}
+            initialTrack={selectedTrack}
           />
 
         </div>
@@ -866,9 +880,9 @@ export default function App() {
       {/* Bespoke Neo-Brutalist Kinetic Footer */}
       <BrutalistFooter
         onOpenRoadmap={() => setRoadmapModalOpen(true)}
-        onOpenFaq={() => setFaqModalOpen(true)}
+        onOpenFaq={() => { const el = document.getElementById('faq'); el?.scrollIntoView({ behavior: 'smooth' }); }}
         onOpenDiagnostic={() => setDiagnosticModalOpen(true)}
-        onApply={() => navigate('/apply')}
+        onApply={() => scrollToAdmissions()}
         onOpenAdmin={() => setAdminDrawerOpen(true)}
       />
 
@@ -876,13 +890,7 @@ export default function App() {
       <ExposureRoadmapModal
         isOpen={roadmapModalOpen}
         onClose={() => setRoadmapModalOpen(false)}
-        onApply={() => navigate('/apply')}
-      />
-
-      {/* Brutalist FAQ Modal */}
-      <BrutalistFAQModal
-        isOpen={faqModalOpen}
-        onClose={() => setFaqModalOpen(false)}
+        onApply={() => { setRoadmapModalOpen(false); scrollToAdmissions(); }}
       />
 
       {/* 1-on-1 Confidence Diagnostic Booking Modal */}

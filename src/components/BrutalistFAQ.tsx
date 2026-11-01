@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { HelpCircle, Sparkles, MessageCircleQuestion, X, ArrowRight, BookOpen } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowDown, CheckCircle2 } from 'lucide-react';
 
 export interface FAQItem {
   id: string;
@@ -15,7 +15,7 @@ export const FAQS: FAQItem[] = [
     question: 'What happens if I freeze or panic during a live pod?',
     answer: 'Freezing is not a failure at POLOMO—it is the entire reason we exist. Unlike standard courses where freezing feels humiliating, our pods are specifically trained in freeze de-escalation. Your facilitator guides you through a 5-second physiological reset (reset breath, gaze focal shift, and low-pressure re-entry). You are never rushed off the stage or judged.',
     tag: 'Safety Protocol',
-    accent: '#FF0000'
+    accent: '#FF3366'
   },
   {
     id: 'toastmasters',
@@ -27,7 +27,7 @@ export const FAQS: FAQItem[] = [
   {
     id: 'crowd-size',
     question: 'Do I have to stand in front of huge crowds right away?',
-    answer: 'Never. That is why standard courses fail. We follow the 4-Stage Exposure Roadmap: you start with zero-stakes 60-second private audio drills in Week 1, graduate to a tight 4-person supportive pod in Weeks 2–4, expand to the virtual group in Weeks 5–6, and only step onto a live real-world stage when your baseline heart rate remains steady.',
+    answer: 'Never. That is why standard courses fail. We follow graduated exposure: you start with zero-stakes 60-second private audio drills in Week 1, graduate to a tight 4-person supportive pod in Weeks 2–4, expand to the virtual group in Weeks 5–6, and only step onto a live real-world stage when your baseline heart rate remains steady.',
     tag: 'Progression',
     accent: '#00E575'
   },
@@ -50,100 +50,133 @@ export const FAQS: FAQItem[] = [
     question: 'Can I join if I have never spoken publicly before in my life?',
     answer: 'Yes. In fact, over 65% of our cohort members describe themselves as severe stage avoiders who previously faked sickness or stayed muted in Zoom calls to avoid talking. The first phase is calibrated specifically for zero-experience beginners.',
     tag: 'Eligibility',
-    accent: '#FFFFFF'
+    accent: '#C7D2FE'
   }
 ];
 
-// 1. Full On-Page Accessible Neo-Brutalist Accordion (neobrutalism.dev Accordion Spec)
-export const FAQTeaserBar: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
-  const [openIds, setOpenIds] = useState<Record<string, boolean>>({
-    freeze: true,
-    toastmasters: false,
-    'crowd-size': false,
-    commitment: false,
-  });
+export const BrutalistFAQ: React.FC = () => {
+  const [activeId, setActiveId] = useState<string | null>('freeze');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'safety' | 'method' | 'schedule'>('all');
 
   const toggleItem = (id: string) => {
-    setOpenIds((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    setActiveId((prev) => (prev === id ? null : id));
   };
 
+  const filteredFaqs = FAQS.filter((faq) => {
+    if (selectedCategory === 'safety') return faq.id === 'freeze' || faq.id === 'therapy';
+    if (selectedCategory === 'method') return faq.id === 'toastmasters' || faq.id === 'crowd-size';
+    if (selectedCategory === 'schedule') return faq.id === 'commitment' || faq.id === 'beginners';
+    return true;
+  });
+
   return (
-    <section className="section py-8" id="faq" aria-labelledby="faq-section-title">
-      <div className="border-[3px] border-black bg-white rounded-3xl p-6 sm:p-10 shadow-[8px_8px_0_#000000]">
+    <div className="approach-wrap scroll-mt-28" id="faq">
+      <section className="border-[3px] border-black bg-white text-[#111118] rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:p-7 shadow-[6px_6px_0_#000000]" aria-labelledby="faq-section-title">
         
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-6 border-b-2 border-black/10">
+        {/* Header - Scaled to match Our Approach blueprint */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-5 pb-3 sm:pb-3.5 border-b-2 border-black/10">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[11px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[1.5px_1.5px_0_#000]">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#FFE500] text-black border border-black shadow-[1.5px_1.5px_0_#000]">
                 Common Hesitations
               </span>
-              <span className="text-xs font-bold text-neutral-600">
+              <span className="text-[11px] font-bold text-neutral-600">
                 Direct Answers
               </span>
             </div>
-            <h2 id="faq-section-title" className="text-2xl sm:text-4xl font-black text-[#0A0A0C] tracking-tight m-0">
-              Frequently Answered Questions
+            <h2 id="faq-section-title" className="text-2xl sm:text-3xl lg:text-[34px] font-black text-[#0A0A0C] tracking-tight leading-[1.2] m-0">
+              Frequently Answered Inquiries
             </h2>
-            <p className="text-neutral-700 text-sm sm:text-base font-medium mt-1.5 max-w-xl leading-relaxed">
-              Everything you need to know about stage freeze protocol, cohort cadence, and zero-judgment practice.
+            <p className="text-xs sm:text-sm text-[#181820] font-medium mt-1 max-w-xl leading-snug m-0">
+              Direct, no-spin answers to the questions people ask right before stepping into their first live exposure pod.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={onOpenModal}
-            className="self-start sm:self-auto inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-black bg-[#FAF8F5] hover:bg-neutral-100 text-black font-extrabold text-xs uppercase tracking-wider shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer"
+          <a
+            href="#cohort"
+            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 border-black bg-black hover:bg-[#FF3366] text-white font-extrabold text-xs uppercase tracking-wider shadow-[2px_2px_0_#FFE500] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer no-underline shrink-0"
           >
-            <BookOpen className="size-3.5 stroke-[2.5]" />
-            <span>Open Dedicated FAQ Window ↗</span>
-          </button>
+            <span>Jump to Admissions</span>
+            <ArrowDown className="size-3.5 stroke-[2.5] text-white" />
+          </a>
         </div>
 
-        {/* Accordion Stack (neobrutalism.dev Accordion structure) */}
-        <div className="space-y-3.5">
-          {FAQS.map((faq) => {
-            const isOpen = !!openIds[faq.id];
+        {/* Quick Filter Bar - Compact */}
+        <div className="flex flex-wrap items-center gap-2 mb-3.5 sm:mb-4">
+          <span className="text-[11px] font-mono font-bold text-neutral-600 uppercase tracking-wider mr-0.5">
+            Filter:
+          </span>
+          {[
+            { id: 'all', label: 'All Inquiries (6)' },
+            { id: 'safety', label: 'Safety & Freezing (2)' },
+            { id: 'method', label: 'Methodology & Pods (2)' },
+            { id: 'schedule', label: 'Time & Eligibility (2)' },
+          ].map((cat) => {
+            const isSelected = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.id as any)}
+                className={`text-[11px] font-bold px-3 py-1 rounded-full border-2 border-black transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-black text-[#FFE500] shadow-[2px_2px_0_#FFE500]'
+                    : 'bg-[#FAF8F5] text-[#181820] hover:bg-neutral-100 shadow-[1px_1px_0_#000]'
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* On-Page Accordion Stack - Compact cards matching 18px radius and tight padding */}
+        <div className="space-y-2 sm:space-y-2.5">
+          {filteredFaqs.map((faq, index) => {
+            const isOpen = activeId === faq.id;
             return (
               <div
                 key={faq.id}
-                className="border-2 border-black rounded-2xl overflow-hidden transition-all bg-[#FAF8F5] shadow-[3px_3px_0_#000]"
+                className="border-2 border-black rounded-[16px] sm:rounded-[18px] overflow-hidden transition-all bg-[#FAF8F5] shadow-[3px_3px_0_#000]"
               >
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => toggleItem(faq.id)}
-                  className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left cursor-pointer hover:bg-white transition-colors select-none"
+                  className="w-full py-2.5 px-3.5 sm:py-3 sm:px-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-white transition-colors select-none"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+                    <span className="font-mono text-[11px] font-black text-black bg-white px-2 py-0.5 rounded border border-black shrink-0 shadow-[1px_1px_0_#000]">
+                      0{index + 1}
+                    </span>
                     <span
-                      className="size-3 rounded-full border border-black shrink-0 hidden sm:block"
+                      className="size-2.5 rounded-full border border-black shrink-0 hidden sm:block"
                       style={{ background: faq.accent }}
                       aria-hidden="true"
                     />
-                    <h3 className="text-sm sm:text-base font-black text-[#0A0A0C] m-0">
+                    <h3 className="text-sm sm:text-[15.5px] font-bold text-[#0A0A0C] m-0 leading-snug">
                       {faq.question}
                     </h3>
                   </div>
 
-                  <div className="flex items-center gap-2.5 shrink-0">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white text-black border border-black shadow-[1px_1px_0_#000] hidden md:inline-block">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white text-black border border-black shadow-[1px_1px_0_#000] hidden md:inline-block">
                       {faq.tag}
                     </span>
-                    <span className={`size-7 rounded-lg border-2 border-black flex items-center justify-center font-black text-sm transition-transform duration-200 ${
-                      isOpen ? 'bg-[#FFE500] text-black rotate-45' : 'bg-black text-white'
-                    }`}>
+                    <span
+                      className={`size-6 sm:size-7 rounded-lg border-2 border-black flex items-center justify-center font-black text-sm shrink-0 transition-transform duration-200 shadow-[1.5px_1.5px_0_#000] ${
+                        isOpen ? 'bg-[#FFE500] text-black rotate-45' : 'bg-black text-white'
+                      }`}
+                      aria-hidden="true"
+                    >
                       +
                     </span>
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 border-t-2 border-black/10 bg-white">
-                    <p className="text-xs sm:text-sm text-neutral-800 font-medium leading-relaxed m-0 pt-2">
+                  <div className="px-4 pb-3.5 pt-2 sm:px-5 sm:pb-4 border-t border-black/10 bg-white animate-in fade-in-50 duration-150">
+                    <p className="text-xs sm:text-[13.5px] text-[#181820] font-medium leading-relaxed m-0">
                       {faq.answer}
                     </p>
                   </div>
@@ -153,158 +186,24 @@ export const FAQTeaserBar: React.FC<{ onOpenModal: () => void }> = ({ onOpenModa
           })}
         </div>
 
-      </div>
-    </section>
-  );
-};
-
-// 2. Full Brutalist FAQ Modal (neobrutalism.dev dialog spec with crisp white canvas)
-export const BrutalistFAQModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
-  isOpen,
-  onClose
-}) => {
-  const [openIds, setOpenIds] = useState<Record<string, boolean>>({
-    freeze: true
-  });
-
-  const toggleItem = (id: string) => {
-    setOpenIds((prev) => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
-
-  // Close on Escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  // Lock background scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-faq-title"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div
-        className="relative w-full max-w-3xl border-[3px] border-black bg-white rounded-3xl shadow-[10px_10px_0_#000] overflow-hidden my-auto max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Top Window Bar */}
-        <header className="flex items-center justify-between p-4 sm:p-5 border-b-[2.5px] border-black bg-[#FAF8F5] shrink-0">
-          <div className="flex items-center gap-2.5">
-            <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#000]">
-              FAQ Direct
-            </span>
-            <span id="modal-faq-title" className="text-base sm:text-lg font-black text-[#0A0A0C] tracking-tight">
-              Frequently Answered Inquiries
-            </span>
+        {/* Bottom Assurance Strip - Compact field note */}
+        <div className="border-2 border-black bg-[#FAF8F5] rounded-xl px-4 py-2 mt-3.5 sm:mt-4 shadow-[2px_2px_0_#000] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold text-[#181820]">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="size-4 text-black stroke-[2.5] shrink-0" />
+            <span className="text-[11.5px] sm:text-xs">Have a specific edge-case or upcoming deadline? Ask in your 10-min free audit.</span>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border-2 border-black bg-white hover:bg-neutral-100 text-black font-extrabold text-xs cursor-pointer shadow-[2px_2px_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
-            aria-label="Close FAQ modal"
+          <a
+            href="#cohort"
+            className="text-black underline font-black hover:text-[#FF3366] transition-colors text-xs shrink-0"
           >
-            <X className="size-4 stroke-[3]" />
-            <span>Close</span>
-          </button>
-        </header>
-
-        {/* Modal Scrollable Accordion Content */}
-        <div className="p-5 sm:p-7 overflow-y-auto flex-1 space-y-3.5 bg-white">
-          {FAQS.map((item, index) => {
-            const isOpen = !!openIds[item.id];
-            return (
-              <div
-                key={item.id}
-                className="border-2 border-black rounded-2xl overflow-hidden bg-white shadow-[4px_4px_0_#000] transition-all"
-              >
-                <button
-                  type="button"
-                  onClick={() => toggleItem(item.id)}
-                  aria-expanded={isOpen}
-                  className="w-full flex items-center justify-between p-4 sm:p-4.5 text-left cursor-pointer gap-3 select-none hover:bg-[#FAF8F5] transition-colors"
-                >
-                  <div className="flex items-center gap-3.5 flex-1">
-                    <span className="font-mono text-xs font-black text-black bg-[#FAF8F5] px-2.5 py-1 rounded-lg border border-black shrink-0">
-                      0{index + 1}
-                    </span>
-                    <h4 className="text-sm sm:text-base font-extrabold text-[#0A0A0C] m-0 leading-snug">
-                      {item.question}
-                    </h4>
-                  </div>
-
-                  {/* Indicator Box - Neobrutalism.dev Toggle Icon */}
-                  <span
-                    className={`size-7 rounded-lg border-2 border-black flex items-center justify-center font-black text-sm shrink-0 transition-transform duration-150 shadow-[2px_2px_0_#000] ${
-                      isOpen ? 'bg-[#FFE500] text-black rotate-45' : 'bg-black text-white'
-                    }`}
-                    aria-hidden="true"
-                  >
-                    +
-                  </span>
-                </button>
-
-                {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-neutral-700 leading-relaxed font-medium bg-[#FAF8F5] border-t-2 border-black/10">
-                    <p className="m-0 pt-2">
-                      {item.answer}
-                    </p>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+            Review Admissions Criteria →
+          </a>
         </div>
 
-        {/* Modal Footer Bridge */}
-        <footer className="p-4 sm:p-5 border-t-[2.5px] border-black bg-[#FAF8F5] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-          <span className="text-xs text-neutral-600 font-semibold">
-            Still have an edge case or upcoming presentation deadline?
-          </span>
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-xs font-bold py-2.5 px-5 rounded-full border-2 border-black bg-white hover:bg-neutral-100 text-black shadow-[2px_2px_0_#000] cursor-pointer"
-            >
-              Close
-            </button>
-            <a
-              href="#cohort"
-              onClick={onClose}
-              className="text-xs font-extrabold py-2.5 px-6 rounded-full border-2 border-black bg-black text-white hover:bg-[#FF3366] shadow-[3px_3px_0_#FFE500] flex items-center gap-1.5 w-full sm:w-auto justify-center transition-all"
-            >
-              <span>Go to Application</span>
-              <ArrowRight className="size-3.5 stroke-[2.5]" />
-            </a>
-          </div>
-        </footer>
-      </div>
+      </section>
     </div>
   );
 };
+
+// Backwards-compatibility alias so any existing import does not break
+export const FAQTeaserBar = BrutalistFAQ;
