@@ -97,80 +97,169 @@ export const PHASES: StagePhase[] = [
 ];
 
 // 1. Compact On-Page Teaser Strip (HyperUI Connected Steps + Neobrutalism Spec)
-export const ExposureRoadmapTeaser: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
+// 1. Full On-Page Interactive Exposure Console (21st.dev + neobrutalism.dev Tabs Spec)
+export const ExposureRoadmapTeaser: React.FC<{ onOpenModal: () => void; onApply?: () => void }> = ({ onOpenModal, onApply }) => {
+  const [selectedPhaseIndex, setSelectedPhaseIndex] = useState<number>(0);
+  const activePhase = PHASES[selectedPhaseIndex];
+  const ActiveIcon = activePhase.icon;
+
   return (
     <section className="section" id="roadmap" aria-labelledby="roadmap-title">
-      <div className="border-[2.5px] border-black bg-white rounded-3xl p-6 sm:p-8 shadow-[7px_7px_0_#000] relative overflow-hidden">
+      <div className="border-[3px] border-black bg-white rounded-3xl p-6 sm:p-10 shadow-[8px_8px_0_#000000] relative overflow-hidden">
         
-        {/* Subtle Warm Graph Accent */}
+        {/* Subtle Decorative Backdrop */}
         <div
-          className="absolute -right-16 -top-16 w-60 h-60 rounded-full bg-[#C7D2FE]/40 pointer-events-none blur-3xl"
+          className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-[#FFE500]/20 pointer-events-none blur-3xl"
           aria-hidden="true"
         />
 
-        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div className="flex-1 w-full">
-            <div className="flex items-center gap-2.5 mb-2.5">
-              <span className="text-[11px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-[#00E575] text-black border-2 border-black shadow-[2px_2px_0_#000]">
-                4-Stage Protocol
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-6 border-b-2 border-black/10">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[11px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-[#00E575] text-black border-2 border-black shadow-[1.5px_1.5px_0_#000]">
+                4-Stage Progressive Ladder
               </span>
               <span className="text-xs font-bold text-neutral-600">
-                Biological Exposure Ladder
+                Biological Desensitization
               </span>
             </div>
-            
-            <h3 id="roadmap-title" className="text-2xl sm:text-3xl font-black text-[#0A0A0C] tracking-tight m-0">
+            <h2 id="roadmap-title" className="text-2xl sm:text-4xl font-black text-[#0A0A0C] tracking-tight m-0">
               The Exposure Roadmap
-            </h3>
-            <p className="text-neutral-700 text-sm font-medium mt-1.5 max-w-xl leading-relaxed">
-              How we retrain your nervous system from private 60-second micro-reps to commanding a live auditorium.
+            </h2>
+            <p className="text-neutral-700 text-sm sm:text-base font-medium mt-1.5 max-w-2xl leading-relaxed">
+              We never throw you into the deep end. We retrain your nervous system from private 60-second audio reps to commanding a live auditorium.
             </p>
+          </div>
 
-            {/* HyperUI-Style Connected Step Sequence */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-              {PHASES.map((p) => {
-                const Icon = p.icon;
-                return (
-                  <div
-                    key={p.id}
-                    onClick={onOpenModal}
-                    className="p-3.5 rounded-2xl border-2 border-black bg-[#FAF8F5] hover:bg-white transition-all cursor-pointer group flex flex-col justify-between shadow-[3px_3px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span
-                        className="text-[10px] font-black px-2 py-0.5 rounded-full border border-black shadow-[1px_1px_0_#000]"
-                        style={{ background: p.badgeColor, color: '#0A0A0C' }}
-                      >
-                        {p.step}
-                      </span>
-                      <Icon className="size-4 text-neutral-700 group-hover:text-black transition-colors" />
-                    </div>
-                    <span className="text-xs font-black text-[#0A0A0C] leading-snug block truncate">
-                      {p.badge}
-                    </span>
-                    <span className="text-[11px] text-neutral-500 font-bold block mt-1">
-                      {p.stakes}
-                    </span>
+          <button
+            type="button"
+            onClick={onOpenModal}
+            className="self-start md:self-auto inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-black bg-[#FAF8F5] hover:bg-neutral-100 text-black font-extrabold text-xs uppercase tracking-wider shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer"
+          >
+            <Layers className="size-3.5 stroke-[2.5]" />
+            <span>Modal Deep Dive ↗</span>
+          </button>
+        </div>
+
+        {/* Segmented 4-Tab Stepper Bar (neobrutalism.dev Tabs pattern) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-6">
+          {PHASES.map((p, idx) => {
+            const Icon = p.icon;
+            const isSelected = selectedPhaseIndex === idx;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSelectedPhaseIndex(idx)}
+                className={`p-3.5 sm:p-4 rounded-2xl border-2 border-black text-left cursor-pointer transition-all flex flex-col justify-between ${
+                  isSelected
+                    ? 'shadow-[4px_4px_0_#000000] translate-x-[-1px] translate-y-[-1px]'
+                    : 'bg-[#FAF8F5] hover:bg-neutral-100 shadow-[2px_2px_0_#000]'
+                }`}
+                style={{
+                  backgroundColor: isSelected ? p.badgeColor : undefined,
+                  color: isSelected ? '#0A0A0C' : '#3F3F46',
+                }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-[10px] font-black px-2 py-0.5 rounded border border-black ${
+                    isSelected ? 'bg-black text-white' : 'bg-white text-black'
+                  }`}>
+                    {p.step}
+                  </span>
+                  <Icon className="size-4 stroke-[2.5]" />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-black text-[#0A0A0C] leading-snug">
+                    {p.badge}
                   </div>
-                );
-              })}
+                  <div className="text-[11px] font-bold mt-0.5 opacity-80">
+                    {p.stakes}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active Stage Detailed Stage Card (21st.dev brutalist card console) */}
+        <div className="border-2 border-black bg-[#FAF8F5] rounded-2xl p-6 sm:p-8 shadow-[5px_5px_0_#000000]">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-5 border-b-2 border-black/10">
+            <div className="flex items-center gap-3">
+              <div
+                className="size-12 rounded-xl border-2 border-black flex items-center justify-center text-black shadow-[2px_2px_0_#000]"
+                style={{ background: activePhase.badgeColor }}
+              >
+                <ActiveIcon className="size-6 stroke-[2.5]" />
+              </div>
+              <div>
+                <span className="text-[11px] font-black uppercase tracking-wider text-neutral-500 block">
+                  Stage {activePhase.step} · {activePhase.stakes}
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-[#0A0A0C] m-0">
+                  {activePhase.title}
+                </h3>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-black text-black bg-white px-3 py-1.5 rounded-xl border-2 border-black shadow-[1.5px_1.5px_0_#000]">
+                ⏱ {activePhase.frequency}
+              </span>
+              <span className="text-xs font-black text-black bg-[#FFE500] px-3 py-1.5 rounded-xl border-2 border-black shadow-[1.5px_1.5px_0_#000]">
+                🎯 {activePhase.repsTarget}
+              </span>
             </div>
           </div>
 
-          {/* Trigger Button - Neobrutalism.dev Pill CTA */}
-          <div className="shrink-0 w-full lg:w-auto">
+          {/* Nervous System Biological Goal */}
+          <div className="my-5 p-4 rounded-xl border-2 border-black bg-white shadow-[2px_2px_0_#000]">
+            <span className="text-[11px] font-black uppercase tracking-wider text-neutral-500 block mb-1">
+              Biological Nervous System Goal
+            </span>
+            <p className="text-sm sm:text-base font-bold text-[#0A0A0C] m-0 leading-relaxed">
+              "{activePhase.nervousSystemGoal}"
+            </p>
+          </div>
+
+          {/* Tactical Weekly Drills Grid */}
+          <div className="mb-6">
+            <span className="text-xs font-black uppercase tracking-wider text-[#0A0A0C] block mb-3">
+              Active Desensitization Drills in Stage {activePhase.step}
+            </span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {activePhase.weeklyDrills.map((drill, dIdx) => (
+                <div
+                  key={dIdx}
+                  className="p-3.5 bg-white rounded-xl border-2 border-black text-xs font-bold text-neutral-800 flex items-start gap-2.5 shadow-[2px_2px_0_#000]"
+                >
+                  <span className="size-5 rounded-full bg-black text-white shrink-0 flex items-center justify-center text-[10px] font-black mt-0.5">
+                    {dIdx + 1}
+                  </span>
+                  <span className="leading-snug">{drill}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Row */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t-2 border-black/10">
+            <span className="text-xs font-semibold text-neutral-600">
+              📍 Environment: <strong className="text-black">{activePhase.environment}</strong>
+            </span>
+
             <button
               type="button"
-              onClick={onOpenModal}
-              className="w-full lg:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-full border-2 border-black bg-black text-white hover:bg-[#FF3366] font-extrabold text-sm shadow-[4px_4px_0_#FFE500] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
-              style={{ margin: 0 }}
+              onClick={onApply || (() => { const el = document.getElementById('cohort'); el?.scrollIntoView({ behavior: 'smooth' }); })}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border-2 border-black bg-black text-white hover:bg-[#FF3366] font-extrabold text-xs uppercase tracking-wider shadow-[3px_3px_0_#FFE500] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer transition-all"
             >
-              <Layers className="size-4 stroke-[2.5]" />
-              <span>Inspect Protocol &amp; Drills</span>
-              <ArrowRight className="size-4 stroke-[2.5]" />
+              <span>Join Stage {activePhase.step} Pod Cohort</span>
+              <ArrowRight className="size-3.5 stroke-[2.5]" />
             </button>
           </div>
         </div>
+
       </div>
     </section>
   );

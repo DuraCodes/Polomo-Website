@@ -89,22 +89,20 @@ export const BrutalistFooter: React.FC<BrutalistFooterProps> = ({
                   </a>
                 </li>
                 <li>
-                  <button
-                    type="button"
-                    onClick={onOpenRoadmap}
+                  <a
+                    href="#roadmap"
                     className="text-zinc-300 hover:text-white hover:underline underline-offset-4 decoration-[#FF0000] decoration-2 transition-colors text-left bg-transparent border-none p-0 font-medium text-sm cursor-pointer block py-0.5"
                   >
-                    4-Stage Roadmap ↗
-                  </button>
+                    4-Stage Roadmap &amp; Drills
+                  </a>
                 </li>
                 <li>
-                  <button
-                    type="button"
-                    onClick={onOpenFaq}
+                  <a
+                    href="#faq"
                     className="text-zinc-300 hover:text-white hover:underline underline-offset-4 decoration-[#FFE500] decoration-2 transition-colors text-left bg-transparent border-none p-0 font-medium text-sm cursor-pointer block py-0.5"
                   >
-                    Frequently Answered ↗
-                  </button>
+                    Frequently Answered Questions
+                  </a>
                 </li>
                 <li>
                   <button

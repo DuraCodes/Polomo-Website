@@ -219,7 +219,7 @@ export const CohortApplicationForm: React.FC = () => {
                       onClick={() => handleToggleSymptom(sym)}
                       className={`px-4 py-2 rounded-full text-xs font-bold border-2 border-black transition-all cursor-pointer ${
                         isChecked
-                          ? 'bg-[#FF3366] text-white shadow-[3px_3px_0_#000]'
+                          ? 'bg-black text-[#FFE500] border-black shadow-[3px_3px_0_#FFE500]'
                           : 'bg-[#FAF8F5] text-neutral-800 hover:bg-neutral-100 shadow-[2px_2px_0_#000]'
                       }`}
                     >

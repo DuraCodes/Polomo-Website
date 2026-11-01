@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronRightIcon, ArrowRight } from "lucide-react";
+import { ChevronRightIcon, ArrowRight, ShieldCheck, Users, Sparkles, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -203,26 +203,12 @@ export default function App() {
                 </a>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={() => setRoadmapModalOpen(true)}
-                  className="cursor-pointer"
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#FFFFFF',
-                    padding: '0 12px',
-                    minHeight: '38px',
-                    font: 'inherit',
-                    fontWeight: 500,
-                    fontSize: '14.5px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    whiteSpace: 'nowrap'
-                  }}
+                <a
+                  className={activeSection === 'roadmap' ? 'is-underlined' : ''}
+                  href="#roadmap"
                 >
-                  Roadmap ↗
-                </button>
+                  Roadmap
+                </a>
               </li>
               <li>
                 <a
@@ -241,26 +227,12 @@ export default function App() {
                 </a>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={() => setFaqModalOpen(true)}
-                  className="cursor-pointer"
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#FFFFFF',
-                    padding: '0 12px',
-                    minHeight: '38px',
-                    font: 'inherit',
-                    fontWeight: 500,
-                    fontSize: '14.5px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    whiteSpace: 'nowrap'
-                  }}
+                <a
+                  className={activeSection === 'faq' ? 'is-underlined' : ''}
+                  href="#faq"
                 >
-                  FAQ ↗
-                </button>
+                  FAQ
+                </a>
               </li>
             </ul>
             <div className="nav__actions">
@@ -323,9 +295,9 @@ export default function App() {
                 </header>
                 <nav className="chm-27__menu" aria-label="Site">
                   <div className="chm-27__row"><a href="#approach" onClick={() => setMenuChecked(false)}><b>01</b>OUR METHOD<span aria-hidden="true">→</span></a></div>
-                  <div className="chm-27__row"><a href="#roadmap" onClick={(e) => { e.preventDefault(); setMenuChecked(false); setRoadmapModalOpen(true); }}><b>02</b>EXPOSURE ROADMAP<span aria-hidden="true">↗</span></a></div>
+                  <div className="chm-27__row"><a href="#roadmap" onClick={() => setMenuChecked(false)}><b>02</b>EXPOSURE ROADMAP<span aria-hidden="true">→</span></a></div>
                   <div className="chm-27__row"><a href="#who-it-is-for" onClick={() => setMenuChecked(false)}><b>03</b>WHO IT'S FOR<span aria-hidden="true">→</span></a></div>
-                  <div className="chm-27__row"><a href="#faq" onClick={(e) => { e.preventDefault(); setMenuChecked(false); setFaqModalOpen(true); }}><b>04</b>FAQ INQUIRIES<span aria-hidden="true">↗</span></a></div>
+                  <div className="chm-27__row"><a href="#faq" onClick={() => setMenuChecked(false)}><b>04</b>FAQ INQUIRIES<span aria-hidden="true">→</span></a></div>
                   <div className="chm-27__row"><button type="button" onClick={() => { setMenuChecked(false); navigate('/apply'); }} className="w-full text-left bg-transparent border-none p-0 cursor-pointer font-inherit text-inherit"><b>05</b>APPLY FOR COHORT<span aria-hidden="true">→</span></button></div>
                   <div className="chm-27__foot">
                     <div className="chm-27__badge">
@@ -458,21 +430,52 @@ export default function App() {
             </div>
 
             <div className="hero__content">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-[11px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF]">
+                  Next Cohort Enrolling · Pods Capped at 4–6 Peers
+                </span>
+              </div>
               <h1 id="hero-title">Stop Learning About Public Speaking. Start Speaking.</h1>
-              <p className="hero__lede">We don't teach communication theory.</p>
+              <p className="hero__lede">
+                A practical 6-week exposure lab for students, professionals, and founders who freeze under audience scrutiny. No passive lectures. No theory. Active micro-reps from Day 1.
+              </p>
 
+              {/* Dual-Action Conversion Console (neobrutalism.dev hierarchy) */}
               <div className="hero__actions">
                 <button
                   type="button"
                   className="btn btn--primary"
                   onClick={() => navigate('/apply')}
                 >
-                  <span>Get started</span>
-                  <ArrowRight className="size-4 stroke-[2.5]" />
+                  <span>Apply for Next Cohort</span>
+                  <ArrowRight className="size-4 stroke-[3]" />
                 </button>
-                <a className="btn btn--dark" href="#about">
-                  <span>Learn more</span>
-                </a>
+                <button
+                  type="button"
+                  className="btn btn--dark"
+                  onClick={() => setDiagnosticModalOpen(true)}
+                >
+                  <Radio className="size-4 text-[#00E575] animate-pulse" />
+                  <span>Book 10-Min Free Audit ↗</span>
+                </button>
+              </div>
+
+              {/* Immediate Social Proof & Reassurance Strip (NN/G claim-to-proof adjacency) */}
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8 text-xs font-semibold text-zinc-300">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="size-4 text-[#00E575] stroke-[2.5]" />
+                  <span>100% Judgment-Free Pods</span>
+                </span>
+                <span className="text-zinc-600 hidden sm:inline">·</span>
+                <span className="flex items-center gap-1.5">
+                  <Users className="size-4 text-[#FFE500] stroke-[2.5]" />
+                  <span>Curated 4–6 Peers / Facilitator</span>
+                </span>
+                <span className="text-zinc-600 hidden sm:inline">·</span>
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="size-4 text-[#8FD4EE] stroke-[2.5]" />
+                  <span>Instant Biological Reset Tools</span>
+                </span>
               </div>
             </div>
           </section>
@@ -556,8 +559,11 @@ export default function App() {
             </section>
           </div>
 
-          {/* 4-Stage Exposure Roadmap Teaser Strip */}
-          <ExposureRoadmapTeaser onOpenModal={() => setRoadmapModalOpen(true)} />
+          {/* 4-Stage Exposure Roadmap Interactive Console (21st.dev + neobrutalism.dev tabs) */}
+          <ExposureRoadmapTeaser
+            onOpenModal={() => setRoadmapModalOpen(true)}
+            onApply={() => navigate('/apply')}
+          />
 
           {/* Why we do it */}
           <section className="section section--alt">

@@ -54,38 +54,105 @@ export const FAQS: FAQItem[] = [
   }
 ];
 
-// 1. Compact On-Page Teaser Bar (Neobrutalism.dev Clean Callout Spec)
+// 1. Full On-Page Accessible Neo-Brutalist Accordion (neobrutalism.dev Accordion Spec)
 export const FAQTeaserBar: React.FC<{ onOpenModal: () => void }> = ({ onOpenModal }) => {
+  const [openIds, setOpenIds] = useState<Record<string, boolean>>({
+    freeze: true,
+    toastmasters: false,
+    'crowd-size': false,
+    commitment: false,
+  });
+
+  const toggleItem = (id: string) => {
+    setOpenIds((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
   return (
-    <section className="section py-4" id="faq" aria-labelledby="faq-teaser-title">
-      <div className="border-[2.5px] border-black bg-white rounded-2xl p-5 sm:p-6 shadow-[6px_6px_0_#000] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="size-11 rounded-xl bg-[#FFE500] border-2 border-black flex items-center justify-center text-black shrink-0 font-black text-xl shadow-[2px_2px_0_#000]">
-            ?
-          </div>
+    <section className="section py-8" id="faq" aria-labelledby="faq-section-title">
+      <div className="border-[3px] border-black bg-white rounded-3xl p-6 sm:p-10 shadow-[8px_8px_0_#000000]">
+        
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-6 border-b-2 border-black/10">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-black bg-[#C7D2FE] px-2.5 py-0.5 rounded-full border border-black">
-                Quick Clarifications
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[11px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[1.5px_1.5px_0_#000]">
+                Common Hesitations
               </span>
-              <span className="text-neutral-500 text-xs font-semibold">• 6 Answers</span>
+              <span className="text-xs font-bold text-neutral-600">
+                Direct Answers
+              </span>
             </div>
-            <h3 id="faq-teaser-title" className="text-base sm:text-lg font-extrabold text-[#0A0A0C] m-0">
-              Questions about panic freezing, pod sizes, or weekly time commitments?
-            </h3>
+            <h2 id="faq-section-title" className="text-2xl sm:text-4xl font-black text-[#0A0A0C] tracking-tight m-0">
+              Frequently Answered Questions
+            </h2>
+            <p className="text-neutral-700 text-sm sm:text-base font-medium mt-1.5 max-w-xl leading-relaxed">
+              Everything you need to know about stage freeze protocol, cohort cadence, and zero-judgment practice.
+            </p>
           </div>
+
+          <button
+            type="button"
+            onClick={onOpenModal}
+            className="self-start sm:self-auto inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-black bg-[#FAF8F5] hover:bg-neutral-100 text-black font-extrabold text-xs uppercase tracking-wider shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer"
+          >
+            <BookOpen className="size-3.5 stroke-[2.5]" />
+            <span>Open Dedicated FAQ Window ↗</span>
+          </button>
         </div>
 
-        <button
-          type="button"
-          onClick={onOpenModal}
-          className="text-xs font-black py-2.5 px-6 rounded-full border-2 border-black bg-black text-white hover:bg-[#FF3366] shadow-[3px_3px_0_#FFE500] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none shrink-0 w-full md:w-auto flex items-center justify-center gap-2 cursor-pointer transition-all"
-          style={{ margin: 0 }}
-        >
-          <BookOpen className="size-3.5 stroke-[2.5]" />
-          <span>Read Full FAQ Modal</span>
-          <ArrowRight className="size-3.5 stroke-[2.5]" />
-        </button>
+        {/* Accordion Stack (neobrutalism.dev Accordion structure) */}
+        <div className="space-y-3.5">
+          {FAQS.map((faq) => {
+            const isOpen = !!openIds[faq.id];
+            return (
+              <div
+                key={faq.id}
+                className="border-2 border-black rounded-2xl overflow-hidden transition-all bg-[#FAF8F5] shadow-[3px_3px_0_#000]"
+              >
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  onClick={() => toggleItem(faq.id)}
+                  className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left cursor-pointer hover:bg-white transition-colors select-none"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="size-3 rounded-full border border-black shrink-0 hidden sm:block"
+                      style={{ background: faq.accent }}
+                      aria-hidden="true"
+                    />
+                    <h3 className="text-sm sm:text-base font-black text-[#0A0A0C] m-0">
+                      {faq.question}
+                    </h3>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white text-black border border-black shadow-[1px_1px_0_#000] hidden md:inline-block">
+                      {faq.tag}
+                    </span>
+                    <span className={`size-7 rounded-lg border-2 border-black flex items-center justify-center font-black text-sm transition-transform duration-200 ${
+                      isOpen ? 'bg-[#FFE500] text-black rotate-45' : 'bg-black text-white'
+                    }`}>
+                      +
+                    </span>
+                  </div>
+                </button>
+
+                {isOpen && (
+                  <div className="px-5 pb-5 pt-1 border-t-2 border-black/10 bg-white">
+                    <p className="text-xs sm:text-sm text-neutral-800 font-medium leading-relaxed m-0 pt-2">
+                      {faq.answer}
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
       </div>
     </section>
   );

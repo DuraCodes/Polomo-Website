@@ -65,7 +65,7 @@ h1, h2, h3, p {
 }
 
 :focus-visible {
-  outline: 3px solid var(--accent-red);
+  outline: 3px solid #FFE500;
   outline-offset: 3px;
   border-radius: 6px;
 }

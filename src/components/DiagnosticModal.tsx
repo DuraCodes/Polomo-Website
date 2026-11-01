@@ -232,14 +232,14 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-neutral-700 mb-1">
-                      WhatsApp / Phone *
+                      Email Address *
                     </label>
                     <input
-                      type="tel"
+                      type="email"
                       required
-                      placeholder="+1 (555) 000-0000"
-                      value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
+                      placeholder="jane@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl text-sm text-[#0A0A0C] font-semibold px-3.5 py-2 outline-none focus:bg-white focus:shadow-[3px_3px_0_#000] transition-all"
                     />
                   </div>
@@ -247,14 +247,13 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold text-neutral-700 mb-1">
-                    Email Address *
+                    WhatsApp / Phone Number <span className="text-neutral-500 font-normal">(Optional — for calendar SMS reminder)</span>
                   </label>
                   <input
-                    type="email"
-                    required
-                    placeholder="jane@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="tel"
+                    placeholder="+1 (555) 000-0000"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
                     className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl text-sm text-[#0A0A0C] font-semibold px-3.5 py-2 outline-none focus:bg-white focus:shadow-[3px_3px_0_#000] transition-all"
                   />
                 </div>
@@ -262,11 +261,11 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
                 <div className="pt-2">
                   <button
                     type="button"
-                    disabled={!name || !email || !whatsapp}
+                    disabled={!name.trim() || !email.trim() || !email.includes('@')}
                     onClick={() => setStep(2)}
                     className="w-full py-3.5 px-6 rounded-full border-2 border-black bg-black text-white hover:bg-[#FF3366] font-extrabold text-sm shadow-[4px_4px_0_#FFE500] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all flex items-center justify-center gap-2"
                   >
-                    <span>Select 10-Minute Slot</span>
+                    <span>Proceed to 10-Minute Slot Selection</span>
                     <ArrowRight className="size-4 stroke-[2.5]" />
                   </button>
                 </div>
