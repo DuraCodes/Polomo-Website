@@ -87,26 +87,26 @@ export const AdminControlDrawer: React.FC<AdminControlDrawerProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-[620px] my-8 bg-[#121218] border-3 border-white shadow-[8px_8px_0_#FFE500] rounded-none overflow-hidden text-white flex flex-col font-sans">
+      <div className="relative w-full max-w-[620px] my-auto max-h-[92vh] max-h-[92dvh] bg-[#121218] border-3 border-white shadow-[8px_8px_0_#FFE500] rounded-none overflow-hidden text-white flex flex-col font-sans">
         
         {/* Header Bar */}
-        <header className="flex items-center justify-between p-4 bg-[#14141c] border-b-3 border-white">
+        <header className="flex items-center justify-between p-4 bg-[#14141c] border-b-3 border-white shrink-0">
           <div className="flex items-center gap-2.5">
             <Settings className="size-5 text-[#FFE500]" />
-            <h3 className="font-extrabold text-base tracking-wider text-white">
-              POLOMO Mission Control Switchboard
+            <h3 className="font-extrabold text-sm sm:text-base tracking-wider text-white">
+              POLOMO Mission Control
             </h3>
           </div>
           <button
             type="button"
-            className="flex items-center justify-center h-8 px-3 border-2 border-white bg-transparent text-white font-bold text-xs uppercase cursor-pointer hover:bg-white/10"
+            className="flex items-center justify-center min-h-[36px] px-3 border-2 border-white bg-transparent text-white font-bold text-xs uppercase cursor-pointer hover:bg-white/10"
             onClick={onClose}
           >
             Close ✕
@@ -114,7 +114,7 @@ export const AdminControlDrawer: React.FC<AdminControlDrawerProps> = ({
         </header>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1">
 
           {/* 1. Google Account Connection */}
           <div className="p-4 bg-[#181824] border-2 border-white/20">

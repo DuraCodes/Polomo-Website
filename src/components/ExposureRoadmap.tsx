@@ -309,7 +309,7 @@ export const ExposureRoadmapModal: React.FC<{ isOpen: boolean; onClose: () => vo
       }}
     >
       <div
-        className="relative w-full max-w-4xl border-[3px] border-black bg-white rounded-3xl shadow-[10px_10px_0_#000] overflow-hidden my-auto max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-150"
+        className="relative w-full max-w-4xl border-[3px] border-black bg-white rounded-2xl sm:rounded-3xl shadow-[5px_5px_0_#000] sm:shadow-[10px_10px_0_#000] overflow-hidden my-auto max-h-[92dvh] flex flex-col animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Window Bar */}

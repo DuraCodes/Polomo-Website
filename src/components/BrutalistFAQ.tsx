@@ -71,7 +71,7 @@ export const BrutalistFAQ: React.FC = () => {
 
   return (
     <section
-      className="w-full min-h-screen min-h-[100dvh] flex flex-col justify-center bg-white text-[#111118] border-b-[3px] border-black py-8 sm:py-12 lg:py-14 px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
+      className="w-full py-12 sm:py-16 lg:py-20 lg:min-h-screen lg:min-h-[100dvh] flex flex-col justify-center bg-white text-[#111118] border-b-[3px] border-black px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
       id="faq"
       aria-labelledby="faq-section-title"
     >
@@ -85,7 +85,7 @@ export const BrutalistFAQ: React.FC = () => {
 
           <a
             href="#cohort"
-            className="btn btn--dark"
+            className="btn btn--dark min-h-[44px]"
           >
             <span>Jump to Admissions</span>
             <ArrowDown className="size-4 stroke-[2.5]" />
@@ -106,7 +106,7 @@ export const BrutalistFAQ: React.FC = () => {
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id as any)}
-                className={`text-xs sm:text-sm font-bold px-3.5 py-1.5 rounded-full border-2 border-black transition-all cursor-pointer ${
+                className={`text-xs sm:text-sm font-bold min-h-[38px] px-3.5 py-1.5 rounded-full border-2 border-black transition-all cursor-pointer flex items-center justify-center ${
                   isSelected
                     ? 'bg-black text-[#FFE500] shadow-[2px_2px_0_#FFE500]'
                     : 'bg-[#FAF8F5] text-[#181820] hover:bg-neutral-100 shadow-[1px_1px_0_#000]'
@@ -131,7 +131,7 @@ export const BrutalistFAQ: React.FC = () => {
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => toggleItem(faq.id)}
-                  className="w-full py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-white transition-colors select-none"
+                  className="w-full py-3.5 px-4 sm:py-4 sm:px-5 min-h-[52px] flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-white transition-colors select-none"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className="font-mono text-xs font-black text-black bg-white px-2.5 py-1 rounded border border-black shrink-0 shadow-[1px_1px_0_#000]">

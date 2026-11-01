@@ -20,6 +20,11 @@ import { CohortCalloutCard } from './components/CohortCalloutCard';
 import { BrutalistFooter } from './components/BrutalistFooter';
 import { DiagnosticModal } from './components/DiagnosticModal';
 import { AdminControlDrawer } from './components/AdminControlDrawer';
+import { TextEffect } from './components/motion-primitives/text-effect';
+import { AnimatedBackground } from './components/motion-primitives/animated-background';
+import { Tilt } from './components/motion-primitives/tilt';
+import { BlurFade } from './components/magicui/blur-fade';
+import { NumberTicker } from './components/magicui/number-ticker';
 
 export default function App() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -381,21 +386,43 @@ export default function App() {
             </div>
 
             <div className="hero__content">
-              <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <span className="text-xs sm:text-[13px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF]">
-                  Free 60-Second Speaking Diagnostic · Zero Passive Lectures
+              <div className="flex items-center justify-center mb-3 sm:mb-4 w-full px-2">
+                <span className="text-[10px] sm:text-xs md:text-[13px] font-black uppercase tracking-wider px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF] text-center max-w-full leading-tight inline-flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
+                  <span>Free 60-Sec Diagnostic</span>
+                  <span>•</span>
+                  <span><NumberTicker value={12} className="font-black text-black" /> Seats Per Pod</span>
+                  <span className="hidden min-[420px]:inline">•</span>
+                  <span className="hidden min-[420px]:inline">Zero Passive Lectures</span>
                 </span>
               </div>
-              <h1 id="hero-title">Stop Learning About Public Speaking. Start Speaking.</h1>
-              <p className="hero__lede">
+              <h1 id="hero-title" className="sr-only">
+                Stop Learning About Public Speaking. Start Speaking.
+              </h1>
+              <TextEffect
+                as="h1"
+                per="word"
+                preset="fade-in-blur"
+                speedReveal={1.2}
+                className="font-bold text-center leading-[1.08] sm:leading-[1.02] lg:leading-[0.98] tracking-[-0.03em] max-w-4xl mx-auto"
+                aria-hidden="true"
+              >
+                Stop Learning About Public Speaking. Start Speaking.
+              </TextEffect>
+              <TextEffect
+                as="p"
+                per="line"
+                preset="fade"
+                delay={0.2}
+                className="hero__lede"
+              >
                 A practical exposure lab for students, professionals, and founders who freeze under audience scrutiny. Run your free diagnostic, identify your freeze triggers, and unlock your practice pod pass.
-              </p>
+              </TextEffect>
 
               {/* Dual-Action Conversion Console (neobrutalism.dev hierarchy) */}
-              <div className="hero__actions">
+              <div className="hero__actions w-full sm:w-auto">
                 <button
                   type="button"
-                  className="btn btn--primary"
+                  className="btn btn--primary w-full sm:w-auto min-h-[48px]"
                   onClick={() => scrollToAdmissions()}
                 >
                   <span>Run Free Diagnostic</span>
@@ -403,7 +430,7 @@ export default function App() {
                 </button>
                 <button
                   type="button"
-                  className="btn btn--dark"
+                  className="btn btn--dark w-full sm:w-auto min-h-[48px]"
                   onClick={() => setDiagnosticModalOpen(true)}
                 >
                   <Radio className="size-4 text-[#00E575] animate-pulse" />
@@ -414,7 +441,7 @@ export default function App() {
           </section>
 
           {/* Our approach - Stretches edge-to-edge from left to right */}
-          <section className="approach scroll-mt-20 min-h-screen min-h-[100dvh] flex flex-col justify-center" id="approach" aria-labelledby="approach-title">
+          <section className="approach scroll-mt-20 py-12 sm:py-16 lg:py-20 lg:min-h-screen lg:min-h-[100dvh] flex flex-col justify-center" id="approach" aria-labelledby="approach-title">
             <div className="approach__inner">
               <div className="approach__head">
                 <h2 id="approach-title">Our approach</h2>
@@ -468,7 +495,7 @@ export default function App() {
 
           {/* Who it's for - Full-Bleed Manila Dossier Board Stretching Edge-to-Edge */}
           <section
-            className="w-full min-h-screen min-h-[100dvh] flex flex-col justify-center bg-[#FAF7EE] border-b-[3px] border-black py-8 sm:py-12 lg:py-14 px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
+            className="w-full py-12 sm:py-16 lg:py-20 lg:min-h-screen lg:min-h-[100dvh] flex flex-col justify-center bg-[#FAF7EE] border-b-[3px] border-black px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
             id="who-it-is-for"
             aria-labelledby="who-title"
           >
@@ -480,7 +507,7 @@ export default function App() {
                 </h2>
                 <button
                   type="button"
-                  className="btn btn--dark"
+                  className="btn btn--dark min-h-[44px]"
                   onClick={() => scrollToAdmissions()}
                 >
                   <span>Get started</span>
@@ -488,47 +515,43 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Mobile / Small Screen Segmented Archetype Switcher */}
-              <div className="md:hidden flex p-1.5 bg-black/10 rounded-xl gap-1 mb-4 border-2 border-black">
-                <button
-                  type="button"
-                  onClick={() => setActiveArchetype('student')}
-                  className={`flex-1 py-2 px-2 text-xs sm:text-sm font-black rounded-lg transition-all cursor-pointer ${
-                    activeArchetype === 'student'
-                      ? 'bg-[#C7D2FE] text-[#111118] border-2 border-black shadow-[2px_2px_0_#000]'
-                      : 'text-neutral-700 hover:text-black border-2 border-transparent'
-                  }`}
-                >
-                  🎓 Students
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveArchetype('professional')}
-                  className={`flex-1 py-2 px-2 text-xs sm:text-sm font-black rounded-lg transition-all cursor-pointer ${
-                    activeArchetype === 'professional'
-                      ? 'bg-[#FFE500] text-[#111118] border-2 border-black shadow-[2px_2px_0_#000]'
-                      : 'text-neutral-700 hover:text-black border-2 border-transparent'
-                  }`}
-                >
-                  💼 Pros
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveArchetype('founder')}
-                  className={`flex-1 py-2 px-2 text-xs sm:text-sm font-black rounded-lg transition-all cursor-pointer ${
-                    activeArchetype === 'founder'
-                      ? 'bg-[#FF3366] text-white border-2 border-black shadow-[2px_2px_0_#000]'
-                      : 'text-neutral-700 hover:text-black border-2 border-transparent'
-                  }`}
-                >
-                  🚀 Founders
-                </button>
+              {/* Mobile / Tablet Segmented Archetype Switcher (Under 1024px) with Motion-Primitives AnimatedBackground */}
+              <div className="lg:hidden p-1.5 bg-black/10 rounded-xl mb-5 border-2 border-black max-w-xl mx-auto">
+                <div className="flex gap-1.5">
+                  <AnimatedBackground
+                    defaultValue={activeArchetype}
+                    className="rounded-lg bg-black shadow-[2px_2px_0_#000]"
+                    transition={{
+                      type: 'spring',
+                      bounce: 0.15,
+                      duration: 0.35,
+                    }}
+                    onValueChange={(id) => {
+                      if (id) setActiveArchetype(id as any);
+                    }}
+                  >
+                    {[
+                      { id: 'student', label: 'Students' },
+                      { id: 'professional', label: 'Professionals' },
+                      { id: 'founder', label: 'Founders' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        data-id={tab.id}
+                        type="button"
+                        className="flex-1 min-h-[44px] py-2 px-2 sm:px-4 text-xs sm:text-sm font-black transition-colors cursor-pointer flex items-center justify-center text-neutral-800 data-[checked=true]:text-white select-none"
+                      >
+                        <span className="truncate">{tab.label}</span>
+                      </button>
+                    ))}
+                  </AnimatedBackground>
+                </div>
               </div>
 
-              {/* Mobile Single Card View (Active Persona Only) */}
-              <div className="md:hidden">
+              {/* Mobile & Tablet Single Card View (Active Persona Only) */}
+              <div className="lg:hidden max-w-2xl mx-auto">
                 {activeArchetype === 'student' && (
-                  <article className="relative flex flex-col justify-between bg-[#C7D2FE] border-[3px] border-black text-[#111118] rounded-[20px] p-5 shadow-[4px_4px_0_#000] animate-in fade-in-50 duration-150">
+                  <article className="relative flex flex-col justify-between bg-[#C7D2FE] border-[3px] border-black text-[#111118] rounded-[20px] p-5 sm:p-7 shadow-[4px_4px_0_#000] animate-in fade-in-50 duration-150">
                     <span
                       className="absolute top-4 right-4 size-7 rounded-full bg-[#FF0000] border-2 border-black"
                       aria-hidden="true"
@@ -657,155 +680,161 @@ export default function App() {
                 )}
               </div>
 
-              {/* Desktop 3-Card Grid - Clear, readable typography matching Our Approach */}
-              <div className="hidden md:grid md:grid-cols-3 gap-4 lg:gap-5 w-full">
+              {/* Desktop 3-Card Grid - Clear, readable typography matching Our Approach (active on >= 1024px) */}
+              <div className="hidden lg:grid lg:grid-cols-3 gap-5 lg:gap-6 w-full">
                 
                 {/* Persona 1: Students & Graduates */}
-                <article className="relative flex flex-col justify-between bg-[#C7D2FE] border-[3px] border-black text-[#111118] rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
-                  <span
-                    className="card__dot"
-                    aria-hidden="true"
-                    style={{ top: '18px', right: '18px', width: '28px', height: '28px', background: '#FF0000', border: '2px solid #000' }}
-                  />
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
-                        Academia &amp; Entry
-                      </span>
+                <Tilt rotationFactor={6} isRevese={true} className="h-full">
+                  <article className="relative flex flex-col justify-between bg-[#C7D2FE] border-[3px] border-black text-[#111118] rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] h-full shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                    <span
+                      className="card__dot"
+                      aria-hidden="true"
+                      style={{ top: '18px', right: '18px', width: '28px', height: '28px', background: '#FF0000', border: '2px solid #000' }}
+                    />
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
+                          Academia &amp; Entry
+                        </span>
+                      </div>
+                      <h3 className="text-xl lg:text-[23px] font-black text-[#111118] tracking-tight mb-2 pr-8 leading-snug">
+                        Students &amp; Graduates
+                      </h3>
+                      <p className="text-[#181820] font-normal text-sm sm:text-[14.5px] leading-relaxed mb-3">
+                        Thesis defenses, capstone presentations, and high-pressure job interviews.
+                      </p>
+
+                      <ul className="space-y-1.5 text-xs sm:text-sm text-[#111118] font-medium list-none p-0 m-0">
+                        <li className="flex items-start gap-2">
+                          <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                          <span>Defend thesis without vocal trembling.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                          <span>Conquer interview jitters &amp; curveballs.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                          <span>Eliminate sudden mental blanking.</span>
+                        </li>
+                      </ul>
                     </div>
-                    <h3 className="text-xl lg:text-[23px] font-black text-[#111118] tracking-tight mb-2 pr-8 leading-snug">
-                      Students &amp; Graduates
-                    </h3>
-                    <p className="text-[#181820] font-normal text-sm sm:text-[14.5px] leading-relaxed mb-3">
-                      Thesis defenses, capstone presentations, and high-pressure job interviews.
-                    </p>
 
-                    <ul className="space-y-1.5 text-xs sm:text-sm text-[#111118] font-medium list-none p-0 m-0">
-                      <li className="flex items-start gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                        <span>Defend thesis without vocal trembling.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                        <span>Conquer interview jitters &amp; curveballs.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                        <span>Eliminate sudden mental blanking.</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="pt-4 mt-auto">
-                    <button
-                      type="button"
-                      onClick={() => scrollToAdmissions('student')}
-                      className="pill cursor-pointer text-sm font-bold py-2 px-4"
-                      style={{ marginTop: 0 }}
-                    >
-                      <span>Student track</span>
-                      <ArrowRight className="size-4 stroke-[2.5]" />
-                    </button>
-                  </div>
-                </article>
+                    <div className="pt-4 mt-auto">
+                      <button
+                        type="button"
+                        onClick={() => scrollToAdmissions('student')}
+                        className="pill cursor-pointer text-sm font-bold py-2 px-4"
+                        style={{ marginTop: 0 }}
+                      >
+                        <span>Student track</span>
+                        <ArrowRight className="size-4 stroke-[2.5]" />
+                      </button>
+                    </div>
+                  </article>
+                </Tilt>
 
                 {/* Persona 2: Professionals & Seekers */}
-                <article className="relative flex flex-col justify-between bg-[#FFE500] border-[3px] border-black text-[#111118] rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] shadow-[4px_4px_0_#000] lg:[transform:rotate(1.2deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
-                  <span
-                    className="card__dot"
-                    aria-hidden="true"
-                    style={{ top: '18px', right: '18px', width: '28px', height: '28px', background: '#111118', border: '2px solid #000' }}
-                  />
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
-                        Career &amp; Visibility
-                      </span>
+                <Tilt rotationFactor={6} isRevese={true} className="h-full">
+                  <article className="relative flex flex-col justify-between bg-[#FFE500] border-[3px] border-black text-[#111118] rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] h-full shadow-[4px_4px_0_#000] lg:[transform:rotate(1.2deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                    <span
+                      className="card__dot"
+                      aria-hidden="true"
+                      style={{ top: '18px', right: '18px', width: '28px', height: '28px', background: '#111118', border: '2px solid #000' }}
+                    />
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
+                          Career &amp; Visibility
+                        </span>
+                      </div>
+                      <h3 className="text-xl lg:text-[23px] font-black text-[#111118] tracking-tight mb-2 pr-8 leading-snug">
+                        Professionals &amp; Seekers
+                      </h3>
+                      <p className="text-[#181820] font-normal text-sm sm:text-[14.5px] leading-relaxed mb-3">
+                        Commanding meetings, executive reviews, and unscripted Q&amp;A.
+                      </p>
+
+                      <ul className="space-y-1.5 text-xs sm:text-sm text-[#111118] font-medium list-none p-0 m-0">
+                        <li className="flex items-start gap-2">
+                          <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                          <span>Stop staying muted when you have answers.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                          <span>Pitch ideas to executive stakeholders.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
+                          <span>Handle tough pushback with composure.</span>
+                        </li>
+                      </ul>
                     </div>
-                    <h3 className="text-xl lg:text-[23px] font-black text-[#111118] tracking-tight mb-2 pr-8 leading-snug">
-                      Professionals &amp; Seekers
-                    </h3>
-                    <p className="text-[#181820] font-normal text-sm sm:text-[14.5px] leading-relaxed mb-3">
-                      Commanding meetings, executive reviews, and unscripted Q&amp;A.
-                    </p>
 
-                    <ul className="space-y-1.5 text-xs sm:text-sm text-[#111118] font-medium list-none p-0 m-0">
-                      <li className="flex items-start gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                        <span>Stop staying muted when you have answers.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                        <span>Pitch ideas to executive stakeholders.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-black stroke-[3]" />
-                        <span>Handle tough pushback with composure.</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="pt-4 mt-auto">
-                    <button
-                      type="button"
-                      onClick={() => scrollToAdmissions('professional')}
-                      className="pill cursor-pointer text-sm font-bold py-2 px-4"
-                      style={{ marginTop: 0 }}
-                    >
-                      <span>Join a pod</span>
-                      <ArrowRight className="size-4 stroke-[2.5]" />
-                    </button>
-                  </div>
-                </article>
+                    <div className="pt-4 mt-auto">
+                      <button
+                        type="button"
+                        onClick={() => scrollToAdmissions('professional')}
+                        className="pill cursor-pointer text-sm font-bold py-2 px-4"
+                        style={{ marginTop: 0 }}
+                      >
+                        <span>Join a pod</span>
+                        <ArrowRight className="size-4 stroke-[2.5]" />
+                      </button>
+                    </div>
+                  </article>
+                </Tilt>
 
                 {/* Persona 3: Founders & Creators */}
-                <article className="relative flex flex-col justify-between bg-[#FF3366] border-[3px] border-black text-white rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
-                  <span
-                    className="card__dot"
-                    aria-hidden="true"
-                    style={{ top: '18px', right: '18px', width: '28px', height: '28px', background: '#FFFFFF', border: '2px solid #000' }}
-                  />
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
-                        Pitches &amp; Stages
-                      </span>
+                <Tilt rotationFactor={6} isRevese={true} className="h-full">
+                  <article className="relative flex flex-col justify-between bg-[#FF3366] border-[3px] border-black text-white rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] h-full shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                    <span
+                      className="card__dot"
+                      aria-hidden="true"
+                      style={{ top: '18px', right: '18px', width: '28px', height: '28px', background: '#FFFFFF', border: '2px solid #000' }}
+                    />
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-white">
+                          Pitches &amp; Stages
+                        </span>
+                      </div>
+                      <h3 className="text-xl lg:text-[23px] font-black text-white tracking-tight mb-2 pr-8 leading-snug">
+                        Founders &amp; Creators
+                      </h3>
+                      <p className="text-white/95 font-normal text-sm sm:text-[14.5px] leading-relaxed mb-3">
+                        Investor pitches, demo days, podcasts, and live auditorium scrutiny.
+                      </p>
+
+                      <ul className="space-y-1.5 text-xs sm:text-sm text-white font-medium list-none p-0 m-0">
+                        <li className="flex items-start gap-2">
+                          <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-white stroke-[3]" />
+                          <span>Pitch your startup with conviction.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-white stroke-[3]" />
+                          <span>Command stages of 10 or 1,000 listeners.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-white stroke-[3]" />
+                          <span>Navigate harsh investor critique calmly.</span>
+                        </li>
+                      </ul>
                     </div>
-                    <h3 className="text-xl lg:text-[23px] font-black text-white tracking-tight mb-2 pr-8 leading-snug">
-                      Founders &amp; Creators
-                    </h3>
-                    <p className="text-white/95 font-normal text-sm sm:text-[14.5px] leading-relaxed mb-3">
-                      Investor pitches, demo days, podcasts, and live auditorium scrutiny.
-                    </p>
 
-                    <ul className="space-y-1.5 text-xs sm:text-sm text-white font-medium list-none p-0 m-0">
-                      <li className="flex items-start gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-white stroke-[3]" />
-                        <span>Pitch your startup with conviction.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-white stroke-[3]" />
-                        <span>Command stages of 10 or 1,000 listeners.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <ChevronRightIcon className="mt-0.5 size-4 shrink-0 text-white stroke-[3]" />
-                        <span>Navigate harsh investor critique calmly.</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="pt-4 mt-auto">
-                    <button
-                      type="button"
-                      onClick={() => scrollToAdmissions('founder')}
-                      className="pill cursor-pointer text-sm font-bold py-2 px-4"
-                      style={{ marginTop: 0 }}
-                    >
-                      <span>Explore stages</span>
-                      <ArrowRight className="size-4 stroke-[2.5]" />
-                    </button>
-                  </div>
-                </article>
+                    <div className="pt-4 mt-auto">
+                      <button
+                        type="button"
+                        onClick={() => scrollToAdmissions('founder')}
+                        className="pill cursor-pointer text-sm font-bold py-2 px-4"
+                        style={{ marginTop: 0 }}
+                      >
+                        <span>Explore stages</span>
+                        <ArrowRight className="size-4 stroke-[2.5]" />
+                      </button>
+                    </div>
+                  </article>
+                </Tilt>
 
               </div>
             </div>

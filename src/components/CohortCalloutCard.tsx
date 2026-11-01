@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, CheckCircle2, User, Mail, Phone, MessageSquare, Zap } from 'lucide-react';
+import { NumberTicker } from './magicui/number-ticker';
 
 export interface CohortCalloutCardProps {
   cohortStatus?: 'DIAGNOSTIC' | 'OPEN' | 'WAITLIST';
@@ -114,7 +115,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
 
   return (
     <section
-      className="w-full min-h-screen min-h-[100dvh] bg-[#0D0D12] text-white border-b-[3px] border-black flex flex-col justify-center py-10 sm:py-14 lg:py-16 px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
+      className="w-full py-12 sm:py-16 lg:py-20 lg:min-h-screen lg:min-h-[100dvh] bg-[#0D0D12] text-white border-b-[3px] border-black flex flex-col justify-center px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
       id="cohort"
       aria-labelledby="cohort-callout-title"
     >
@@ -128,8 +129,10 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
           >
             Speaking Diagnostic &amp; Practice Pass
           </h2>
-          <span className="text-xs font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF]">
-            Free 60-Sec Diagnostic · Instant Biological Resets
+          <span className="text-xs font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF] inline-flex items-center gap-1.5">
+            <span>Free 60-Sec Diagnostic</span>
+            <span>•</span>
+            <span><NumberTicker value={12} className="font-black text-black" /> Seats Left</span>
           </span>
         </div>
 
@@ -187,7 +190,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
                 href={whatsappInviteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-full border-2 border-black bg-[#25D366] hover:bg-[#20ba59] text-black font-black text-sm sm:text-base uppercase tracking-wider shadow-[4px_4px_0_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all w-full sm:w-auto text-center"
+                className="inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-full border-2 border-black bg-[#25D366] hover:bg-[#20ba59] text-black font-black text-sm sm:text-base uppercase tracking-wider shadow-[4px_4px_0_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all w-full sm:w-auto text-center min-h-[48px]"
               >
                 <MessageSquare className="size-5 stroke-[3]" />
                 <span>Open WhatsApp &amp; Join Practice Pod ↗</span>
@@ -198,7 +201,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
               <button
                 type="button"
                 onClick={() => setSubmittedTicket(null)}
-                className="text-xs font-bold text-neutral-600 underline underline-offset-4 hover:text-black cursor-pointer"
+                className="text-xs font-bold text-neutral-600 underline underline-offset-4 hover:text-black cursor-pointer min-h-[36px] py-1 inline-flex items-center"
               >
                 Run Another Diagnostic
               </button>
@@ -208,7 +211,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
           /* Main 3-Step Diagnostic Terminal (Less is More) */
           <form
             onSubmit={handleSubmit}
-            className="border-[3px] border-black bg-white rounded-2xl p-6 sm:p-8 lg:p-9 shadow-[6px_6px_0_#FFE500] relative text-[#111118]"
+            className="border-[3px] border-black bg-white rounded-2xl p-5 sm:p-8 lg:p-9 shadow-[6px_6px_0_#FFE500] relative text-[#111118]"
           >
             {/* 1. Track Selector */}
             <div className="mb-5">
@@ -227,7 +230,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
                       key={t.id}
                       type="button"
                       onClick={() => setFormData({ ...formData, track: t.id as any })}
-                      className={`p-3 rounded-xl border-2 border-black text-left cursor-pointer transition-all ${
+                      className={`p-3 rounded-xl border-2 border-black text-left cursor-pointer transition-all min-h-[54px] flex flex-col justify-center ${
                         isSelected
                           ? `${t.color} text-black shadow-[3px_3px_0_#000] translate-x-[-1px] translate-y-[-1px]`
                           : 'bg-[#FAF8F5] text-neutral-800 hover:bg-neutral-100 shadow-[1.5px_1.5px_0_#000]'
@@ -263,7 +266,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
                       key={sym}
                       type="button"
                       onClick={() => setFormData({ ...formData, symptom: sym })}
-                      className={`px-3.5 py-1.5 rounded-full text-xs sm:text-[13px] font-bold border-2 border-black transition-all cursor-pointer ${
+                      className={`px-3.5 py-1.5 rounded-full text-xs sm:text-[13px] font-bold border-2 border-black transition-all cursor-pointer min-h-[38px] flex items-center justify-center ${
                         isChecked
                           ? 'bg-black text-[#FFE500] shadow-[2px_2px_0_#FFE500] translate-x-[-1px] translate-y-[-1px]'
                           : 'bg-[#FAF8F5] text-neutral-800 hover:bg-neutral-100 shadow-[1.5px_1.5px_0_#000]'
@@ -291,7 +294,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
                     placeholder="e.g. Jordan Miller"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl py-2.5 pl-10 pr-3.5 text-xs sm:text-sm text-[#0A0A0C] font-bold placeholder:text-neutral-400 shadow-[2px_2px_0_#000] focus:outline-none focus:bg-white focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000] transition-all"
+                    className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl py-2.5 pl-10 pr-3.5 text-base sm:text-sm text-[#0A0A0C] font-bold placeholder:text-neutral-400 shadow-[2px_2px_0_#000] focus:outline-none focus:bg-white focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000] transition-all min-h-[44px]"
                   />
                 </div>
                 {errors.name && <span className="text-[11px] font-bold text-[#FF0000] mt-1 block">{errors.name}</span>}
@@ -309,7 +312,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
                     placeholder="jordan@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl py-2.5 pl-10 pr-3.5 text-xs sm:text-sm text-[#0A0A0C] font-bold placeholder:text-neutral-400 shadow-[2px_2px_0_#000] focus:outline-none focus:bg-white focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000] transition-all"
+                    className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl py-2.5 pl-10 pr-3.5 text-base sm:text-sm text-[#0A0A0C] font-bold placeholder:text-neutral-400 shadow-[2px_2px_0_#000] focus:outline-none focus:bg-white focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000] transition-all min-h-[44px]"
                   />
                 </div>
                 {errors.email && <span className="text-[11px] font-bold text-[#FF0000] mt-1 block">{errors.email}</span>}
@@ -334,7 +337,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
                   placeholder="e.g. +1 (555) 019-2834"
                   value={formData.whatsapp}
                   onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                  className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl py-2.5 pl-10 pr-3.5 text-xs sm:text-sm text-[#0A0A0C] font-bold placeholder:text-neutral-400 shadow-[2px_2px_0_#000] focus:outline-none focus:bg-white focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000] transition-all"
+                  className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl py-2.5 pl-10 pr-3.5 text-base sm:text-sm text-[#0A0A0C] font-bold placeholder:text-neutral-400 shadow-[2px_2px_0_#000] focus:outline-none focus:bg-white focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000] transition-all min-h-[44px]"
                 />
               </div>
               {errors.whatsapp && <span className="text-[11px] font-bold text-[#FF0000] mt-1 block">{errors.whatsapp}</span>}
@@ -344,7 +347,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
             <div className="pt-5 border-t-2 border-black/10 flex justify-center">
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2.5 px-10 py-4 rounded-full border-2 border-black bg-[#FFE500] hover:bg-[#25D366] text-black font-black text-sm sm:text-base uppercase tracking-wider shadow-[4px_4px_0_#000] hover:translate-x-[-1.5px] hover:translate-y-[-1.5px] hover:shadow-[6px_6px_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#000] w-full sm:w-auto cursor-pointer transition-all"
+                className="inline-flex items-center justify-center gap-2.5 px-10 py-4 rounded-full border-2 border-black bg-[#FFE500] hover:bg-[#25D366] text-black font-black text-sm sm:text-base uppercase tracking-wider shadow-[4px_4px_0_#000] hover:translate-x-[-1.5px] hover:translate-y-[-1.5px] hover:shadow-[6px_6px_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#000] w-full sm:w-auto cursor-pointer transition-all min-h-[50px]"
               >
                 <span>Generate Diagnostic &amp; Claim Pod Pass</span>
                 <ArrowRight className="size-4 stroke-[3]" />

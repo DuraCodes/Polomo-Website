@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, CheckCircle2, AlertCircle, ArrowRight, MessageSquare, Video, X } from 'lucide-react';
-import { Button } from './ui/button';
+import { X, ArrowRight, Check } from 'lucide-react';
 import { scheduleDiagnosticSession } from '../services/googleCalendar';
 import { appendApplicantToSheet, getStoredSheetId } from '../services/googleSheets';
 import { getAccessToken, googleSignIn } from '../services/googleAuth';
@@ -11,6 +10,10 @@ interface DiagnosticModalProps {
   defaultTrack?: 'Student & Graduate' | 'Professional & Seeker' | 'Founder & Creator';
 }
 
+/**
+ * Rebuilt using pure Neobrutalism.dev & 21st.dev Component Primitives
+ * Patterns: neobrutalism.dev/r/dialog.json, input.json, button.json, alert-dialog.json
+ */
 export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
   isOpen,
   onClose,
@@ -22,15 +25,24 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
   const [whatsapp, setWhatsapp] = useState('');
   const [track, setTrack] = useState<'Student & Graduate' | 'Professional & Seeker' | 'Founder & Creator'>(defaultTrack);
   const [fearTrigger, setFearTrigger] = useState('My mind blanks the moment all eyes turn to me');
+  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
   
   // Date & Slot Selection
   const [selectedSlot, setSelectedSlot] = useState<string>('tomorrow-18:00');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [bookingResult, setBookingResult] = useState<{
+  const [, setBookingResult] = useState<{
     time?: string;
     meetLink?: string;
     success: boolean;
   } | null>(null);
+
+  // Sync defaultTrack prop when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setTrack(defaultTrack);
+      setErrors({});
+    }
+  }, [isOpen, defaultTrack]);
 
   // Close on Escape key
   useEffect(() => {
@@ -56,12 +68,31 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleProceedToSlots = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: { name?: string; email?: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = 'Please provide your full name';
+    }
+    if (!email.trim() || !email.includes('@')) {
+      newErrors.email = 'Please provide a valid email address';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setStep(2);
+  };
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // Calculate appointment start date based on selected slot
       const date = new Date();
       date.setDate(date.getDate() + 1); // Tomorrow
       const [hours, minutes] = selectedSlot.includes('18:00') ? [18, 0] : selectedSlot.includes('19:00') ? [19, 0] : [20, 0];
@@ -69,7 +100,6 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
 
       let token = await getAccessToken();
       
-      // If token not present, request Google sign-in to authenticate with Calendar & Sheets
       if (!token) {
         try {
           const authResult = await googleSignIn();
@@ -116,7 +146,7 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
         meetLink: meetUrl,
         success: true,
       });
-      setStep(3); // Go to celebration / WhatsApp invite screen
+      setStep(3);
     } catch (err: unknown) {
       console.error('Diagnostic booking error:', err);
       setBookingResult({ success: true, time: 'Confirmed' });
@@ -128,259 +158,299 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-sm overflow-y-auto"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-[540px] my-8 bg-white border-[3px] border-black shadow-[10px_10px_0_#000] rounded-3xl overflow-hidden text-[#0A0A0C] flex flex-col font-sans">
-        
-        {/* Header Bar */}
-        <header className="flex items-center justify-between p-4 sm:p-5 bg-[#FAF8F5] border-b-[2.5px] border-black shrink-0">
-          <div className="flex items-center gap-2.5">
-            <span className="font-black text-lg tracking-tight text-[#0A0A0C]">POLOMO</span>
-            <span className="text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[1px_1px_0_#000]">
-              1-on-1 Diagnostic
+      {/* Neobrutalism.dev Dialog Box Container */}
+      <div
+        className="relative w-full max-w-[520px] my-auto max-h-[92dvh] bg-white text-black border-2 sm:border-[3px] border-black rounded-2xl shadow-[4px_4px_0_#000000] sm:shadow-[6px_6px_0_#000000] overflow-hidden flex flex-col font-sans"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Neobrutalism.dev Dialog Header */}
+        <div className="flex items-center justify-between px-4 py-3 sm:px-5 sm:py-3.5 border-b-2 border-black bg-[#FAF8F5] shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="font-black text-base sm:text-lg tracking-tight text-black">POLOMO</span>
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-black bg-[#FFE500] text-black shadow-[1px_1px_0_#000]">
+              {step === 1 ? 'Step 1 of 2' : step === 2 ? 'Step 2 of 2' : 'Confirmed'}
             </span>
           </div>
           <button
             type="button"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border-2 border-black bg-white hover:bg-neutral-100 text-black font-extrabold text-xs cursor-pointer shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
             onClick={onClose}
-            aria-label="Close diagnostic modal"
+            className="size-9 sm:size-8 rounded-full border-2 border-black bg-white hover:bg-[#FF3366] hover:text-white text-black font-black text-xs flex items-center justify-center shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer"
+            aria-label="Close modal"
           >
-            <X className="size-4 stroke-[3]" />
-            <span>Close</span>
+            <X className="size-4 stroke-[2.5]" />
           </button>
-        </header>
+        </div>
 
-        {/* Modal Body */}
-        <div className="p-6 sm:p-7 bg-white">
+        {/* Dialog Content Area */}
+        <div className="p-4 sm:p-6 bg-white overflow-y-auto flex-1 overscroll-contain">
+          
+          {/* STEP 1: Details Form */}
           {step === 1 && (
-            <div>
-              <div className="mb-6">
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-[#0A0A0C] mb-2">
+            <form onSubmit={handleProceedToSlots} noValidate className="space-y-4">
+              <div>
+                <h3 className="text-lg sm:text-xl font-black tracking-tight text-black mb-1 leading-snug">
                   10-Minute Speaking Confidence Audit
                 </h3>
-                <p className="text-sm text-neutral-700 font-medium leading-relaxed">
-                  A private, zero-judgment 1-on-1 session to diagnose where you freeze, test your stage hesitation, and receive 1 instant physiological reset tool.
+                <p className="text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed">
+                  A private, zero-judgment 1-on-1 session to diagnose where you freeze and receive 1 instant physiological reset tool.
                 </p>
               </div>
 
-              <div className="space-y-4">
-                {/* Track Picker */}
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-[#0A0A0C] mb-2">
-                    Select Your Track
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    {[
-                      { id: 'Student & Graduate', label: 'Academia & Thesis' },
-                      { id: 'Professional & Seeker', label: 'Meetings & Reviews' },
-                      { id: 'Founder & Creator', label: 'Pitches & Stages' },
-                    ].map((t) => (
+              {/* Neobrutalism.dev Radio Card Grid */}
+              <div>
+                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-black mb-1.5">
+                  Select Your Speaking Track
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    { id: 'Student & Graduate', label: 'Students & Grads', sub: 'Theses & Interviews' },
+                    { id: 'Professional & Seeker', label: 'Professionals', sub: 'Meetings & Reviews' },
+                    { id: 'Founder & Creator', label: 'Founders & Creators', sub: 'Pitches & Stages' },
+                  ].map((t) => {
+                    const isSelected = track === t.id;
+                    return (
                       <button
                         key={t.id}
                         type="button"
                         onClick={() => setTrack(t.id as any)}
-                        className={`p-3 rounded-xl text-left text-xs font-bold border-2 border-black transition-all cursor-pointer ${
-                          track === t.id
-                            ? 'bg-[#FFE500] text-black shadow-[3px_3px_0_#000] translate-x-[1px] translate-y-[1px]'
-                            : 'bg-[#FAF8F5] text-neutral-800 hover:bg-neutral-100 shadow-[2px_2px_0_#000]'
+                        className={`p-2.5 sm:p-3 rounded-xl text-left border-2 border-black transition-all cursor-pointer min-h-[44px] flex flex-col justify-center ${
+                          isSelected
+                            ? 'bg-[#FFE500] text-black shadow-[3px_3px_0_#000000] translate-x-[-1px] translate-y-[-1px]'
+                            : 'bg-[#FAF8F5] text-neutral-800 hover:bg-neutral-100 shadow-[1.5px_1.5px_0_#000000]'
                         }`}
                       >
-                        {t.label}
+                        <span className="font-extrabold text-xs block truncate">{t.label}</span>
+                        <span className="text-[10px] text-neutral-600 font-semibold hidden sm:block">{t.sub}</span>
                       </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Primary Fear Trigger */}
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-[#0A0A0C] mb-1.5">
-                    What happens physically when you speak?
-                  </label>
-                  <select
-                    value={fearTrigger}
-                    onChange={(e) => setFearTrigger(e.target.value)}
-                    className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl text-sm text-[#0A0A0C] font-semibold px-3.5 py-2.5 outline-none focus:bg-white focus:shadow-[3px_3px_0_#000] transition-all"
-                  >
-                    <option value="My mind blanks the moment all eyes turn to me">My mind blanks the moment all eyes turn to me</option>
-                    <option value="My voice trembles, breathing becomes shallow">My voice trembles, breathing becomes shallow</option>
-                    <option value="I flush, sweat, and avoid unscripted questions">I flush, sweat, and avoid unscripted questions</option>
-                    <option value="I stay muted in meetings even when I have answers">I stay muted in meetings even when I have answers</option>
-                    <option value="High-stakes audience or executive intimidation">High-stakes audience or executive intimidation</option>
-                  </select>
-                </div>
-
-                {/* Name & Contact */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-neutral-700 mb-1">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Jane Doe"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl text-sm text-[#0A0A0C] font-semibold px-3.5 py-2 outline-none focus:bg-white focus:shadow-[3px_3px_0_#000] transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-neutral-700 mb-1">
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="jane@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl text-sm text-[#0A0A0C] font-semibold px-3.5 py-2 outline-none focus:bg-white focus:shadow-[3px_3px_0_#000] transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">
-                    WhatsApp / Phone Number <span className="text-neutral-500 font-normal">(Optional — for calendar SMS reminder)</span>
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="+1 (555) 000-0000"
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    className="w-full bg-[#FAF8F5] border-2 border-black rounded-xl text-sm text-[#0A0A0C] font-semibold px-3.5 py-2 outline-none focus:bg-white focus:shadow-[3px_3px_0_#000] transition-all"
-                  />
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    disabled={!name.trim() || !email.trim() || !email.includes('@')}
-                    onClick={() => setStep(2)}
-                    className="w-full py-3.5 px-6 rounded-full border-2 border-black bg-black text-white hover:bg-[#FF3366] font-extrabold text-sm shadow-[4px_4px_0_#FFE500] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all flex items-center justify-center gap-2"
-                  >
-                    <span>Proceed to 10-Minute Slot Selection</span>
-                    <ArrowRight className="size-4 stroke-[2.5]" />
-                  </button>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
+
+              {/* Neobrutalism.dev Select */}
+              <div>
+                <label htmlFor="diag-fear" className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-black mb-1">
+                  What happens physically when you speak?
+                </label>
+                <select
+                  id="diag-fear"
+                  value={fearTrigger}
+                  onChange={(e) => setFearTrigger(e.target.value)}
+                  className="w-full rounded-xl border-2 border-black bg-[#FAF8F5] px-3.5 py-2.5 text-base sm:text-sm font-bold text-black shadow-[2px_2px_0_#000000] focus:bg-white focus:outline-none focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000000] transition-all cursor-pointer"
+                >
+                  <option value="My mind blanks the moment all eyes turn to me">My mind blanks the moment all eyes turn to me</option>
+                  <option value="My voice trembles, breathing becomes shallow">My voice trembles, breathing becomes shallow</option>
+                  <option value="I flush, sweat, and avoid unscripted questions">I flush, sweat, and avoid unscripted questions</option>
+                  <option value="I stay muted in meetings even when I have answers">I stay muted in meetings even when I have answers</option>
+                  <option value="High-stakes audience or executive intimidation">High-stakes audience or executive intimidation</option>
+                </select>
+              </div>
+
+              {/* Neobrutalism.dev Inputs without non-standard inline icon adornments */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="diag-name" className="block text-[11px] font-black uppercase tracking-wider text-neutral-800 mb-1">
+                    Full Name <span className="text-[#FF0000]">*</span>
+                  </label>
+                  <input
+                    id="diag-name"
+                    type="text"
+                    autoComplete="name"
+                    placeholder="e.g. Jordan Miller"
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
+                    }}
+                    className="w-full rounded-xl border-2 border-black bg-[#FAF8F5] px-3.5 py-2.5 text-base sm:text-sm font-bold text-black placeholder:text-neutral-400 shadow-[2px_2px_0_#000000] focus:bg-white focus:outline-none focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000000] transition-all min-h-[44px]"
+                  />
+                  {errors.name && <span className="text-[11px] font-bold text-[#FF0000] mt-1 block">{errors.name}</span>}
+                </div>
+
+                <div>
+                  <label htmlFor="diag-email" className="block text-[11px] font-black uppercase tracking-wider text-neutral-800 mb-1">
+                    Email Address <span className="text-[#FF0000]">*</span>
+                  </label>
+                  <input
+                    id="diag-email"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    placeholder="jordan@example.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+                    }}
+                    className="w-full rounded-xl border-2 border-black bg-[#FAF8F5] px-3.5 py-2.5 text-base sm:text-sm font-bold text-black placeholder:text-neutral-400 shadow-[2px_2px_0_#000000] focus:bg-white focus:outline-none focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000000] transition-all min-h-[44px]"
+                  />
+                  {errors.email && <span className="text-[11px] font-bold text-[#FF0000] mt-1 block">{errors.email}</span>}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="diag-phone" className="block text-[11px] font-black uppercase tracking-wider text-neutral-800">
+                    WhatsApp / Phone Number
+                  </label>
+                  <span className="text-[10px] text-neutral-500 font-semibold">
+                    Optional SMS reminder
+                  </span>
+                </div>
+                <input
+                  id="diag-phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="e.g. +1 (555) 019-2834"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  className="w-full rounded-xl border-2 border-black bg-[#FAF8F5] px-3.5 py-2.5 text-base sm:text-sm font-bold text-black placeholder:text-neutral-400 shadow-[2px_2px_0_#000000] focus:bg-white focus:outline-none focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_#000000] transition-all min-h-[44px]"
+                />
+              </div>
+
+              {/* Neobrutalism.dev Button */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0_#000000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all py-3.5 px-5 cursor-pointer min-h-[48px]"
+                >
+                  <span>Choose 10-Minute Window</span>
+                  <ArrowRight className="size-4 stroke-[3]" />
+                </button>
+              </div>
+            </form>
           )}
 
+          {/* STEP 2: Time Window Selector */}
           {step === 2 && (
             <div>
-              <div className="mb-5">
+              <div className="mb-4">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="text-xs font-bold text-neutral-600 hover:text-black uppercase mb-2 inline-flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-black text-neutral-800 hover:text-black uppercase mb-1.5 inline-flex items-center gap-1.5 cursor-pointer min-h-[40px] px-2.5 py-1.5 -ml-2.5 rounded-lg active:bg-neutral-100 transition-colors"
                 >
                   ← Back to Details
                 </button>
-                <h3 className="text-xl font-black tracking-tight text-[#0A0A0C]">
+                <h3 className="text-lg sm:text-xl font-black tracking-tight text-black leading-snug">
                   Pick Your 10-Minute Window
                 </h3>
-                <p className="text-xs text-neutral-600 font-semibold mt-1">
+                <p className="text-xs text-neutral-600 font-semibold mt-0.5">
                   100% Free • Hosted live via Google Meet / WhatsApp Audio
                 </p>
               </div>
 
-              <form onSubmit={handleBookingSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <form onSubmit={handleBookingSubmit} className="space-y-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
                     { id: 'tomorrow-18:00', label: 'Tomorrow 6:00 PM', desc: 'Evening Slot' },
                     { id: 'tomorrow-19:00', label: 'Tomorrow 7:00 PM', desc: 'Prime Slot' },
                     { id: 'tomorrow-20:00', label: 'Tomorrow 8:00 PM', desc: 'Late Slot' },
-                  ].map((s) => (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => setSelectedSlot(s.id)}
-                      className={`p-3.5 rounded-2xl text-left border-2 border-black cursor-pointer transition-all ${
-                        selectedSlot === s.id
-                          ? 'bg-[#00E575] text-black shadow-[3px_3px_0_#000] translate-x-[1px] translate-y-[1px]'
-                          : 'bg-[#FAF8F5] text-neutral-800 hover:bg-neutral-100 shadow-[2px_2px_0_#000]'
-                      }`}
-                    >
-                      <Clock className="size-4 text-black mb-1.5" />
-                      <div className="text-sm font-black text-[#0A0A0C]">{s.label}</div>
-                      <div className="text-[11px] text-neutral-600 font-bold">{s.desc}</div>
-                    </button>
-                  ))}
+                  ].map((s) => {
+                    const isSelected = selectedSlot === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setSelectedSlot(s.id)}
+                        className={`p-3 rounded-xl text-left border-2 border-black cursor-pointer transition-all min-h-[48px] flex sm:flex-col justify-between sm:justify-start items-center sm:items-start ${
+                          isSelected
+                            ? 'bg-[#00E575] text-black shadow-[3px_3px_0_#000000] translate-x-[-1px] translate-y-[-1px]'
+                            : 'bg-[#FAF8F5] text-neutral-800 hover:bg-neutral-100 shadow-[1.5px_1.5px_0_#000000]'
+                        }`}
+                      >
+                        <span className="text-xs sm:text-sm font-black text-black">{s.label}</span>
+                        <span className="text-[10px] sm:text-[11px] text-neutral-600 font-bold">{s.desc}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <div className="p-4 bg-[#FAF8F5] border-2 border-black rounded-2xl text-xs text-neutral-700 leading-relaxed shadow-[2px_2px_0_#000]">
-                  <div className="font-black text-[#0A0A0C] mb-1.5 flex items-center gap-1.5">
-                    <CheckCircle2 className="size-4 text-black stroke-[2.5]" />
+                {/* What to Expect Callout */}
+                <div className="p-3.5 bg-[#FAF8F5] border-2 border-black rounded-xl text-xs text-neutral-700 leading-relaxed shadow-[2px_2px_0_#000000]">
+                  <div className="font-black text-black mb-1 flex items-center gap-1.5">
+                    <Check className="size-4 text-emerald-600 stroke-[3]" />
                     What to expect in your 10 minutes:
                   </div>
-                  1. Pinpoint the exact physical trigger that causes your freeze.<br />
-                  2. Receive one custom breathing or cognitive reset protocol.<br />
-                  3. Direct invite to the WhatsApp Practice Circle &amp; priority cohort waitlist.
+                  <div className="space-y-1 text-[11px] sm:text-xs font-medium text-neutral-800">
+                    <div>• Pinpoint the exact biological trigger that causes your freeze.</div>
+                    <div>• Receive one custom breathing or cognitive reset protocol.</div>
+                    <div>• Unlock direct access to the WhatsApp Practice Circle.</div>
+                  </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 px-6 rounded-full border-2 border-black bg-black text-white hover:bg-[#FF3366] font-extrabold text-sm shadow-[4px_4px_0_#FFE500] disabled:opacity-50 cursor-pointer transition-all flex items-center justify-center gap-2"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider border-2 border-black bg-black text-white hover:bg-[#FF0000] shadow-[3px_3px_0_#FFE500] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0_#FFE500] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50 transition-all py-3.5 px-5 cursor-pointer min-h-[48px]"
                 >
-                  {isSubmitting ? 'Confirming Appointment...' : 'Confirm 1-on-1 Diagnostic Session →'}
+                  {isSubmitting ? (
+                    <span>Confirming Appointment...</span>
+                  ) : (
+                    <>
+                      <span>Confirm 1-on-1 Session (Free)</span>
+                      <ArrowRight className="size-4 stroke-[3]" />
+                    </>
+                  )}
                 </button>
               </form>
             </div>
           )}
 
+          {/* STEP 3: Booking Success & WhatsApp Bridge */}
           {step === 3 && (
-            <div className="text-center py-4">
-              <div className="inline-flex items-center justify-center size-14 rounded-full bg-[#00E575] border-2 border-black text-black mb-3 shadow-[2px_2px_0_#000]">
-                <CheckCircle2 className="size-8 stroke-[2.5]" />
+            <div className="text-center py-2 sm:py-3">
+              <div className="inline-flex items-center justify-center size-12 sm:size-14 rounded-full bg-[#00E575] border-2 border-black text-black mb-2.5 shadow-[2px_2px_0_#000000]">
+                <Check className="size-7 sm:size-8 stroke-[3]" />
               </div>
-              <h3 className="text-2xl font-black uppercase tracking-tight text-[#0A0A0C] mb-1">
+              <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-black mb-1">
                 You're On The Schedule!
               </h3>
-              <p className="text-sm text-neutral-700 font-medium mb-5">
-                Your 10-minute audit has been secured. We've emailed confirmation details to <strong className="text-black">{email}</strong>.
+              <p className="text-xs sm:text-sm text-neutral-700 font-medium mb-4 max-w-sm mx-auto">
+                Your 10-minute audit has been secured. Confirmation details have been sent to <strong className="text-black">{email}</strong>.
               </p>
 
-              {/* The Primary Conversion Hook: WhatsApp Community */}
-              <div className="bg-[#FAF8F5] border-2 border-black rounded-2xl p-5 mb-5 text-left shadow-[5px_5px_0_#00E575]">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#00E575] text-black border border-black">
+              {/* The Bridge into WhatsApp Community */}
+              <div className="bg-[#FAF8F5] border-2 border-black rounded-2xl p-4 sm:p-5 mb-4 text-left shadow-[4px_4px_0_#00E575]">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#00E575] text-black border border-black">
                     Immediate Next Step
                   </span>
                 </div>
-                <h4 className="text-base font-black text-[#0A0A0C] mb-1">
+                <h4 className="text-sm sm:text-base font-black text-black mb-1">
                   Join the POLOMO WhatsApp Practice Circle
                 </h4>
-                <p className="text-xs text-neutral-700 font-medium leading-relaxed mb-4">
-                  While you wait for your 1-on-1 session, join our private WhatsApp group for weekly live AMAs, 45-second audio drills, and priority drops for upcoming Telegram Pods.
+                <p className="text-xs text-neutral-700 font-medium leading-relaxed mb-3">
+                  While you wait for your 1-on-1 session, join our private WhatsApp group for weekly voice drills, freeze-prevention breakdowns, and priority cohort drops.
                 </p>
                 <a
                   href="https://chat.whatsapp.com/invite"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 w-full py-3.5 px-5 rounded-full border-2 border-black bg-[#00E575] hover:bg-[#00c965] text-black font-extrabold text-sm shadow-[3px_3px_0_#000] transition-all"
+                  className="inline-flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-full border-2 border-black bg-[#25D366] hover:bg-[#20ba59] text-black font-black text-xs sm:text-sm uppercase tracking-wider shadow-[3px_3px_0_#000000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all min-h-[44px]"
                 >
-                  <MessageSquare className="size-4" />
-                  <span>Enter WhatsApp Community Now →</span>
+                  <span>Enter WhatsApp Circle Now ↗</span>
                 </a>
               </div>
 
               <button
                 type="button"
                 onClick={onClose}
-                className="text-xs font-bold text-neutral-600 hover:text-black uppercase tracking-wider cursor-pointer"
+                className="text-xs font-bold text-neutral-600 hover:text-black uppercase tracking-wider cursor-pointer min-h-[40px] inline-flex items-center justify-center px-4"
               >
                 Close &amp; Return to Site
               </button>
             </div>
           )}
+
         </div>
       </div>
     </div>
