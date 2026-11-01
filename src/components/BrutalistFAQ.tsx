@@ -70,47 +70,35 @@ export const BrutalistFAQ: React.FC = () => {
   });
 
   return (
-    <div className="approach-wrap scroll-mt-28" id="faq">
-      <section className="border-[3px] border-black bg-white text-[#111118] rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 lg:p-7 shadow-[6px_6px_0_#000000]" aria-labelledby="faq-section-title">
+    <section
+      className="w-full min-h-screen min-h-[100dvh] flex flex-col justify-center bg-white text-[#111118] border-b-[3px] border-black py-8 sm:py-12 lg:py-14 px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
+      id="faq"
+      aria-labelledby="faq-section-title"
+    >
+      <div className="w-full max-w-[1488px] mx-auto">
         
-        {/* Header - Scaled to match Our Approach blueprint */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-5 pb-3 sm:pb-3.5 border-b-2 border-black/10">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#FFE500] text-black border border-black shadow-[1.5px_1.5px_0_#000]">
-                Common Hesitations
-              </span>
-              <span className="text-[11px] font-bold text-neutral-600">
-                Direct Answers
-              </span>
-            </div>
-            <h2 id="faq-section-title" className="text-2xl sm:text-3xl lg:text-[34px] font-black text-[#0A0A0C] tracking-tight leading-[1.2] m-0">
-              Frequently Answered Inquiries
-            </h2>
-            <p className="text-xs sm:text-sm text-[#181820] font-medium mt-1 max-w-xl leading-snug m-0">
-              Direct, no-spin answers to the questions people ask right before stepping into their first live exposure pod.
-            </p>
-          </div>
+        {/* Header - Clean blueprint exactly matching Our Approach, retaining Jump to button */}
+        <div className="flex items-center justify-between gap-4 mb-5 sm:mb-6 flex-wrap">
+          <h2 id="faq-section-title" className="text-2xl sm:text-3xl lg:text-[40px] font-bold text-[#0A0A0C] tracking-tight leading-tight m-0 font-display">
+            FAQ
+          </h2>
 
           <a
             href="#cohort"
-            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 border-black bg-black hover:bg-[#FF3366] text-white font-extrabold text-xs uppercase tracking-wider shadow-[2px_2px_0_#FFE500] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer no-underline shrink-0"
+            className="btn btn--dark"
           >
             <span>Jump to Admissions</span>
-            <ArrowDown className="size-3.5 stroke-[2.5] text-white" />
+            <ArrowDown className="size-4 stroke-[2.5]" />
           </a>
         </div>
 
-        {/* Quick Filter Bar - Compact */}
-        <div className="flex flex-wrap items-center gap-2 mb-3.5 sm:mb-4">
-          <span className="text-[11px] font-mono font-bold text-neutral-600 uppercase tracking-wider mr-0.5">
-            Filter:
-          </span>
+        {/* Quick Filter Bar */}
+        <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-5">
           {[
-            { id: 'all', label: 'All Inquiries (6)' },
-            { id: 'safety', label: 'Safety & Freezing (2)' },
-            { id: 'method', label: 'Methodology & Pods (2)' },
-            { id: 'schedule', label: 'Time & Eligibility (2)' },
+            { id: 'all', label: 'All Inquiries' },
+            { id: 'safety', label: 'Safety & Freezing' },
+            { id: 'method', label: 'Methodology & Pods' },
+            { id: 'schedule', label: 'Time & Eligibility' },
           ].map((cat) => {
             const isSelected = selectedCategory === cat.id;
             return (
@@ -118,7 +106,7 @@ export const BrutalistFAQ: React.FC = () => {
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id as any)}
-                className={`text-[11px] font-bold px-3 py-1 rounded-full border-2 border-black transition-all cursor-pointer ${
+                className={`text-xs sm:text-sm font-bold px-3.5 py-1.5 rounded-full border-2 border-black transition-all cursor-pointer ${
                   isSelected
                     ? 'bg-black text-[#FFE500] shadow-[2px_2px_0_#FFE500]'
                     : 'bg-[#FAF8F5] text-[#181820] hover:bg-neutral-100 shadow-[1px_1px_0_#000]'
@@ -130,41 +118,41 @@ export const BrutalistFAQ: React.FC = () => {
           })}
         </div>
 
-        {/* On-Page Accordion Stack - Compact cards matching 18px radius and tight padding */}
-        <div className="space-y-2 sm:space-y-2.5">
+        {/* On-Page Accordion Stack - Spacious cards with clear, readable fonts */}
+        <div className="space-y-2.5 sm:space-y-3">
           {filteredFaqs.map((faq, index) => {
             const isOpen = activeId === faq.id;
             return (
               <div
                 key={faq.id}
-                className="border-2 border-black rounded-[16px] sm:rounded-[18px] overflow-hidden transition-all bg-[#FAF8F5] shadow-[3px_3px_0_#000]"
+                className="border-2 border-black rounded-[18px] overflow-hidden transition-all bg-[#FAF8F5] shadow-[3px_3px_0_#000]"
               >
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => toggleItem(faq.id)}
-                  className="w-full py-2.5 px-3.5 sm:py-3 sm:px-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-white transition-colors select-none"
+                  className="w-full py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-white transition-colors select-none"
                 >
-                  <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
-                    <span className="font-mono text-[11px] font-black text-black bg-white px-2 py-0.5 rounded border border-black shrink-0 shadow-[1px_1px_0_#000]">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className="font-mono text-xs font-black text-black bg-white px-2.5 py-1 rounded border border-black shrink-0 shadow-[1px_1px_0_#000]">
                       0{index + 1}
                     </span>
                     <span
-                      className="size-2.5 rounded-full border border-black shrink-0 hidden sm:block"
+                      className="size-3 rounded-full border border-black shrink-0 hidden sm:block"
                       style={{ background: faq.accent }}
                       aria-hidden="true"
                     />
-                    <h3 className="text-sm sm:text-[15.5px] font-bold text-[#0A0A0C] m-0 leading-snug">
+                    <h3 className="text-base sm:text-lg lg:text-[18.5px] font-bold text-[#0A0A0C] m-0 leading-snug">
                       {faq.question}
                     </h3>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white text-black border border-black shadow-[1px_1px_0_#000] hidden md:inline-block">
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <span className="text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-white text-black border border-black shadow-[1px_1px_0_#000] hidden md:inline-block">
                       {faq.tag}
                     </span>
                     <span
-                      className={`size-6 sm:size-7 rounded-lg border-2 border-black flex items-center justify-center font-black text-sm shrink-0 transition-transform duration-200 shadow-[1.5px_1.5px_0_#000] ${
+                      className={`size-7 sm:size-8 rounded-lg border-2 border-black flex items-center justify-center font-black text-base shrink-0 transition-transform duration-200 shadow-[1.5px_1.5px_0_#000] ${
                         isOpen ? 'bg-[#FFE500] text-black rotate-45' : 'bg-black text-white'
                       }`}
                       aria-hidden="true"
@@ -175,8 +163,8 @@ export const BrutalistFAQ: React.FC = () => {
                 </button>
 
                 {isOpen && (
-                  <div className="px-4 pb-3.5 pt-2 sm:px-5 sm:pb-4 border-t border-black/10 bg-white animate-in fade-in-50 duration-150">
-                    <p className="text-xs sm:text-[13.5px] text-[#181820] font-medium leading-relaxed m-0">
+                  <div className="px-5 pb-4 pt-2.5 sm:px-6 sm:pb-5 border-t border-black/10 bg-white animate-in fade-in-50 duration-150">
+                    <p className="text-sm sm:text-base lg:text-[16px] text-[#181820] font-normal leading-relaxed m-0">
                       {faq.answer}
                     </p>
                   </div>
@@ -186,22 +174,8 @@ export const BrutalistFAQ: React.FC = () => {
           })}
         </div>
 
-        {/* Bottom Assurance Strip - Compact field note */}
-        <div className="border-2 border-black bg-[#FAF8F5] rounded-xl px-4 py-2 mt-3.5 sm:mt-4 shadow-[2px_2px_0_#000] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold text-[#181820]">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="size-4 text-black stroke-[2.5] shrink-0" />
-            <span className="text-[11.5px] sm:text-xs">Have a specific edge-case or upcoming deadline? Ask in your 10-min free audit.</span>
-          </div>
-          <a
-            href="#cohort"
-            className="text-black underline font-black hover:text-[#FF3366] transition-colors text-xs shrink-0"
-          >
-            Review Admissions Criteria →
-          </a>
-        </div>
-
-      </section>
-    </div>
+      </div>
+    </section>
   );
 };
 
