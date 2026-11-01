@@ -36,7 +36,7 @@ interface DiagnosticResult {
 }
 
 export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
-  whatsappInviteUrl = 'https://chat.whatsapp.com/invite',
+  whatsappInviteUrl = 'https://chat.whatsapp.com/LHcbvetC4sRG8Sr7hAk2Uq?s=cl&p=a&mlu=4&ilr=4',
   initialTrack = 'professional',
 }) => {
   const [formData, setFormData] = useState<FormData>({
@@ -115,21 +115,26 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
 
   return (
     <section
-      className="w-full py-12 sm:py-16 lg:py-20 lg:min-h-screen lg:min-h-[100dvh] bg-[#0D0D12] text-white border-b-[3px] border-black flex flex-col justify-center px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
+      className="w-full py-12 sm:py-16 lg:py-20 lg:min-h-screen lg:min-h-[100dvh] bg-[#FAF8F5] text-[#0A0A0C] border-b-[3px] border-black flex flex-col justify-center px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
       id="cohort"
       aria-labelledby="cohort-callout-title"
     >
       <div className="w-full max-w-[860px] mx-auto relative z-10">
         
-        {/* Header - Clean Neo-Brutalist blueprint */}
+        {/* Header - Clean Neo-Brutalist blueprint on Parchment */}
         <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8 flex-wrap">
-          <h2
-            id="cohort-callout-title"
-            className="text-2xl sm:text-3xl lg:text-[40px] font-bold text-white tracking-tight leading-tight m-0 font-display"
-          >
-            Speaking Diagnostic &amp; Practice Pass
-          </h2>
-          <span className="text-xs font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF] inline-flex items-center gap-1.5">
+          <div>
+            <span className="text-xs font-black uppercase tracking-wider text-[#FF0000] mb-1 block">
+              Step 01 · Immediate Triage
+            </span>
+            <h2
+              id="cohort-callout-title"
+              className="text-2xl sm:text-3xl lg:text-[40px] font-bold text-[#0A0A0C] tracking-tight leading-tight m-0 font-display"
+            >
+              Speaking Diagnostic &amp; Practice Pass
+            </h2>
+          </div>
+          <span className="text-xs font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#000] inline-flex items-center gap-1.5">
             <span>Free 60-Sec Diagnostic</span>
             <span>•</span>
             <span><NumberTicker value={12} className="font-black text-black" /> Seats Left</span>
@@ -138,7 +143,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
 
         {submittedTicket ? (
           /* Instant Lead Magnet Payoff: Diagnostic Result + WhatsApp Bridge */
-          <div className="border-[3px] border-black bg-white rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0_#FFE500] relative overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-[#111118]">
+          <div className="border-[3px] border-black bg-white rounded-2xl p-6 sm:p-8 shadow-[6px_6px_0_#000000] sm:shadow-[8px_8px_0_#000000] relative overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-[#111118]">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b-2 border-dashed border-black/30 gap-3">
               <div className="flex items-center gap-3.5">
                 <div className="size-12 rounded-xl bg-[#00E575] border-[2.5px] border-black flex items-center justify-center font-black text-xl text-black shadow-[2px_2px_0_#000]">
@@ -148,7 +153,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
                   <span className="text-xs font-black tracking-wider uppercase text-black bg-[#FFE500] px-2.5 py-0.5 rounded-full border border-black inline-block">
                     Diagnostic Complete
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-black text-[#0A0A0C] m-0 mt-1 font-display">
+                  <h3 className="text-xl sm:text-2xl font-black text-[#0A0A0C] m-0 mt-1 font-display tracking-[-0.025em]">
                     {submittedTicket.profileName}
                   </h3>
                 </div>
@@ -166,7 +171,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
                   Your Emergency Biological Reset: {submittedTicket.protocolKey}
                 </span>
               </div>
-              <p className="text-sm sm:text-[15px] font-medium text-neutral-800 leading-relaxed m-0">
+              <p className="text-sm sm:text-[15.5px] font-editorial text-neutral-900 leading-[1.7] m-0 max-w-[65ch]">
                 {submittedTicket.resetProtocol}
               </p>
             </div>
@@ -211,7 +216,7 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
           /* Main 3-Step Diagnostic Terminal (Less is More) */
           <form
             onSubmit={handleSubmit}
-            className="border-[3px] border-black bg-white rounded-2xl p-5 sm:p-8 lg:p-9 shadow-[6px_6px_0_#FFE500] relative text-[#111118]"
+            className="border-[3px] border-black bg-white rounded-2xl p-5 sm:p-8 lg:p-9 shadow-[6px_6px_0_#000000] sm:shadow-[8px_8px_0_#000000] relative text-[#111118]"
           >
             {/* 1. Track Selector */}
             <div className="mb-5">

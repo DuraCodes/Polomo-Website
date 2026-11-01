@@ -3,14 +3,24 @@
 @theme {
   --font-display: "Poppins", system-ui, -apple-system, sans-serif;
   --font-body: "Poppins", system-ui, -apple-system, sans-serif;
+  --font-serif: "Lora", Georgia, Cambria, serif;
 }
 
-/* ---------- Design tokens (Adapted for Black, White & Electric Red + Neon Dopamine) ---------- */
+/* ---------- Design tokens (Adapted for Black, White & Electric Red + High-Impact Typography) ---------- */
 :root {
   /* Core brand colors */
   --bg-color: #000000;
   --text-main: #FFFFFF;
+  --text-body: #E4E4E7; /* Softened from 100% white to Zinc-200 to eliminate halation on black */
+  --text-muted: #A1A1AA; /* Zinc-400 for secondary text and metadata */
   --accent-red: #FF0000;
+
+  /* Palette Strategy A: Section Canvas Rhythms */
+  --canvas-approach: #FF3366;
+  --canvas-dossier: #F5F3EC;
+  --canvas-faq: #11121A;
+  --canvas-admissions: #FAF8F5;
+  --canvas-footer: #090A0F;
 
   /* Mapped design tokens */
   --ink: #FFFFFF;
@@ -26,9 +36,18 @@
   --yellow: #FFE500;
   --white: #ffffff;
 
-  /* Poppins as the ONLY font family across the entire site */
+  /* Typographic Hierarchy: Poppins Display + Lora Serif Narrative + Clean UI */
   --font-display: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-body: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Lora", Georgia, Cambria, serif;
+
+  /* Typographic Tracking & Leading Standards */
+  --tracking-hero: -0.035em;
+  --tracking-h1: -0.03em;
+  --tracking-h2: -0.025em;
+  --tracking-h3: -0.015em;
+  --tracking-body: 0.005em;
+  --tracking-micro: 0.08em;
 
   /* Fluid gutters and sizing */
   --gutter: clamp(16px, 7vw, 160px);
@@ -48,21 +67,56 @@ html {
 body {
   margin: 0;
   background: var(--page);
-  color: var(--ink);
+  color: var(--text-body);
   font-family: var(--font-body);
   font-weight: 400;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.65;
+  letter-spacing: var(--tracking-body);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings: Tight negative tracking, balanced wrapping, optical punch */
+h1, h2, h3, h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+h1 {
+  letter-spacing: var(--tracking-hero);
+  line-height: 1.08;
+}
+
+h2 {
+  letter-spacing: var(--tracking-h1);
+  line-height: 1.15;
+}
+
+h3 {
+  letter-spacing: var(--tracking-h2);
+  line-height: 1.25;
+}
+
+/* Paragraph measure containment to prevent long-line fatigue */
+p {
+  margin: 0;
+  max-width: 68ch;
 }
 
 a {
   color: inherit;
 }
 
-h1, h2, h3, p {
-  margin: 0;
+/* Explicit Typographic Utilities */
+.font-editorial {
+  font-family: var(--font-serif);
+}
+
+.text-prose-measure {
+  max-width: 65ch;
 }
 
 :focus-visible {
@@ -151,7 +205,7 @@ button, a, input, select {
 .site-header__inner {
   width: min(100% - 32px, 1488px);
   margin: 0 auto;
-  padding-top: 14px;
+  padding-top: 16px;
 }
 .nav {
   display: flex;
@@ -280,10 +334,10 @@ button, a, input, select {
 }
 .chm-27__stage {
   position: relative;
-  width: min(400px, 88cqi, 88vw);
-  height: min(560px, 84vh);
+  width: min(420px, calc(100vw - 32px));
+  height: min(500px, 86dvh);
   border: 3px solid var(--ink);
-  background: radial-gradient(rgba(255, 255, 255, 0.12) 1.2px, transparent 1.3px) 0 0 / 18px 18px, var(--paper);
+  background: var(--paper);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -395,10 +449,10 @@ button, a, input, select {
 }
 .chm-27__menu {
   position: absolute;
-  inset: 79px 0 40px;
+  inset: 79px 0 0;
   z-index: 1;
   background: var(--paper);
-  border-bottom: 3px solid var(--ink);
+  border-bottom: none;
   display: none;
   flex-direction: column;
   overflow-y: auto;
@@ -490,87 +544,58 @@ button, a, input, select {
 }
 .chm-27__foot {
   flex: 1;
-  padding: 18px;
+  padding: 24px 18px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: flex-start;
-  gap: 12px;
-  background: radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.3px) 0 0 / 18px 18px;
+  align-items: center;
+  background: #0E0E14;
+}
+.chm-27__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
+.chm-27__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00E575;
+  box-shadow: 0 0 8px #00E575;
+  display: inline-block;
+  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
 }
 .chm-27__subtext {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: .08em;
-  color: rgba(255, 255, 255, 0.65);
+  color: #FFFFFF;
   text-transform: uppercase;
 }
-.chm-27__page {
-  flex: 1;
-  padding: 22px;
-  display: grid;
-  gap: 18px;
-  align-content: start;
-}
-.chm-27__badge {
-  width: max-content;
-  border: 3px solid var(--ink);
-  background: var(--acc);
-  padding: 12px 16px;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.7;
-  letter-spacing: .06em;
-  rotate: -1.5deg;
-  box-shadow: 6px 6px 0 var(--ink);
-  color: var(--ink);
-}
-.chm-27__box {
-  height: 150px;
-  border: 3px solid var(--ink);
-  background: repeating-linear-gradient(-45deg, var(--paper) 0 12px, rgba(255, 0, 0, 0.18) 12px 24px);
-}
-.chm-27__ticker {
-  margin-top: auto;
-  border-top: 3px solid var(--ink);
-  background: var(--accent-red);
-  color: #FFFFFF;
-  overflow: hidden;
-  padding: 9px 0;
-}
-.chm-27__tape {
-  display: flex;
-  width: max-content;
-  animation: chm27-tape 14s linear infinite;
-}
-.chm-27__tape span {
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  white-space: nowrap;
-}
-@keyframes chm27-tape {
-  to {
-    translate: -50% 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .chm-27__tape {
-    animation: none;
-  }
-  .chm-27 * {
-    transition: none !important;
-  }
-}
 
-/* Modal overlay wrapper for chm-27 on site */
+/* Modal overlay wrapper for chm-27 on site - Solid opaque backdrop & top stacking */
 .chm-27-overlay {
   position: fixed;
   inset: 0;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.78);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 9999;
+  background: #0A0A0F;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -625,23 +650,38 @@ button, a, input, select {
 .hero {
   position: relative;
   overflow: hidden;
-  min-height: calc(100vh - 34px);
-  min-height: calc(100dvh - 34px);
   box-sizing: border-box;
-  padding: clamp(76px, 8vw, 104px) 20px clamp(32px, 4vw, 52px);
+  width: 100%;
+  padding: 80px 20px 48px;
   background: linear-gradient(to bottom, #0a0a0f 0%, var(--page) 100%);
   text-align: center;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
+@media (min-width: 768px) {
+  .hero {
+    padding: 112px 24px 80px;
+  }
+}
+@media (min-width: 1024px) {
+  .hero {
+    padding: 128px 32px 88px;
+  }
+}
 .hero--full {
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* Fluid padding replaces rigid full-viewport height lock */
 }
 .hero__shapes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   overflow: hidden;
+  user-select: none;
+  z-index: 0;
 }
 .hero__shapes--desktop {
   position: absolute;
@@ -658,10 +698,14 @@ button, a, input, select {
   inset: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
+  overflow: hidden;
 }
 .shape {
   position: absolute;
   display: block;
+  pointer-events: none;
+  user-select: none;
 }
 .shape--circle {
   border-radius: 50%;
@@ -669,40 +713,49 @@ button, a, input, select {
 
 .hero__content {
   position: relative;
-  z-index: 1;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 16px;
   max-width: 1040px;
   margin: 0 auto;
   padding: 0 16px;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .hero__content {
+    gap: 20px;
+  }
 }
 .hero h1 {
   margin-top: 0;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(34px, 4.8vw, 66px);
-  line-height: 1.08;
+  font-size: clamp(32px, 4.5vw, 64px);
+  line-height: 1.05;
   letter-spacing: -0.035em;
   text-wrap: balance;
   color: #FFFFFF;
 }
 .hero__lede {
-  margin-top: 20px;
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: clamp(16.5px, 1.4vw, 21px);
-  line-height: 1.55;
+  margin-top: 0;
+  font-family: var(--font-serif), serif;
+  font-weight: 400;
+  font-size: clamp(15.5px, 1.25vw, 19px);
+  line-height: 1.65;
   color: #E4E4E7;
-  max-width: 760px;
+  max-width: 65ch;
 }
 .hero__actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 16px;
-  margin-top: 32px;
+  gap: 14px;
+  margin-top: 8px;
+  width: 100%;
 }
 
 /* ---------- Neo-Brutalist Buttons (neobrutalism.dev spec) ---------- */
@@ -1062,7 +1115,24 @@ main {
   }
 }
 
-/* Tablets (under 900px) */
+/* Tablets & Small Desktops (under 1024px / lg) - Switch to brutalist hamburger menu */
+@media (max-width: 1023px) {
+  .site-header__inner {
+    width: min(100% - 24px, 1488px);
+    padding-top: 14px;
+  }
+  .nav__links {
+    display: none !important;
+  }
+  .nav__plate-toggle {
+    display: inline-flex !important;
+  }
+  .nav__btn {
+    display: none !important;
+  }
+}
+
+/* Tablets (under 900px) - Toggle shapes */
 @media (max-width: 900px) {
   .hero__shapes--desktop {
     display: none;
@@ -1076,17 +1146,11 @@ main {
 @media (max-width: 768px) {
   .site-header__inner {
     width: min(100% - 16px, 1488px);
-    padding-top: 10px;
+    padding-top: 12px;
   }
   .nav {
     height: 48px;
     padding: 0 8px 0 6px;
-  }
-  .nav__links {
-    display: none;
-  }
-  .nav__plate-toggle {
-    display: inline-flex;
   }
   .nav__actions {
     gap: 8px;
@@ -1094,17 +1158,8 @@ main {
   .nav__logo {
     height: 32px;
   }
-  .nav__btn {
-    display: none !important;
-  }
   .hero {
-    min-height: calc(100vh - 34px);
-    min-height: calc(100dvh - 34px);
-    padding: 68px 16px 28px;
-  }
-  .hero--full {
-    min-height: 100vh;
-    min-height: 100dvh;
+    padding: 80px 16px 48px;
   }
 }
 
@@ -1154,16 +1209,16 @@ main {
   }
 
   .hero {
-    padding: 60px 14px 24px;
+    padding: 76px 16px 48px;
   }
   .hero h1 {
     font-size: clamp(24px, 6.2vw, 32px);
-    line-height: 1.15;
+    line-height: 1.12;
   }
   .hero__lede {
-    margin-top: 12px;
-    font-size: 14.5px;
-    line-height: 1.55;
+    margin-top: 0;
+    font-size: 15px;
+    line-height: 1.6;
   }
 
   /* Buttons on mobile have ergonomic touch size */

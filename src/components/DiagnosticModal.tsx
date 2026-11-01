@@ -195,10 +195,10 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
           {step === 1 && (
             <form onSubmit={handleProceedToSlots} noValidate className="space-y-4">
               <div>
-                <h3 className="text-lg sm:text-xl font-black tracking-tight text-black mb-1 leading-snug">
+                <h3 className="text-lg sm:text-xl font-black tracking-[-0.02em] text-black mb-1 leading-snug">
                   10-Minute Speaking Confidence Audit
                 </h3>
-                <p className="text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed">
+                <p className="text-xs sm:text-[14px] text-neutral-700 font-editorial leading-relaxed max-w-[50ch]">
                   A private, zero-judgment 1-on-1 session to diagnose where you freeze and receive 1 instant physiological reset tool.
                 </p>
               </div>

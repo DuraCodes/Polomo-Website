@@ -8,7 +8,7 @@ interface WhatsAppCommunityCardProps {
 
 export const WhatsAppCommunityCard: React.FC<WhatsAppCommunityCardProps> = ({
   onBookDiagnostic,
-  whatsappInviteUrl = 'https://chat.whatsapp.com/invite',
+  whatsappInviteUrl = 'https://chat.whatsapp.com/LHcbvetC4sRG8Sr7hAk2Uq?s=cl&p=a&mlu=4&ilr=4',
 }) => {
   return (
     <section className="section" id="community" aria-labelledby="community-title">

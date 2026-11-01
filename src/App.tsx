@@ -14,12 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ExposureRoadmapModal } from './components/ExposureRoadmap';
 import { BrutalistFAQ } from './components/BrutalistFAQ';
 import { CohortCalloutCard } from './components/CohortCalloutCard';
 import { BrutalistFooter } from './components/BrutalistFooter';
 import { DiagnosticModal } from './components/DiagnosticModal';
-import { AdminControlDrawer } from './components/AdminControlDrawer';
 import { TextEffect } from './components/motion-primitives/text-effect';
 import { AnimatedBackground } from './components/motion-primitives/animated-background';
 import { Tilt } from './components/motion-primitives/tilt';
@@ -30,15 +28,8 @@ export default function App() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [menuChecked, setMenuChecked] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
-  const [roadmapModalOpen, setRoadmapModalOpen] = useState(false);
   const [diagnosticModalOpen, setDiagnosticModalOpen] = useState(false);
-  const [adminDrawerOpen, setAdminDrawerOpen] = useState(false);
   const [cohortStatus, setCohortStatus] = useState<'DIAGNOSTIC' | 'OPEN' | 'WAITLIST'>('DIAGNOSTIC');
-  const [capacities, setCapacities] = useState({
-    student: 24,
-    professional: 36,
-    founder: 12,
-  });
   const [selectedTrack, setSelectedTrack] = useState<'student' | 'professional' | 'founder'>('professional');
   const [activeArchetype, setActiveArchetype] = useState<'student' | 'professional' | 'founder'>('professional');
 
@@ -93,6 +84,18 @@ export default function App() {
     };
   }, []);
 
+  // Prevent background scrolling and lock body when mobile menu is open
+  useEffect(() => {
+    if (menuChecked) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [menuChecked]);
+
   // 14-point star points computed exactly as in the original code
   const starPoints = useMemo(() => {
     const points: string[] = [];
@@ -109,8 +112,8 @@ export default function App() {
 
   return (
     <>
-      {/* Announcement banner */}
-      {!bannerDismissed && (
+      {/* Announcement banner - hidden when mobile menu is active to prevent bleed-through */}
+      {!bannerDismissed && !menuChecked && (
         <div className="banner" id="banner" role="region" aria-label="Announcement">
           <div className="banner__track" id="bannerTrack">
             {Array.from({ length: 12 }).map((_, i) => (
@@ -152,7 +155,7 @@ export default function App() {
 
       {/* Header */}
       <header className="site-header">
-        <div className="site-header__inner">
+        <div className="site-header__inner mt-2 sm:mt-3">
           <nav className="nav" aria-label="Main">
             <a
               className="nav__home"
@@ -166,7 +169,7 @@ export default function App() {
                 className="nav__logo"
               />
             </a>
-            <ul className="nav__links">
+            <ul className="nav__links hidden lg:flex">
               <li>
                 <a
                   className={activeSection === 'approach' ? 'is-underlined' : ''}
@@ -195,14 +198,14 @@ export default function App() {
             <div className="nav__actions">
               <button
                 type="button"
-                className="btn btn--primary nav__btn hidden md:inline-flex"
+                className="btn btn--primary nav__btn hidden lg:inline-flex"
                 onClick={() => scrollToAdmissions()}
               >
                 Free Diagnostic
               </button>
               <button
                 type="button"
-                className={`chm-27__plate nav__plate-toggle ${menuChecked ? 'is-checked' : ''}`}
+                className={`chm-27__plate nav__plate-toggle inline-flex lg:hidden ${menuChecked ? 'is-checked' : ''}`}
                 aria-label={menuChecked ? 'Close navigation menu' : 'Open navigation menu'}
                 onClick={() => setMenuChecked((prev) => !prev)}
               >
@@ -256,15 +259,14 @@ export default function App() {
                   <div className="chm-27__row"><a href="#faq" onClick={() => setMenuChecked(false)}><b>03</b>FAQ INQUIRIES<span aria-hidden="true">→</span></a></div>
                   <div className="chm-27__row"><button type="button" onClick={() => { setMenuChecked(false); scrollToAdmissions(); }} className="w-full text-left bg-transparent border-none p-0 cursor-pointer font-inherit text-inherit"><b>04</b>FREE DIAGNOSTIC PASS<span aria-hidden="true">→</span></button></div>
                   <div className="chm-27__foot">
-                    <div className="chm-27__badge">
-                      ZERO THEORY<br />ACTIVE EXPOSURE<br />DAILY SPEAKING REPS
+                    <div className="chm-27__status-pill">
+                      <span className="chm-27__status-dot" aria-hidden="true"></span>
+                      <span className="chm-27__subtext">
+                        NEXT COHORT ENROLLING • 12 SEATS PER POD
+                      </span>
                     </div>
-                    <span className="chm-27__subtext">
-                      NEXT COHORT ENROLLING • 12 SEATS PER POD
-                    </span>
                   </div>
                 </nav>
-                <div className="chm-27__ticker" aria-hidden="true"><div className="chm-27__tape"><span>STOP LEARNING, START SPEAKING ★ NEXT COHORT ENROLLING ★ REAL STAGE PRESENCE ★&nbsp;</span><span>STOP LEARNING, START SPEAKING ★ NEXT COHORT ENROLLING ★ REAL STAGE PRESENCE ★&nbsp;</span></div></div>
               </div>
             </section>
           </div>
@@ -275,16 +277,16 @@ export default function App() {
         <div className="stack">
 
           {/* Hero */}
-          <section className={`hero ${bannerDismissed ? 'hero--full' : ''}`} aria-labelledby="hero-title">
-            {/* Desktop Hero Shapes */}
-            <div className="hero__shapes hero__shapes--desktop" aria-hidden="true">
+          <section className="hero pt-20 pb-12 md:pt-28 md:pb-20 flex flex-col items-center justify-center relative overflow-hidden" aria-labelledby="hero-title">
+            {/* Desktop Hero Shapes - Framed along perimeter to never overlap copy */}
+            <div className="hero__shapes hero__shapes--desktop pointer-events-none select-none z-0" aria-hidden="true">
               <span
                 className="shape shape--circle"
-                style={{ left: '-120px', top: '-60px', width: '220px', height: '220px', background: '#FF0000', opacity: 0.6 }}
+                style={{ left: '-100px', top: '-40px', width: '220px', height: '220px', background: '#FF0000', opacity: 0.45 }}
               />
               <svg
                 className="shape"
-                style={{ left: '20px', top: '-40px', width: '180px', height: '190px', opacity: 0.55 }}
+                style={{ left: '40px', top: '10px', width: '150px', height: '160px', opacity: 0.45 }}
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >
@@ -292,15 +294,15 @@ export default function App() {
               </svg>
               <span
                 className="shape shape--circle"
-                style={{ right: '-30px', top: '-25px', width: '210px', height: '210px', background: '#8fd4ee', opacity: 0.85 }}
+                style={{ right: '-40px', top: '-25px', width: '200px', height: '200px', background: '#8fd4ee', opacity: 0.65 }}
               />
               <span
                 className="shape"
-                style={{ right: '16px', top: '150px', width: '180px', height: '180px', background: '#FFE500', transform: 'rotate(14deg)', opacity: 0.85 }}
+                style={{ right: '20px', top: '40%', width: '120px', height: '120px', background: '#FFE500', transform: 'rotate(14deg)', opacity: 0.65, borderRadius: '14px' }}
               />
               <svg
                 className="shape"
-                style={{ left: '16px', top: '140px', width: '180px', height: '190px', opacity: 0.85 }}
+                style={{ left: '20px', top: '40%', width: '130px', height: '140px', opacity: 0.65 }}
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >
@@ -309,31 +311,27 @@ export default function App() {
               <svg
                 className="shape"
                 id="star"
-                style={{ right: '80px', top: '280px', width: '160px', height: '160px', opacity: 0.7 }}
+                style={{ right: '40px', bottom: '24px', width: '130px', height: '130px', opacity: 0.55 }}
                 viewBox="-50 -50 100 100"
               >
                 <polygon fill="#FF4071" points={starPoints} />
               </svg>
               <span
                 className="shape shape--circle"
-                style={{ left: '-60px', top: '290px', width: '160px', height: '160px', background: '#FF4071', opacity: 0.6 }}
+                style={{ left: '-40px', bottom: '20px', width: '130px', height: '130px', background: '#FF4071', opacity: 0.45 }}
               />
               <span
                 className="shape shape--circle"
-                style={{ left: '80px', top: '290px', width: '150px', height: '150px', background: '#FF3B30', opacity: 0.5 }}
-              />
-              <span
-                className="shape shape--circle"
-                style={{ left: '210px', top: '320px', width: '80px', height: '80px', background: '#FFFFFF', opacity: 0.7 }}
+                style={{ left: '50px', bottom: '12px', width: '90px', height: '90px', background: '#FF3B30', opacity: 0.35 }}
               />
             </div>
 
-            {/* Mobile Hero Shapes - Proportionally scaled and framed for small viewports */}
-            <div className="hero__shapes hero__shapes--mobile" aria-hidden="true">
+            {/* Mobile Hero Shapes - Proportionally scaled and framed along perimeter to never obstruct text copy */}
+            <div className="hero__shapes hero__shapes--mobile pointer-events-none select-none z-0" aria-hidden="true">
               {/* Top Left Yellow Angle */}
               <svg
                 className="shape"
-                style={{ left: '-12px', top: '-10px', width: '92px', height: '96px' }}
+                style={{ left: '-10px', top: '-10px', width: '60px', height: '64px', opacity: 0.45 }}
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >
@@ -342,51 +340,29 @@ export default function App() {
               {/* Top Right Arctic Cyan Circle */}
               <span
                 className="shape shape--circle"
-                style={{ right: '-18px', top: '12px', width: '80px', height: '80px', background: '#8FD4EE' }}
+                style={{ right: '-16px', top: '10px', width: '60px', height: '60px', background: '#8FD4EE', opacity: 0.55 }}
               />
-              {/* Mid Left Coral-Red Circle & White Dot */}
-              <span
-                className="shape shape--circle"
-                style={{ left: '-30px', top: '42%', width: '96px', height: '96px', background: '#FF3B30' }}
-              />
-              <span
-                className="shape shape--circle"
-                style={{ left: '38px', top: '53%', width: '44px', height: '44px', background: '#FFFFFF' }}
-              />
-              {/* Mid Right Hot Pink Star */}
-              <svg
-                className="shape"
-                style={{ right: '-16px', top: '44%', width: '92px', height: '92px' }}
-                viewBox="-50 -50 100 100"
-              >
-                <polygon fill="#FF4071" points={starPoints} />
-              </svg>
               {/* Bottom Left Green Accent */}
               <svg
                 className="shape"
-                style={{ left: '10px', bottom: '10px', width: '64px', height: '70px' }}
+                style={{ left: '-10px', bottom: '10px', width: '54px', height: '58px', opacity: 0.5 }}
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >
                 <polygon points="0,0 100,48 12,100" fill="#00E575" />
               </svg>
-              {/* Bottom Right Yellow Rotated Tile */}
-              <span
+              {/* Bottom Right Hot Pink Star */}
+              <svg
                 className="shape"
-                style={{
-                  right: '12px',
-                  bottom: '14px',
-                  width: '52px',
-                  height: '52px',
-                  background: '#FFE500',
-                  transform: 'rotate(14deg)',
-                  borderRadius: '10px'
-                }}
-              />
+                style={{ right: '-12px', bottom: '10px', width: '58px', height: '58px', opacity: 0.45 }}
+                viewBox="-50 -50 100 100"
+              >
+                <polygon fill="#FF4071" points={starPoints} />
+              </svg>
             </div>
 
-            <div className="hero__content">
-              <div className="flex items-center justify-center mb-3 sm:mb-4 w-full px-2">
+            <div className="hero__content relative z-20 flex flex-col items-center justify-center gap-4 sm:gap-5 md:gap-6 max-w-4xl mx-auto px-4 w-full">
+              <div className="flex items-center justify-center w-full px-2">
                 <span className="text-[10px] sm:text-xs md:text-[13px] font-black uppercase tracking-wider px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF] text-center max-w-full leading-tight inline-flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
                   <span>Free 60-Sec Diagnostic</span>
                   <span>•</span>
@@ -403,7 +379,7 @@ export default function App() {
                 per="word"
                 preset="fade-in-blur"
                 speedReveal={1.2}
-                className="font-bold text-center leading-[1.08] sm:leading-[1.02] lg:leading-[0.98] tracking-[-0.03em] max-w-4xl mx-auto"
+                className="font-black text-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.05] sm:leading-[1.0] lg:leading-[0.96] tracking-[-0.035em] max-w-4xl mx-auto text-white"
                 aria-hidden="true"
               >
                 Stop Learning About Public Speaking. Start Speaking.
@@ -413,13 +389,13 @@ export default function App() {
                 per="line"
                 preset="fade"
                 delay={0.2}
-                className="hero__lede"
+                className="hero__lede font-editorial text-[#E4E4E7] text-base sm:text-lg lg:text-[19px] max-w-[65ch] mx-auto leading-[1.65] text-center"
               >
                 A practical exposure lab for students, professionals, and founders who freeze under audience scrutiny. Run your free diagnostic, identify your freeze triggers, and unlock your practice pod pass.
               </TextEffect>
 
               {/* Dual-Action Conversion Console (neobrutalism.dev hierarchy) */}
-              <div className="hero__actions w-full sm:w-auto">
+              <div className="hero__actions flex flex-wrap items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto mt-2 sm:mt-3">
                 <button
                   type="button"
                   className="btn btn--primary w-full sm:w-auto min-h-[48px]"
@@ -459,8 +435,8 @@ export default function App() {
                 <article className="card card--sky">
                   <span className="card__dot" aria-hidden="true"></span>
                   <div className="card__body">
-                    <h3 className="card__title">Daily Speaking Reps</h3>
-                    <p className="card__text">You get micro-opportunities to speak every single day. This constant frequency builds instant habit and eliminates overthinking.</p>
+                    <h3 className="card__title tracking-[-0.025em] font-black">Daily Speaking Reps</h3>
+                    <p className="card__text font-editorial text-[15px] sm:text-[16px] text-[#181820] leading-relaxed max-w-[55ch]">You get micro-opportunities to speak every single day. This constant frequency builds instant habit and eliminates overthinking.</p>
                   </div>
                   <a className="pill" href="#cohort">
                     <span>Daily reps</span>
@@ -470,8 +446,8 @@ export default function App() {
 
                 <article className="card card--green">
                   <div className="card__body">
-                    <h3 className="card__title">Progressive Exposure Pods</h3>
-                    <p className="card__text">You are placed into small, supportive peer groups led by dedicated facilitators, ensuring you are never thrown into the deep end alone.</p>
+                    <h3 className="card__title tracking-[-0.025em] font-black">Progressive Exposure Pods</h3>
+                    <p className="card__text font-editorial text-[15px] sm:text-[16px] text-[#181820] leading-relaxed max-w-[55ch]">You are placed into small, supportive peer groups led by dedicated facilitators, ensuring you are never thrown into the deep end alone.</p>
                   </div>
                   <a className="pill" href="#cohort">
                     <span>Join a pod</span>
@@ -481,8 +457,8 @@ export default function App() {
 
                 <article className="card card--orange">
                   <div className="card__body">
-                    <h3 className="card__title">Real-World and Virtual Stages</h3>
-                    <p className="card__text">You practice across both virtual environments and physical spaces—stepping onto real stages, managing eye contact, and projecting your voice in front of live audiences.</p>
+                    <h3 className="card__title tracking-[-0.025em] font-black">Real-World and Virtual Stages</h3>
+                    <p className="card__text font-editorial text-[15px] sm:text-[16px] text-[#181820] leading-relaxed max-w-[55ch]">You practice across both virtual environments and physical spaces—stepping onto real stages, managing eye contact, and projecting your voice in front of live audiences.</p>
                   </div>
                   <a className="pill" href="#cohort">
                     <span>Real stages</span>
@@ -495,7 +471,7 @@ export default function App() {
 
           {/* Who it's for - Full-Bleed Manila Dossier Board Stretching Edge-to-Edge */}
           <section
-            className="w-full py-12 sm:py-16 lg:py-20 lg:min-h-screen lg:min-h-[100dvh] flex flex-col justify-center bg-[#FAF7EE] border-b-[3px] border-black px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
+            className="w-full py-12 sm:py-16 lg:py-20 lg:min-h-screen lg:min-h-[100dvh] flex flex-col justify-center bg-[#F5F3EC] border-b-[3px] border-black px-[var(--gutter)] scroll-mt-20 relative overflow-hidden"
             id="who-it-is-for"
             aria-labelledby="who-title"
           >
@@ -697,10 +673,10 @@ export default function App() {
                           Academia &amp; Entry
                         </span>
                       </div>
-                      <h3 className="text-xl lg:text-[23px] font-black text-[#111118] tracking-tight mb-2 pr-8 leading-snug">
+                      <h3 className="text-xl lg:text-[23px] font-black text-[#111118] tracking-[-0.02em] mb-2 pr-8 leading-snug">
                         Students &amp; Graduates
                       </h3>
-                      <p className="text-[#181820] font-normal text-sm sm:text-[14.5px] leading-relaxed mb-3">
+                      <p className="text-[#181820] font-editorial text-[15px] sm:text-[15.5px] leading-relaxed mb-3 max-w-[50ch]">
                         Thesis defenses, capstone presentations, and high-pressure job interviews.
                       </p>
 
@@ -748,10 +724,10 @@ export default function App() {
                           Career &amp; Visibility
                         </span>
                       </div>
-                      <h3 className="text-xl lg:text-[23px] font-black text-[#111118] tracking-tight mb-2 pr-8 leading-snug">
+                      <h3 className="text-xl lg:text-[23px] font-black text-[#111118] tracking-[-0.02em] mb-2 pr-8 leading-snug">
                         Professionals &amp; Seekers
                       </h3>
-                      <p className="text-[#181820] font-normal text-sm sm:text-[14.5px] leading-relaxed mb-3">
+                      <p className="text-[#181820] font-editorial text-[15px] sm:text-[15.5px] leading-relaxed mb-3 max-w-[50ch]">
                         Commanding meetings, executive reviews, and unscripted Q&amp;A.
                       </p>
 
@@ -799,10 +775,10 @@ export default function App() {
                           Pitches &amp; Stages
                         </span>
                       </div>
-                      <h3 className="text-xl lg:text-[23px] font-black text-white tracking-tight mb-2 pr-8 leading-snug">
+                      <h3 className="text-xl lg:text-[23px] font-black text-white tracking-[-0.02em] mb-2 pr-8 leading-snug">
                         Founders &amp; Creators
                       </h3>
-                      <p className="text-white/95 font-normal text-sm sm:text-[14.5px] leading-relaxed mb-3">
+                      <p className="text-white/95 font-editorial text-[15px] sm:text-[15.5px] leading-relaxed mb-3 max-w-[50ch]">
                         Investor pitches, demo days, podcasts, and live auditorium scrutiny.
                       </p>
 
@@ -854,34 +830,15 @@ export default function App() {
 
       {/* Bespoke Neo-Brutalist Kinetic Footer */}
       <BrutalistFooter
-        onOpenRoadmap={() => setRoadmapModalOpen(true)}
         onOpenFaq={() => { const el = document.getElementById('faq'); el?.scrollIntoView({ behavior: 'smooth' }); }}
         onOpenDiagnostic={() => setDiagnosticModalOpen(true)}
         onApply={() => scrollToAdmissions()}
-        onOpenAdmin={() => setAdminDrawerOpen(true)}
-      />
-
-      {/* 4-Stage Exposure Roadmap Modal */}
-      <ExposureRoadmapModal
-        isOpen={roadmapModalOpen}
-        onClose={() => setRoadmapModalOpen(false)}
-        onApply={() => { setRoadmapModalOpen(false); scrollToAdmissions(); }}
       />
 
       {/* 1-on-1 Confidence Diagnostic Booking Modal */}
       <DiagnosticModal
         isOpen={diagnosticModalOpen}
         onClose={() => setDiagnosticModalOpen(false)}
-      />
-
-      {/* Admin Mission Control Drawer */}
-      <AdminControlDrawer
-        isOpen={adminDrawerOpen}
-        onClose={() => setAdminDrawerOpen(false)}
-        cohortStatus={cohortStatus}
-        onStatusChange={setCohortStatus}
-        capacities={capacities}
-        onCapacitiesChange={setCapacities}
       />
     </>
   );
