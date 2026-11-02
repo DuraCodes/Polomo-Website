@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowRight, Check } from 'lucide-react';
+import { X, ArrowRight, Check, Calendar, Video, FileSpreadsheet, ExternalLink } from 'lucide-react';
 import { scheduleDiagnosticSession } from '../services/googleCalendar';
-import { appendApplicantToSheet, getStoredSheetId } from '../services/googleSheets';
-import { getAccessToken, googleSignIn } from '../services/googleAuth';
+import { appendApplicantToSheet, getStoredSheetId, initOrCreateSheet } from '../services/googleSheets';
+import { getAccessToken, googleSignIn, initAuth, logout } from '../services/googleAuth';
+import type { User } from 'firebase/auth';
 
 interface DiagnosticModalProps {
   isOpen: boolean;
@@ -30,11 +31,34 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
   // Date & Slot Selection
   const [selectedSlot, setSelectedSlot] = useState<string>('tomorrow-18:00');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [, setBookingResult] = useState<{
+  const [isConnectingGoogle, setIsConnectingGoogle] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [bookingResult, setBookingResult] = useState<{
     time?: string;
     meetLink?: string;
+    calendarLink?: string;
+    sheetSynced?: boolean;
     success: boolean;
   } | null>(null);
+
+  // Initialize Firebase Auth listener for Google OAuth session
+  useEffect(() => {
+    const unsubscribe = initAuth(
+      (user) => {
+        setCurrentUser(user);
+        if (!email && user.email) {
+          setEmail(user.email);
+        }
+        if (!name && user.displayName) {
+          setName(user.displayName);
+        }
+      },
+      () => {
+        setCurrentUser(null);
+      }
+    );
+    return () => unsubscribe();
+  }, [email, name]);
 
   // Sync defaultTrack prop when modal opens
   useEffect(() => {
@@ -88,6 +112,22 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
     setStep(2);
   };
 
+  const handleGoogleConnect = async () => {
+    setIsConnectingGoogle(true);
+    try {
+      const authResult = await googleSignIn();
+      if (authResult?.user) {
+        setCurrentUser(authResult.user);
+        if (!email && authResult.user.email) setEmail(authResult.user.email);
+        if (!name && authResult.user.displayName) setName(authResult.user.displayName);
+      }
+    } catch (err) {
+      console.warn('Google connection cancelled or failed:', err);
+    } finally {
+      setIsConnectingGoogle(false);
+    }
+  };
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -104,13 +144,16 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
         try {
           const authResult = await googleSignIn();
           token = authResult?.accessToken || null;
+          if (authResult?.user) setCurrentUser(authResult.user);
         } catch {
-          console.warn('Proceeding with direct intake logging');
+          console.warn('Proceeding without direct Google OAuth sign-in');
         }
       }
 
       let meetUrl = 'https://meet.google.com/new';
+      let calendarLink: string | undefined;
       let formattedTime = `${hours}:${minutes === 0 ? '00' : minutes}`;
+      let sheetSynced = false;
 
       if (token) {
         try {
@@ -123,11 +166,16 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
             startIsoString: date.toISOString(),
           });
           if (calendarRes.hangoutLink) meetUrl = calendarRes.hangoutLink;
+          if (calendarRes.htmlLink) calendarLink = calendarRes.htmlLink;
           formattedTime = calendarRes.startTime;
+        } catch (apiErr) {
+          console.warn('Calendar sync warning:', apiErr);
+        }
 
-          const sheetId = getStoredSheetId();
+        try {
+          const sheetId = await initOrCreateSheet(token);
           if (sheetId) {
-            await appendApplicantToSheet(token, sheetId, {
+            sheetSynced = await appendApplicantToSheet(token, sheetId, {
               name,
               email,
               whatsapp,
@@ -136,14 +184,16 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
               status: 'Diagnostic Booked',
             });
           }
-        } catch (apiErr) {
-          console.warn('API sync warning:', apiErr);
+        } catch (sheetErr) {
+          console.warn('Google Sheets sync warning:', sheetErr);
         }
       }
 
       setBookingResult({
         time: formattedTime,
         meetLink: meetUrl,
+        calendarLink,
+        sheetSynced,
         success: true,
       });
       setStep(3);
@@ -374,16 +424,69 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
                   })}
                 </div>
 
+                {/* Google Calendar & Meet Sync Card */}
+                <div className="p-3 bg-[#FAF8F5] border-2 border-black rounded-xl shadow-[2px_2px_0_#000000]">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-black flex items-center gap-1.5">
+                      <Calendar className="size-3.5 text-blue-600 stroke-[2.5]" />
+                      Google Workspace Sync
+                    </span>
+                    <span className="text-[10px] font-bold text-neutral-600 bg-white border border-neutral-300 px-2 py-0.5 rounded-full">
+                      Meet + Calendar + Sheets
+                    </span>
+                  </div>
+
+                  {currentUser ? (
+                    <div className="flex items-center justify-between bg-emerald-50 border border-emerald-400 p-2 rounded-lg">
+                      <div className="flex items-center gap-2 truncate">
+                        <div className="size-5 rounded-full bg-[#00E575] text-black font-black text-[10px] flex items-center justify-center border border-black shrink-0">
+                          ✓
+                        </div>
+                        <span className="text-xs font-bold text-neutral-900 truncate">
+                          {currentUser.email}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => logout()}
+                        className="text-[10px] font-bold text-neutral-500 hover:text-black uppercase underline ml-2 shrink-0 cursor-pointer"
+                      >
+                        Disconnect
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <button
+                        type="button"
+                        onClick={handleGoogleConnect}
+                        disabled={isConnectingGoogle}
+                        className="w-full inline-flex items-center justify-center gap-2.5 py-2 px-3 rounded-lg border-2 border-black bg-white hover:bg-neutral-50 text-black font-bold text-xs shadow-[2px_2px_0_#000000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer min-h-[40px]"
+                      >
+                        <svg className="size-4 shrink-0" viewBox="0 0 48 48" aria-hidden="true">
+                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                        </svg>
+                        <span>{isConnectingGoogle ? 'Connecting Google Account...' : 'Sign in with Google for Instant Calendar Invite'}</span>
+                      </button>
+                      <p className="text-[10px] text-neutral-500 font-medium mt-1.5 text-center">
+                        Creates Google Meet link &amp; syncs to your personal calendar with permission.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 {/* What to Expect Callout */}
-                <div className="p-3.5 bg-[#FAF8F5] border-2 border-black rounded-xl text-xs text-neutral-700 leading-relaxed shadow-[2px_2px_0_#000000]">
+                <div className="p-3 bg-[#FAF8F5] border-2 border-black rounded-xl text-xs text-neutral-700 leading-relaxed shadow-[2px_2px_0_#000000]">
                   <div className="font-black text-black mb-1 flex items-center gap-1.5">
                     <Check className="size-4 text-emerald-600 stroke-[3]" />
                     What to expect in your 10 minutes:
                   </div>
-                  <div className="space-y-1 text-[11px] sm:text-xs font-medium text-neutral-800">
+                  <div className="space-y-1 text-[11px] font-medium text-neutral-800">
                     <div>• Pinpoint the exact biological trigger that causes your freeze.</div>
                     <div>• Receive one custom breathing or cognitive reset protocol.</div>
-                    <div>• Unlock direct access to the WhatsApp Practice Circle.</div>
+                    <div>• Receive Google Meet details &amp; WhatsApp Practice Circle pass.</div>
                   </div>
                 </div>
 
@@ -393,7 +496,7 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
                   className="w-full inline-flex items-center justify-center gap-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider border-2 border-black bg-black text-white hover:bg-[#FF0000] shadow-[3px_3px_0_#FFE500] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0_#FFE500] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50 transition-all py-3.5 px-5 cursor-pointer min-h-[48px]"
                 >
                   {isSubmitting ? (
-                    <span>Confirming Appointment...</span>
+                    <span>Syncing Calendar &amp; Scheduling...</span>
                   ) : (
                     <>
                       <span>Confirm 1-on-1 Session (Free)</span>
@@ -405,7 +508,7 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
             </div>
           )}
 
-          {/* STEP 3: Booking Success & WhatsApp Bridge */}
+          {/* STEP 3: Booking Success & Google Meet / WhatsApp Bridge */}
           {step === 3 && (
             <div className="text-center py-2 sm:py-3">
               <div className="inline-flex items-center justify-center size-12 sm:size-14 rounded-full bg-[#00E575] border-2 border-black text-black mb-2.5 shadow-[2px_2px_0_#000000]">
@@ -414,9 +517,54 @@ export const DiagnosticModal: React.FC<DiagnosticModalProps> = ({
               <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-black mb-1">
                 You're On The Schedule!
               </h3>
-              <p className="text-xs sm:text-sm text-neutral-700 font-medium mb-4 max-w-sm mx-auto">
-                Your 10-minute audit has been secured. Confirmation details have been sent to <strong className="text-black">{email}</strong>.
+              <p className="text-xs sm:text-sm text-neutral-700 font-medium mb-3 max-w-sm mx-auto">
+                Your 10-minute audit has been secured for <strong className="text-black">{bookingResult?.time || 'Tomorrow evening'}</strong>.
               </p>
+
+              {/* Google Integration Confirmation Card */}
+              <div className="bg-[#FAF8F5] border-2 border-black rounded-xl p-3 sm:p-3.5 mb-3 text-left shadow-[2px_2px_0_#000000] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-neutral-600 flex items-center gap-1">
+                    <Video className="size-3.5 text-blue-600" />
+                    Google Meet Session
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">
+                    Confirmed
+                  </span>
+                </div>
+
+                {bookingResult?.meetLink && (
+                  <a
+                    href={bookingResult.meetLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-between w-full p-2.5 bg-white border border-black rounded-lg text-xs font-bold text-black hover:bg-neutral-50 transition-colors"
+                  >
+                    <span className="truncate">Open Google Meet Video Call</span>
+                    <ExternalLink className="size-3.5 text-neutral-500 shrink-0 ml-1.5" />
+                  </a>
+                )}
+
+                <div className="flex flex-wrap gap-2 pt-1 text-[11px] font-bold text-neutral-700">
+                  {bookingResult?.calendarLink && (
+                    <a
+                      href={bookingResult.calendarLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                    >
+                      <Calendar className="size-3" />
+                      View in Google Calendar
+                    </a>
+                  )}
+                  {bookingResult?.sheetSynced && (
+                    <span className="inline-flex items-center gap-1 text-emerald-700">
+                      <FileSpreadsheet className="size-3" />
+                      Admissions Sheet Synced
+                    </span>
+                  )}
+                </div>
+              </div>
 
               {/* The Bridge into WhatsApp Community */}
               <div className="bg-[#FAF8F5] border-2 border-black rounded-2xl p-4 sm:p-5 mb-4 text-left shadow-[4px_4px_0_#00E575]">
