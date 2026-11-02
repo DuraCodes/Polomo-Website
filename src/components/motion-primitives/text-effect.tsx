@@ -107,6 +107,35 @@ const presetVariants: Record<
   },
 };
 
+// GPU-friendly variants for mobile devices: relies exclusively on transform & opacity
+const mobileItemVariants: Record<PresetType, Variants> = {
+  blur: {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+  },
+  'fade-in-blur': {
+    hidden: { opacity: 0, y: 16 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 16 },
+  },
+  scale: {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.95 },
+  },
+  fade: {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+  },
+  slide: {
+    hidden: { opacity: 0, y: 16 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 16 },
+  },
+};
+
 const AnimationComponent: React.FC<{
   segment: string;
   variants: Variants;
@@ -217,9 +246,18 @@ export function TextEffect({
   style,
 }: TextEffectProps) {
   const segments = splitText(children, per);
+  const isMobile =
+    typeof window !== 'undefined' &&
+    (window.innerWidth < 768 || 'ontouchstart' in window);
+
   const MotionTag = motion[as as keyof typeof motion] as typeof motion.div;
   const baseVariants = preset
-    ? presetVariants[preset]
+    ? {
+        container: presetVariants[preset].container,
+        item: isMobile
+          ? mobileItemVariants[preset]
+          : presetVariants[preset].item,
+      }
     : { container: defaultContainerVariants, item: defaultItemVariants };
 
   const stagger = defaultStaggerTimes[per] / speedReveal;

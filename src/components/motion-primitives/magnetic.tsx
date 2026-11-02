@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   motion,
   useMotionValue,
@@ -11,8 +11,8 @@ import {
 export interface MagneticProps extends MotionProps {
   children: React.ReactNode;
   className?: string;
-  intensity?: number; // Distance multiplier for magnetic attraction (default 0.35)
-  range?: number; // Activation boundary in pixels (default 80)
+  intensity?: number;
+  range?: number;
   springOptions?: SpringOptions;
   disabled?: boolean;
 }
@@ -21,8 +21,9 @@ export interface MagneticProps extends MotionProps {
  * Magnetic Component
  * Sourced from: Motion Primitives (Julien Thibeaut) & 21st.dev
  *
- * Pulls elements smoothly toward the user's cursor with spring physics.
- * Strictly GPU-accelerated: only updates 2D/3D translate transforms on the compositor.
+ * Desktop: Pulls elements smoothly toward the user's cursor with spring physics.
+ * Mobile / Touch: Automatically scales back cursor tracking, substituting with
+ * a crisp, hardware-accelerated tap scale interaction (whileTap={{ scale: 0.96 }}).
  */
 export function Magnetic({
   children,
@@ -33,6 +34,21 @@ export function Magnetic({
   ...props
 }: MagneticProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    const checkTouch = () => {
+      setIsTouchDevice(
+        window.matchMedia('(hover: none)').matches ||
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        window.innerWidth < 768
+      );
+    };
+    checkTouch();
+    window.addEventListener('resize', checkTouch, { passive: true });
+    return () => window.removeEventListener('resize', checkTouch);
+  }, []);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -41,9 +57,8 @@ export function Magnetic({
   const springY = useSpring(y, springOptions);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (disabled || !ref.current) return;
+    if (disabled || isTouchDevice || !ref.current) return;
 
-    // Check prefers-reduced-motion
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
@@ -60,9 +75,24 @@ export function Magnetic({
   };
 
   const handleMouseLeave = () => {
+    if (isTouchDevice) return;
     x.set(0);
     y.set(0);
   };
+
+  if (isTouchDevice || disabled) {
+    return (
+      <motion.div
+        ref={ref}
+        whileTap={{ scale: 0.96 }}
+        transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+        className={`inline-block will-change-transform ${className}`}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -71,6 +101,7 @@ export function Magnetic({
         x: springX,
         y: springY,
       }}
+      whileTap={{ scale: 0.96 }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={`inline-block will-change-transform ${className}`}

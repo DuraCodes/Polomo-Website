@@ -1,71 +1,192 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 interface Hero3DCanvasProps {
   className?: string;
 }
 
+export type DeviceTier = 'high' | 'medium' | 'low';
+
+interface HardwareProfile {
+  tier: DeviceTier;
+  maxDpr: number;
+  useShadows: boolean;
+  antialias: boolean;
+  ringSegments: number;
+  numRings: number;
+  nodeCountPerPod: number;
+  particleCount: number;
+  sphereSubdivisions: number;
+  isTouch: boolean;
+}
+
+/**
+ * Detects device hardware capability and touch profile prior to WebGL instantiation.
+ * Isolates desktop vs mobile interactivity to prevent touch-scroll jank and battery drain.
+ */
+function detectHardwareProfile(): HardwareProfile {
+  if (typeof window === 'undefined') {
+    return {
+      tier: 'medium',
+      maxDpr: 1.5,
+      useShadows: false,
+      antialias: false,
+      ringSegments: 64,
+      numRings: 3,
+      nodeCountPerPod: 4,
+      particleCount: 20,
+      sphereSubdivisions: 16,
+      isTouch: false,
+    };
+  }
+
+  // 1. Detect software WebGL or low-spec GPU
+  let isSoftware = false;
+  let gpuRenderer = '';
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    if (!gl) {
+      isSoftware = true;
+    } else {
+      const ext = gl.getExtension('WEBGL_debug_renderer_info');
+      const param = ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER;
+      gpuRenderer = String(gl.getParameter(param));
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      isSoftware = /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpuRenderer);
+    }
+  } catch {
+    isSoftware = false;
+  }
+
+  // 2. Evaluate hardware & screen attributes
+  const isMobileScreen = window.innerWidth < 768;
+  const isTabletScreen = window.innerWidth >= 768 && window.innerWidth < 1024;
+  const isTouch = window.matchMedia('(hover: none)').matches || 'ontouchstart' in window || navigator.maxTouchPoints > 0 || isMobileScreen;
+  const cores = navigator.hardwareConcurrency || 4;
+  const deviceMemory = (navigator as unknown as { deviceMemory?: number }).deviceMemory || 4;
+
+  const isLowPowerGpu = /Adreno\s*(3|4|5\d\d)|Mali-(4|T)|PowerVR/i.test(gpuRenderer);
+
+  // 3. Classify tier
+  let tier: DeviceTier = 'high';
+  if (isSoftware || (isMobileScreen && (cores <= 4 || deviceMemory <= 4 || isLowPowerGpu))) {
+    tier = 'low';
+  } else if (isMobileScreen || isTabletScreen || isTouch || cores <= 6) {
+    tier = 'medium';
+  } else {
+    tier = 'high';
+  }
+
+  switch (tier) {
+    case 'low':
+      return {
+        tier: 'low',
+        maxDpr: 1.0, // Strict 1.0 DPR limit eliminates mobile GPU fill-rate strain
+        useShadows: false,
+        antialias: false,
+        ringSegments: 48,
+        numRings: 2,
+        nodeCountPerPod: 3,
+        particleCount: 15,
+        sphereSubdivisions: 12,
+        isTouch,
+      };
+    case 'medium':
+      return {
+        tier: 'medium',
+        maxDpr: isMobileScreen ? 1.25 : 1.5,
+        useShadows: false,
+        antialias: true,
+        ringSegments: 72,
+        numRings: 3,
+        nodeCountPerPod: 5,
+        particleCount: 25,
+        sphereSubdivisions: 18,
+        isTouch,
+      };
+    case 'high':
+    default:
+      return {
+        tier: 'high',
+        maxDpr: 1.5, // Strict 1.5 maximum DPR cap to eliminate mobile GPU fill-rate strain
+        useShadows: true,
+        antialias: true,
+        ringSegments: 128,
+        numRings: 4,
+        nodeCountPerPod: 6,
+        particleCount: 45,
+        sphereSubdivisions: 28,
+        isTouch,
+      };
+  }
+}
+
 /**
  * Hero3DCanvas
- * Immersive, full-bleed real-time 3D WebGL scene for the Hero section.
- * Sourced from open-source 21st.dev / Three.js PBR physical motion patterns:
- * - Dynamic Camera Frustum calculation & Aspect-Ratio Mapping:
- *   Calculates visible viewport width & height in real-time, spreading 3D elements
- *   outward into the horizontal left and right margins across standard, laptop, and ultrawide viewports.
- * - Guaranteed Central Safe Zone:
- *   Keeps the center corridor [-0.45 * halfW, +0.45 * halfW] completely free of dense geometries,
- *   preserving unobstructed readability for the headline, pill badge, lede prose, and CTAs.
- * - RoomEnvironment reflection mapping with PMREMGenerator
- * - Glassmorphic transmission & physical clearcoat materials
- * - Procedural geometries: extruded beveled starburst, triangular prism, rounded boxes, toruses, and sapphire sphere
- * - Full-screen viewport mouse parallax with frame-rate independent THREE.MathUtils.damp spring kinematics
- * - Safe software-WebGL fallback detection (isSoftwareGl) and graceful cleanup
+ * Mobile-First Performance & Touch-Optimized 3D WebGL Motion Canvas:
+ * 1. Touch-Optimized Interaction Redesign:
+ *    - Replaces desktop mousemove with container-confined touch-swipe inertial physics on mobile.
+ *    - Segregates touch vs desktop: zero document-level touchmove listeners during page scrolling.
+ * 2. Device-Tier Interactivity Scaling:
+ *    - On mobile, automatically supplements with autonomous organic breathing kinematics (Lissajous curves),
+ *      keeping the stage alive and responsive with zero battery drain.
+ * 3. Passive Event Listeners & Throttling:
+ *    - All scroll, touch, and resize handlers are marked strictly as passive ({ passive: true }).
+ *    - Activity wake-up notifications throttled to eliminate main-thread scroll blocking.
+ * 4. Automatic Viewport & Idle Culling:
+ *    - IntersectionObserver pauses render loop when scrolled out of view.
+ *    - Inactivity timer pauses loop after 5s of user idle time, resuming instantly upon touch or scroll.
  */
 export function Hero3DCanvas({ className = '' }: Hero3DCanvasProps) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const idleId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(
+        () => setIsHydrated(true),
+        { timeout: 600 }
+      );
+      return () => {
+        (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+      };
+    } else {
+      const timerId = setTimeout(() => setIsHydrated(true), 100);
+      return () => clearTimeout(timerId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
     const container = mountRef.current;
     if (!container) return;
 
-    // Detect software WebGL renderer (SwiftShader / llvmpipe / WARP)
-    const isSoftwareGl = (() => {
-      try {
-        const gl = document.createElement('canvas').getContext('webgl2');
-        if (!gl) return true;
-        const ext = gl.getExtension('WEBGL_debug_renderer_info');
-        const param = ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER;
-        const gpu = String(gl.getParameter(param));
-        gl.getExtension('WEBGL_lose_context')?.loseContext();
-        return /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu);
-      } catch {
-        return false;
-      }
-    })();
+    const profile = detectHardwareProfile();
+    const isSoftwareGl = profile.tier === 'low' && typeof window !== 'undefined' && !window.WebGL2RenderingContext;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Setup Three.js WebGLRenderer adhering strictly to modern color space and PBR pipeline
+    // Renderer setup with strict mobile DPR capping and ACES Filmic tone mapping
     const renderer = new THREE.WebGLRenderer({
-      antialias: !isSoftwareGl,
+      antialias: profile.antialias,
       alpha: true,
       powerPreference: 'high-performance',
+      precision: profile.tier === 'low' ? 'mediump' : 'highp',
     });
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
-    renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = !isSoftwareGl;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMappingExposure = 1.2;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, profile.maxDpr));
 
     const initialWidth = container.clientWidth || window.innerWidth;
     const initialHeight = container.clientHeight || 650;
     renderer.setSize(initialWidth, initialHeight);
 
-    // Ensure canvas element spans cleanly edge-to-edge
     renderer.domElement.style.display = 'block';
     renderer.domElement.style.position = 'absolute';
     renderer.domElement.style.top = '0';
@@ -79,298 +200,257 @@ export function Hero3DCanvas({ className = '' }: Hero3DCanvasProps) {
     const camera = new THREE.PerspectiveCamera(42, initialWidth / initialHeight, 0.1, 100);
     camera.position.set(0, 0, 11);
 
-    // Mandatory Procedural Studio Environment Reflection
+    // Studio Environment Reflections
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     const roomEnvTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = roomEnvTexture;
     pmremGenerator.dispose();
 
-    // Studio Lighting Rig
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    // -------------------------------------------------------------
+    // LIGHTING RIG: Spotlight & Scrutiny Lighting
+    // -------------------------------------------------------------
+    const ambientLight = new THREE.AmbientLight(0xffffff, profile.tier === 'low' ? 0.9 : 0.65);
     scene.add(ambientLight);
 
-    // Warm directional key light
-    const keyLight = new THREE.DirectionalLight(0xfff3e0, 2.3);
-    keyLight.position.set(6, 8, 7);
-    if (!isSoftwareGl) {
-      keyLight.castShadow = true;
-      keyLight.shadow.mapSize.width = 1024;
-      keyLight.shadow.mapSize.height = 1024;
-      keyLight.shadow.camera.near = 0.5;
-      keyLight.shadow.camera.far = 25;
-      keyLight.shadow.bias = -0.0005;
-      keyLight.shadow.normalBias = 0.02;
-    }
-    scene.add(keyLight);
+    const scrutinySpotlight = new THREE.SpotLight(0xfff5e6, 3.2);
+    scrutinySpotlight.position.set(0, 6, 8);
+    scrutinySpotlight.angle = Math.PI / 4.5;
+    scrutinySpotlight.penumbra = 0.85;
+    scrutinySpotlight.decay = 1.8;
+    scrutinySpotlight.distance = 25;
 
-    // Cool rim light for rich specular edge highlights
-    const rimLight = new THREE.DirectionalLight(0xec4899, 1.8);
-    rimLight.position.set(-7, -4, -4);
+    const spotlightTarget = new THREE.Object3D();
+    spotlightTarget.position.set(0, 0, 0);
+    scene.add(spotlightTarget);
+    scrutinySpotlight.target = spotlightTarget;
+    scene.add(scrutinySpotlight);
+
+    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.4);
+    rimLight.position.set(-6, -4, -3);
     scene.add(rimLight);
 
-    // Hemisphere sky/ground contrast fill
-    const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x0f172a, 1.2);
-    scene.add(hemiLight);
+    const redAccentLight = new THREE.DirectionalLight(0xff0033, 1.2);
+    redAccentLight.position.set(6, -4, -2);
+    scene.add(redAccentLight);
 
-    // Master Group for Parallax Tilt & Global Responsive Scale
     const masterGroup = new THREE.Group();
     scene.add(masterGroup);
 
-    // Array to track individual meshes for physics, idle float, and rotation
-    interface AnimatedMeshItem {
-      id: string;
-      object: THREE.Object3D;
-      basePos: THREE.Vector3;
-      baseRot: THREE.Euler;
-      floatSpeed: number;
-      floatDistance: number;
-      rotSpeed: THREE.Vector3;
-      parallaxFactor: number;
-    }
-
-    const animatedItems: AnimatedMeshItem[] = [];
-
-    // Array to track all disposable resources for clean unmount
+    // Disposable tracking
     const geometriesToDispose: THREE.BufferGeometry[] = [];
     const materialsToDispose: THREE.Material[] = [];
 
-    // Helper to register disposables
-    const track = <G extends THREE.BufferGeometry, M extends THREE.Material>(mesh: THREE.Mesh<G, M>) => {
-      geometriesToDispose.push(mesh.geometry);
-      if (Array.isArray(mesh.material)) {
-        materialsToDispose.push(...mesh.material);
-      } else {
-        materialsToDispose.push(mesh.material);
-      }
-      return mesh;
+    const trackGeom = <G extends THREE.BufferGeometry>(g: G): G => {
+      geometriesToDispose.push(g);
+      return g;
+    };
+    const trackMat = <M extends THREE.Material>(m: M): M => {
+      materialsToDispose.push(m);
+      return m;
     };
 
     // -------------------------------------------------------------
-    // 1. GREEN TRIANGULAR PRISM (Outer Left Flank)
+    // 1. ACOUSTIC WAVEFORM / HARMONIC FREQUENCY RINGS
     // -------------------------------------------------------------
-    const triShape = new THREE.Shape();
-    const triH = 1.6;
-    const triW = 1.7;
-    triShape.moveTo(0, triH * 0.55);
-    triShape.lineTo(triW * 0.5, -triH * 0.45);
-    triShape.lineTo(-triW * 0.5, -triH * 0.45);
-    triShape.closePath();
+    const ringGroup = new THREE.Group();
+    masterGroup.add(ringGroup);
 
-    const triGeom = new THREE.ExtrudeGeometry(triShape, {
-      depth: 0.38,
-      bevelEnabled: true,
-      bevelThickness: 0.08,
-      bevelSize: 0.07,
-      bevelSegments: 4,
-    });
-    triGeom.center();
-
-    const triMat = new THREE.MeshPhysicalMaterial({
-      color: 0x00e575,
-      roughness: 0.18,
-      metalness: 0.18,
-      clearcoat: 0.9,
-      clearcoatRoughness: 0.12,
-      reflectivity: 0.8,
-    });
-
-    const triMesh = track(new THREE.Mesh(triGeom, triMat));
-    triMesh.rotation.set(0.2, -0.4, 0.15);
-    masterGroup.add(triMesh);
-
-    animatedItems.push({
-      id: 'green-triangle',
-      object: triMesh,
-      basePos: new THREE.Vector3(-5.5, 0.2, 0.4),
-      baseRot: triMesh.rotation.clone(),
-      floatSpeed: 1.1,
-      floatDistance: 0.24,
-      rotSpeed: new THREE.Vector3(0.35, 0.45, 0.2),
-      parallaxFactor: 0.07,
-    });
-
-    // -------------------------------------------------------------
-    // 2. YELLOW GLASSMORPHIC CUBES / ROUNDED BOXES
-    // -------------------------------------------------------------
-    const yellowGlassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffe500,
-      roughness: 0.12,
-      metalness: 0.08,
-      transmission: isSoftwareGl ? 0 : 0.84,
-      transparent: true,
-      opacity: isSoftwareGl ? 0.65 : 0.92,
-      ior: 1.52,
-      thickness: 1.4,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.08,
-      reflectivity: 0.9,
-    });
-
-    // Top-Left Primary Cube (Framing Upper Left Margin)
-    const cubeGeom1 = new RoundedBoxGeometry(1.4, 1.4, 1.4, 5, 0.24);
-    const cubeMesh1 = track(new THREE.Mesh(cubeGeom1, yellowGlassMat));
-    cubeMesh1.rotation.set(0.4, 0.6, 0.2);
-    masterGroup.add(cubeMesh1);
-
-    animatedItems.push({
-      id: 'yellow-cube-1',
-      object: cubeMesh1,
-      basePos: new THREE.Vector3(-5.8, 2.5, -0.5),
-      baseRot: cubeMesh1.rotation.clone(),
-      floatSpeed: 0.9,
-      floatDistance: 0.22,
-      rotSpeed: new THREE.Vector3(0.25, 0.35, -0.15),
-      parallaxFactor: 0.06,
-    });
-
-    // Mid-Right Secondary Rounded Box (Framing Right Margin)
-    const cubeGeom2 = new RoundedBoxGeometry(1.25, 1.25, 0.45, 4, 0.18);
-    const cubeMesh2 = track(new THREE.Mesh(cubeGeom2, yellowGlassMat));
-    cubeMesh2.rotation.set(-0.3, 0.5, 0.35);
-    masterGroup.add(cubeMesh2);
-
-    animatedItems.push({
-      id: 'yellow-box-2',
-      object: cubeMesh2,
-      basePos: new THREE.Vector3(6.0, 0.3, 0.5),
-      baseRot: cubeMesh2.rotation.clone(),
-      floatSpeed: 1.3,
-      floatDistance: 0.2,
-      rotSpeed: new THREE.Vector3(-0.2, 0.3, 0.25),
-      parallaxFactor: 0.08,
-    });
-
-    // -------------------------------------------------------------
-    // 3. SOFT BLUE GLASSMORPHIC SPHERE (Top-Right Depth Plane)
-    // -------------------------------------------------------------
-    const sphereGeom = new THREE.SphereGeometry(1.35, 48, 48);
-    const sphereMat = new THREE.MeshPhysicalMaterial({
-      color: 0x38bdf8,
-      roughness: 0.08,
-      metalness: 0.05,
-      transmission: isSoftwareGl ? 0 : 0.88,
-      transparent: true,
-      opacity: isSoftwareGl ? 0.6 : 0.95,
-      ior: 1.48,
-      thickness: 1.9,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.06,
-      attenuationColor: new THREE.Color(0x0284c7),
-      attenuationDistance: 1.6,
-      reflectivity: 0.95,
-    });
-
-    const sphereMesh = track(new THREE.Mesh(sphereGeom, sphereMat));
-    masterGroup.add(sphereMesh);
-
-    animatedItems.push({
-      id: 'blue-sphere',
-      object: sphereMesh,
-      basePos: new THREE.Vector3(5.7, 2.4, -0.4),
-      baseRot: sphereMesh.rotation.clone(),
-      floatSpeed: 0.85,
-      floatDistance: 0.26,
-      rotSpeed: new THREE.Vector3(0.12, 0.18, 0.08),
-      parallaxFactor: 0.05,
-    });
-
-    // -------------------------------------------------------------
-    // 4. MAGENTA 3D STARBURST (Bottom-Right Flank)
-    // -------------------------------------------------------------
-    const starShape = new THREE.Shape();
-    const starSpikes = 14;
-    const outerRadius = 0.95;
-    const innerRadius = 0.58;
-
-    for (let i = 0; i < starSpikes * 2; i++) {
-      const r = i % 2 === 0 ? outerRadius : innerRadius;
-      const angle = (Math.PI * i) / starSpikes - Math.PI / 2;
-      const x = r * Math.cos(angle);
-      const y = r * Math.sin(angle);
-      if (i === 0) starShape.moveTo(x, y);
-      else starShape.lineTo(x, y);
+    interface WaveRingData {
+      line: THREE.LineLoop;
+      baseRadius: number;
+      baseZ: number;
+      speed: number;
+      freq: number;
+      amplitude: number;
+      color: THREE.Color;
+      posArray: Float32Array;
     }
-    starShape.closePath();
 
-    const starGeom = new THREE.ExtrudeGeometry(starShape, {
-      depth: 0.28,
-      bevelEnabled: true,
-      bevelThickness: 0.06,
-      bevelSize: 0.05,
-      bevelSegments: 3,
-    });
-    starGeom.center();
+    const waveRings: WaveRingData[] = [];
+    const ringPalette = [
+      new THREE.Color(0xff0033),
+      new THREE.Color(0xffe500),
+      new THREE.Color(0x00e575),
+      new THREE.Color(0x38bdf8),
+    ];
 
-    const starMat = new THREE.MeshPhysicalMaterial({
-      color: 0xff3366,
-      roughness: 0.24,
-      metalness: 0.22,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.15,
-      reflectivity: 0.85,
-    });
+    const segs = profile.ringSegments;
+    for (let r = 0; r < profile.numRings; r++) {
+      const baseRadius = 2.4 + r * 1.5;
+      const positions = new Float32Array((segs + 1) * 3);
+      const ringGeom = trackGeom(new THREE.BufferGeometry());
+      ringGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-    const starMesh = track(new THREE.Mesh(starGeom, starMat));
-    starMesh.rotation.set(0.1, 0.2, 0);
-    masterGroup.add(starMesh);
+      const ringColor = ringPalette[r % ringPalette.length];
+      const ringMat = trackMat(
+        new THREE.LineBasicMaterial({
+          color: ringColor,
+          transparent: true,
+          opacity: 0.22 - r * 0.035,
+          blending: THREE.AdditiveBlending,
+          linewidth: 1,
+        })
+      );
 
-    animatedItems.push({
-      id: 'magenta-star',
-      object: starMesh,
-      basePos: new THREE.Vector3(5.6, -2.4, 0.3),
-      baseRot: starMesh.rotation.clone(),
-      floatSpeed: 1.0,
-      floatDistance: 0.22,
-      rotSpeed: new THREE.Vector3(0.08, 0.1, 0.5), // Prominent Z-rotation spin
-      parallaxFactor: 0.07,
-    });
+      const ringLine = new THREE.LineLoop(ringGeom, ringMat);
+      ringLine.position.set(0, 0, -1.2 - r * 0.4);
+      ringGroup.add(ringLine);
 
-    // -------------------------------------------------------------
-    // 5. RED OVERLAPPING TRANSLUCENT DISCS / TORUSES (Bottom-Left Flank)
-    // -------------------------------------------------------------
-    const redTranslucentMat = new THREE.MeshPhysicalMaterial({
-      color: 0xff0033,
-      transparent: true,
-      opacity: 0.55,
-      roughness: 0.16,
-      metalness: 0.1,
-      clearcoat: 0.95,
-      clearcoatRoughness: 0.08,
-      depthWrite: false, // Prevents Z-sorting artifacts between overlapping translucent meshes
-    });
-
-    const redGroup = new THREE.Group();
-
-    // Torus Ring 1 (Outer Ring)
-    const torusGeom1 = new THREE.TorusGeometry(1.08, 0.22, 28, 54);
-    const torusMesh1 = track(new THREE.Mesh(torusGeom1, redTranslucentMat));
-    torusMesh1.rotation.set(Math.PI / 3, 0.3, 0);
-    redGroup.add(torusMesh1);
-
-    // Torus Ring 2 (Inner Intersecting Ring)
-    const torusGeom2 = new THREE.TorusGeometry(0.74, 0.16, 24, 48);
-    const torusMesh2 = track(new THREE.Mesh(torusGeom2, redTranslucentMat));
-    torusMesh2.position.set(0.35, -0.2, 0.25);
-    torusMesh2.rotation.set(-Math.PI / 4, 0.5, 0.2);
-    redGroup.add(torusMesh2);
-
-    masterGroup.add(redGroup);
-
-    animatedItems.push({
-      id: 'red-torus-group',
-      object: redGroup,
-      basePos: new THREE.Vector3(-5.5, -2.3, -0.3),
-      baseRot: redGroup.rotation.clone(),
-      floatSpeed: 0.95,
-      floatDistance: 0.2,
-      rotSpeed: new THREE.Vector3(0.2, 0.25, 0.15),
-      parallaxFactor: 0.065,
-    });
+      waveRings.push({
+        line: ringLine,
+        baseRadius,
+        baseZ: -1.2 - r * 0.4,
+        speed: 0.8 + r * 0.35,
+        freq: 3 + r * 2,
+        amplitude: 0.18 + r * 0.07,
+        color: ringColor,
+        posArray: positions,
+      });
+    }
 
     // -------------------------------------------------------------
-    // Responsive Frustum & Dynamic Aspect-Ratio Mapping
-    // Repositions shapes to hug the outer left & right margins
-    // while keeping the center safe zone completely pristine!
+    // 2. ATMOSPHERIC SPOTLIGHT PARTICLES (THEATRICAL DUST MOTES)
+    // -------------------------------------------------------------
+    const particleCount = profile.particleCount;
+    const particlePositions = new Float32Array(particleCount * 3);
+    const particleSpeeds = new Float32Array(particleCount);
+
+    for (let i = 0; i < particleCount; i++) {
+      particlePositions[i * 3] = (Math.random() - 0.5) * 12;
+      particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 8;
+      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 5;
+      particleSpeeds[i] = Math.random() * 0.2 + 0.1;
+    }
+
+    const particleGeom = trackGeom(new THREE.BufferGeometry());
+    particleGeom.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+
+    const particleMat = trackMat(
+      new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: profile.tier === 'low' ? 0.08 : 0.11,
+        transparent: true,
+        opacity: 0.35,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    );
+
+    const particleSystem = new THREE.Points(particleGeom, particleMat);
+    masterGroup.add(particleSystem);
+
+    // -------------------------------------------------------------
+    // 3. INTERACTIVE PRACTICE POD NODES & SYNAPTIC FILAMENTS
+    // -------------------------------------------------------------
+    interface PodNode {
+      mesh: THREE.Mesh;
+      basePos: THREE.Vector3;
+      side: 'left' | 'right';
+      podIndex: number;
+      floatSpeed: number;
+      floatOffset: number;
+      pulseRate: number;
+    }
+
+    const podNodes: PodNode[] = [];
+    const podGroup = new THREE.Group();
+    masterGroup.add(podGroup);
+
+    const nodeMaterials = [
+      trackMat(
+        new THREE.MeshPhysicalMaterial({
+          color: 0x00e575,
+          roughness: 0.15,
+          metalness: 0.2,
+          clearcoat: 0.9,
+          emissive: new THREE.Color(0x00e575),
+          emissiveIntensity: 0.25,
+        })
+      ),
+      trackMat(
+        new THREE.MeshPhysicalMaterial({
+          color: 0xffe500,
+          roughness: 0.12,
+          metalness: 0.1,
+          clearcoat: 0.9,
+          emissive: new THREE.Color(0xffe500),
+          emissiveIntensity: 0.2,
+        })
+      ),
+      trackMat(
+        new THREE.MeshPhysicalMaterial({
+          color: 0xff3366,
+          roughness: 0.2,
+          metalness: 0.15,
+          clearcoat: 0.8,
+          emissive: new THREE.Color(0xff3366),
+          emissiveIntensity: 0.3,
+        })
+      ),
+      trackMat(
+        new THREE.MeshPhysicalMaterial({
+          color: 0x38bdf8,
+          roughness: 0.1,
+          metalness: 0.1,
+          clearcoat: 0.95,
+          emissive: new THREE.Color(0x38bdf8),
+          emissiveIntensity: 0.25,
+        })
+      ),
+    ];
+
+    const sphereGeom = trackGeom(
+      new THREE.SphereGeometry(0.38, profile.sphereSubdivisions, profile.sphereSubdivisions)
+    );
+
+    const nodesPerSide = profile.nodeCountPerPod;
+
+    const createPodSide = (side: 'left' | 'right') => {
+      for (let i = 0; i < nodesPerSide; i++) {
+        const mat = nodeMaterials[i % nodeMaterials.length];
+        const mesh = new THREE.Mesh(sphereGeom, mat);
+        const nodeScale = i === 0 ? 1.25 : 0.85 + (i % 3) * 0.18;
+        mesh.scale.set(nodeScale, nodeScale, nodeScale);
+        podGroup.add(mesh);
+
+        podNodes.push({
+          mesh,
+          basePos: new THREE.Vector3(0, 0, 0),
+          side,
+          podIndex: i,
+          floatSpeed: 0.9 + i * 0.2,
+          floatOffset: i * 1.1 + (side === 'left' ? 0 : Math.PI),
+          pulseRate: 1.2 + i * 0.3,
+        });
+      }
+    };
+
+    createPodSide('left');
+    createPodSide('right');
+
+    const maxLines = nodesPerSide * (nodesPerSide - 1);
+    const linePositions = new Float32Array(maxLines * 6);
+    const lineColors = new Float32Array(maxLines * 6);
+
+    const connectionGeom = trackGeom(new THREE.BufferGeometry());
+    connectionGeom.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+    connectionGeom.setAttribute('color', new THREE.BufferAttribute(lineColors, 3));
+
+    const connectionMat = trackMat(
+      new THREE.LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.45,
+        blending: THREE.AdditiveBlending,
+        linewidth: 1,
+      })
+    );
+
+    const connectionLines = new THREE.LineSegments(connectionGeom, connectionMat);
+    podGroup.add(connectionLines);
+
+    // -------------------------------------------------------------
+    // Responsive Frustum & Horizontal Margin Re-anchoring
     // -------------------------------------------------------------
     const updateResponsiveLayout = () => {
       const currentWidth = container.clientWidth || window.innerWidth;
@@ -378,114 +458,122 @@ export function Hero3DCanvas({ className = '' }: Hero3DCanvasProps) {
 
       camera.aspect = currentWidth / currentHeight;
       camera.updateProjectionMatrix();
+
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, profile.maxDpr));
       renderer.setSize(currentWidth, currentHeight);
 
-      // Frustum calculation in Three.js world coordinates at z=0 plane (distance=11)
       const vFovRad = (camera.fov * Math.PI) / 180;
       const visibleHeight = 2 * Math.tan(vFovRad / 2) * camera.position.z;
       const visibleWidth = visibleHeight * camera.aspect;
       const halfW = visibleWidth / 2;
       const halfH = visibleHeight / 2;
 
-      // Find individual item records
-      const greenTri = animatedItems.find((i) => i.id === 'green-triangle');
-      const yellowCube = animatedItems.find((i) => i.id === 'yellow-cube-1');
-      const yellowBox = animatedItems.find((i) => i.id === 'yellow-box-2');
-      const blueSph = animatedItems.find((i) => i.id === 'blue-sphere');
-      const magentaStar = animatedItems.find((i) => i.id === 'magenta-star');
-      const redTorus = animatedItems.find((i) => i.id === 'red-torus-group');
+      const leftNodes = podNodes.filter((n) => n.side === 'left');
+      const rightNodes = podNodes.filter((n) => n.side === 'right');
 
       if (currentWidth < 640) {
-        // MOBILE (< 640px):
-        // Scale elements down smoothly and tuck them into peripheral corners / extremes
-        // to leave the central vertical corridor entirely clear of obstruction.
-        masterGroup.scale.set(0.58, 0.58, 0.58);
+        masterGroup.scale.set(0.62, 0.62, 0.62);
 
-        // Top periphery
-        if (yellowCube) yellowCube.basePos.set(-halfW * 0.74, halfH * 0.82, -0.5);
-        if (blueSph) blueSph.basePos.set(halfW * 0.74, halfH * 0.82, -0.4);
+        leftNodes.forEach((node, idx) => {
+          const yNorm = idx === 0 ? 0.78 : idx === 1 ? -0.78 : 0.25;
+          const xNorm = idx === 2 ? -0.88 : -0.76;
+          node.basePos.set(halfW * xNorm, halfH * yNorm, -0.2 + idx * 0.2);
+          node.mesh.position.copy(node.basePos);
+        });
 
-        // Mid periphery
-        if (greenTri) greenTri.basePos.set(-halfW * 0.88, halfH * 0.25, 0.3);
-        if (yellowBox) yellowBox.basePos.set(halfW * 0.88, -halfH * 0.22, 0.4);
+        rightNodes.forEach((node, idx) => {
+          const yNorm = idx === 0 ? 0.78 : idx === 1 ? -0.78 : -0.25;
+          const xNorm = idx === 2 ? 0.88 : 0.76;
+          node.basePos.set(halfW * xNorm, halfH * yNorm, -0.2 + idx * 0.2);
+          node.mesh.position.copy(node.basePos);
+        });
 
-        // Bottom periphery
-        if (redTorus) redTorus.basePos.set(-halfW * 0.74, -halfH * 0.82, -0.3);
-        if (magentaStar) magentaStar.basePos.set(halfW * 0.74, -halfH * 0.82, 0.3);
+        ringGroup.scale.set(0.65, 0.65, 0.65);
       } else if (currentWidth < 1024) {
-        // TABLET (640px - 1023px):
-        // Push shapes to 82%-88% of half-width, framing the headline gracefully
-        masterGroup.scale.set(0.76, 0.76, 0.76);
+        masterGroup.scale.set(0.78, 0.78, 0.78);
 
-        // Left Flank
-        if (yellowCube) yellowCube.basePos.set(-halfW * 0.82, halfH * 0.62, -0.5);
-        if (greenTri) greenTri.basePos.set(-halfW * 0.87, halfH * 0.02, 0.4);
-        if (redTorus) redTorus.basePos.set(-halfW * 0.80, -halfH * 0.64, -0.3);
+        leftNodes.forEach((node, idx) => {
+          const angle = (idx / nodesPerSide) * Math.PI * 1.1 - Math.PI * 0.55;
+          const x = -halfW * 0.82 + Math.cos(angle) * 0.9;
+          const y = Math.sin(angle) * (halfH * 0.65);
+          node.basePos.set(x, y, -0.2 + (idx % 2) * 0.4);
+          node.mesh.position.copy(node.basePos);
+        });
 
-        // Right Flank
-        if (blueSph) blueSph.basePos.set(halfW * 0.82, halfH * 0.60, -0.4);
-        if (yellowBox) yellowBox.basePos.set(halfW * 0.87, halfH * 0.04, 0.5);
-        if (magentaStar) magentaStar.basePos.set(halfW * 0.80, -halfH * 0.64, 0.3);
+        rightNodes.forEach((node, idx) => {
+          const angle = (idx / nodesPerSide) * Math.PI * 1.1 - Math.PI * 0.55;
+          const x = halfW * 0.82 - Math.cos(angle) * 0.9;
+          const y = Math.sin(angle) * (halfH * 0.65);
+          node.basePos.set(x, y, -0.2 + (idx % 2) * 0.4);
+          node.mesh.position.copy(node.basePos);
+        });
+
+        ringGroup.scale.set(0.85, 0.85, 0.85);
       } else {
-        // DESKTOP & ULTRAWIDE (>= 1024px):
-        // Dynamically tracks aspect ratio so elements spread all the way into the outer margins.
-        // Ultrawide (21:9 or 32:9) monitors seamlessly extend without dark dead corners!
         masterGroup.scale.set(1.0, 1.0, 1.0);
 
-        // Left Margin (Outer Flank)
-        if (yellowCube) yellowCube.basePos.set(-halfW * 0.82, halfH * 0.58, -0.5);
-        if (greenTri) greenTri.basePos.set(-halfW * 0.86, halfH * 0.04, 0.4);
-        if (redTorus) redTorus.basePos.set(-halfW * 0.78, -halfH * 0.60, -0.3);
+        const leftOffsets = [
+          { x: -0.84, y: 0.55, z: 0.2 },
+          { x: -0.75, y: 0.28, z: -0.4 },
+          { x: -0.86, y: 0.02, z: 0.4 },
+          { x: -0.76, y: -0.22, z: -0.2 },
+          { x: -0.85, y: -0.52, z: 0.3 },
+          { x: -0.72, y: -0.68, z: -0.5 },
+        ];
 
-        // Right Margin (Outer Flank)
-        if (blueSph) blueSph.basePos.set(halfW * 0.82, halfH * 0.56, -0.4);
-        if (yellowBox) yellowBox.basePos.set(halfW * 0.86, halfH * 0.06, 0.5);
-        if (magentaStar) magentaStar.basePos.set(halfW * 0.78, -halfH * 0.58, 0.3);
-      }
+        leftNodes.forEach((node, idx) => {
+          const off = leftOffsets[idx % leftOffsets.length];
+          node.basePos.set(halfW * off.x, halfH * off.y, off.z);
+          node.mesh.position.copy(node.basePos);
+        });
 
-      // Snap current objects to basePos immediately
-      for (const item of animatedItems) {
-        item.object.position.copy(item.basePos);
+        const rightOffsets = [
+          { x: 0.84, y: 0.55, z: 0.2 },
+          { x: 0.75, y: 0.28, z: -0.4 },
+          { x: 0.86, y: 0.02, z: 0.4 },
+          { x: 0.76, y: -0.22, z: -0.2 },
+          { x: 0.85, y: -0.52, z: 0.3 },
+          { x: 0.72, y: -0.68, z: -0.5 },
+        ];
+
+        rightNodes.forEach((node, idx) => {
+          const off = rightOffsets[idx % rightOffsets.length];
+          node.basePos.set(halfW * off.x, halfH * off.y, off.z);
+          node.mesh.position.copy(node.basePos);
+        });
+
+        ringGroup.scale.set(1.0, 1.0, 1.0);
       }
     };
 
     updateResponsiveLayout();
 
     // -------------------------------------------------------------
-    // Mouse Pointer & Physics State (Full-Viewport Parallax)
+    // Mobile-Optimized Interaction & Touch Physics Architecture
     // -------------------------------------------------------------
-    const mouse = {
+    const interaction = {
       targetX: 0,
       targetY: 0,
       currentX: 0,
       currentY: 0,
+      spotlightTargetX: 0,
+      spotlightTargetY: 0,
+      spotlightCurrentX: 0,
+      spotlightCurrentY: 0,
+      // Inertial touch-swipe decay physics
+      touchVelocityX: 0,
+      touchVelocityY: 0,
+      touchImpulseX: 0,
+      touchImpulseY: 0,
     };
 
-    const handlePointerMove = (e: MouseEvent) => {
-      // Map smoothly across the entire viewport for natural tilt
-      const xRatio = (e.clientX / window.innerWidth) * 2 - 1;
-      const yRatio = -(e.clientY / window.innerHeight) * 2 + 1;
-      mouse.targetX = Math.max(-1, Math.min(1, xRatio));
-      mouse.targetY = Math.max(-1, Math.min(1, yRatio));
-    };
-
-    window.addEventListener('mousemove', handlePointerMove, { passive: true });
-
-    // Use ResizeObserver for accurate container tracking alongside window resize
-    const resizeObserver = new ResizeObserver(() => {
-      updateResponsiveLayout();
-    });
-    resizeObserver.observe(container);
-
-    const handleResize = () => {
-      updateResponsiveLayout();
-    };
-    window.addEventListener('resize', handleResize);
-
-    // -------------------------------------------------------------
-    // Render Loop with Damped Inertia & Software WebGL Pacing
-    // -------------------------------------------------------------
+    let isIntersecting = true;
+    let isDocumentVisible = !document.hidden;
+    let isUserActive = true;
+    let isLoopRunning = false;
     let frameId = 0;
+    let inactivityTimer: number | null = null;
+    const INACTIVITY_TIMEOUT_MS = 5000;
     const clock = new THREE.Clock();
 
     function afterDraw(cb: () => void) {
@@ -505,31 +593,195 @@ export function Hero3DCanvas({ className = '' }: Hero3DCanvasProps) {
     }
 
     const animate = () => {
+      if (!isLoopRunning) return;
+
       const delta = clock.getDelta();
       const elapsed = clock.getElapsedTime();
 
-      // Silky-smooth exponential spring damping for mouse parallax
-      mouse.currentX = THREE.MathUtils.damp(mouse.currentX, mouse.targetX, 3.8, delta);
-      mouse.currentY = THREE.MathUtils.damp(mouse.currentY, mouse.targetY, 3.8, delta);
+      if (profile.isTouch) {
+        // MOBILE / TOUCH TIER:
+        // Autonomous organic ambient breathing kinematics (Lissajous curves)
+        // so the scene breathes and feels alive on mobile without user input overhead
+        const autoTime = elapsed * 0.45;
+        const ambientX = Math.sin(autoTime) * 1.5;
+        const ambientY = Math.cos(autoTime * 0.7) * 0.8;
 
-      // Tilt entire master group gently with mouse
-      masterGroup.rotation.y = mouse.currentX * 0.18;
-      masterGroup.rotation.x = -mouse.currentY * 0.14;
+        // Inertial decay of touch swipe impulse
+        interaction.touchVelocityX *= 0.92;
+        interaction.touchVelocityY *= 0.92;
+        interaction.touchImpulseX = THREE.MathUtils.damp(
+          interaction.touchImpulseX,
+          interaction.touchVelocityX,
+          3.5,
+          delta
+        );
+        interaction.touchImpulseY = THREE.MathUtils.damp(
+          interaction.touchImpulseY,
+          interaction.touchVelocityY,
+          3.5,
+          delta
+        );
 
-      // Update individual 3D shapes with idle sinusoidal float & rotation
-      for (let i = 0; i < animatedItems.length; i++) {
-        const item = animatedItems[i];
-        const idleOffset = Math.sin(elapsed * item.floatSpeed + i * 1.3) * item.floatDistance;
-        const reactiveX = mouse.currentX * item.parallaxFactor * 4;
-        const reactiveY = mouse.currentY * item.parallaxFactor * 4;
+        interaction.spotlightCurrentX = THREE.MathUtils.damp(
+          interaction.spotlightCurrentX,
+          ambientX + interaction.touchImpulseX * 2.0,
+          2.5,
+          delta
+        );
+        interaction.spotlightCurrentY = THREE.MathUtils.damp(
+          interaction.spotlightCurrentY,
+          ambientY + interaction.touchImpulseY * 2.0,
+          2.5,
+          delta
+        );
 
-        item.object.position.y = item.basePos.y + idleOffset + reactiveY;
-        item.object.position.x = item.basePos.x + reactiveX;
+        interaction.currentX = THREE.MathUtils.damp(
+          interaction.currentX,
+          (ambientX * 0.25) + interaction.touchImpulseX * 0.4,
+          2.8,
+          delta
+        );
+        interaction.currentY = THREE.MathUtils.damp(
+          interaction.currentY,
+          (ambientY * 0.25) + interaction.touchImpulseY * 0.4,
+          2.8,
+          delta
+        );
+      } else {
+        // DESKTOP TIER: Direct responsive cursor tracking
+        interaction.currentX = THREE.MathUtils.damp(interaction.currentX, interaction.targetX, 3.8, delta);
+        interaction.currentY = THREE.MathUtils.damp(interaction.currentY, interaction.targetY, 3.8, delta);
 
-        item.object.rotation.x += item.rotSpeed.x * delta;
-        item.object.rotation.y += item.rotSpeed.y * delta;
-        item.object.rotation.z += item.rotSpeed.z * delta;
+        interaction.spotlightCurrentX = THREE.MathUtils.damp(
+          interaction.spotlightCurrentX,
+          interaction.spotlightTargetX,
+          3.0,
+          delta
+        );
+        interaction.spotlightCurrentY = THREE.MathUtils.damp(
+          interaction.spotlightCurrentY,
+          interaction.spotlightTargetY,
+          3.0,
+          delta
+        );
       }
+
+      spotlightTarget.position.set(interaction.spotlightCurrentX, interaction.spotlightCurrentY, 0);
+      scrutinySpotlight.position.x = interaction.spotlightCurrentX * 0.45;
+      scrutinySpotlight.position.y = 5.5 + interaction.spotlightCurrentY * 0.35;
+
+      masterGroup.rotation.y = interaction.currentX * 0.16;
+      masterGroup.rotation.x = -interaction.currentY * 0.12;
+
+      // 1. Modulate Acoustic Harmonic Frequency Rings
+      if (!prefersReducedMotion) {
+        for (let r = 0; r < waveRings.length; r++) {
+          const ring = waveRings[r];
+          const positions = ring.posArray;
+          const baseR = ring.baseRadius;
+          const time = elapsed * ring.speed;
+
+          for (let i = 0; i <= segs; i++) {
+            const theta = (i / segs) * Math.PI * 2;
+            const harmonic1 = Math.sin(theta * ring.freq + time) * ring.amplitude;
+            const harmonic2 = Math.cos(theta * (ring.freq + 2) - time * 0.7) * (ring.amplitude * 0.5);
+            const radius = baseR + harmonic1 + harmonic2;
+            const zHarmonic = Math.sin(theta * 3 + time * 1.2) * 0.2;
+
+            positions[i * 3] = Math.cos(theta) * radius;
+            positions[i * 3 + 1] = Math.sin(theta) * radius;
+            positions[i * 3 + 2] = ring.baseZ + zHarmonic;
+          }
+
+          ring.line.geometry.attributes.position.needsUpdate = true;
+          ring.line.rotation.z = elapsed * 0.04 * (r % 2 === 0 ? 1 : -1);
+        }
+      }
+
+      // 2. Animate Atmospheric Stage Particles
+      if (!prefersReducedMotion) {
+        const pPositions = particleGeom.attributes.position.array as Float32Array;
+        for (let i = 0; i < particleCount; i++) {
+          pPositions[i * 3 + 1] += particleSpeeds[i] * delta;
+          pPositions[i * 3] += Math.sin(elapsed * 0.5 + i) * 0.005;
+
+          if (pPositions[i * 3 + 1] > 4.5) {
+            pPositions[i * 3 + 1] = -4.5;
+            pPositions[i * 3] = (Math.random() - 0.5) * 12;
+          }
+        }
+        particleGeom.attributes.position.needsUpdate = true;
+      }
+
+      // 3. Animate Practice Pod Nodes & Synaptic Link Pulses
+      const leftNodes = podNodes.filter((n) => n.side === 'left');
+      const rightNodes = podNodes.filter((n) => n.side === 'right');
+
+      for (let i = 0; i < podNodes.length; i++) {
+        const node = podNodes[i];
+        const floatY = Math.sin(elapsed * node.floatSpeed + node.floatOffset) * 0.22;
+        const floatX = Math.cos(elapsed * (node.floatSpeed * 0.8) + node.floatOffset) * 0.12;
+        const reactiveX = interaction.currentX * 0.35;
+        const reactiveY = interaction.currentY * 0.25;
+
+        node.mesh.position.y = node.basePos.y + floatY + reactiveY;
+        node.mesh.position.x = node.basePos.x + floatX + reactiveX;
+
+        const pulse = 1.0 + Math.sin(elapsed * node.pulseRate + node.floatOffset) * 0.06;
+        node.mesh.scale.setScalar(pulse * (node.podIndex === 0 ? 1.25 : 0.95));
+      }
+
+      // 4. Update Synaptic Filament Lines
+      let lineVertexIdx = 0;
+      const posAttr = connectionGeom.attributes.position.array as Float32Array;
+      const colAttr = connectionGeom.attributes.color.array as Float32Array;
+
+      const updatePodFilaments = (nodes: PodNode[]) => {
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const p1 = nodes[i].mesh.position;
+            const p2 = nodes[j].mesh.position;
+            const dist = p1.distanceTo(p2);
+
+            if (dist < 3.2 && lineVertexIdx < maxLines * 6) {
+              posAttr[lineVertexIdx] = p1.x;
+              posAttr[lineVertexIdx + 1] = p1.y;
+              posAttr[lineVertexIdx + 2] = p1.z;
+
+              posAttr[lineVertexIdx + 3] = p2.x;
+              posAttr[lineVertexIdx + 4] = p2.y;
+              posAttr[lineVertexIdx + 5] = p2.z;
+
+              const pulseIntensity = Math.sin(elapsed * 2.5 + i + j) * 0.3 + 0.7;
+              const r = i % 2 === 0 ? 0.0 : 1.0;
+              const g = i % 2 === 0 ? 0.9 : 0.85;
+              const b = i % 2 === 0 ? 0.45 : 0.0;
+
+              colAttr[lineVertexIdx] = r * pulseIntensity;
+              colAttr[lineVertexIdx + 1] = g * pulseIntensity;
+              colAttr[lineVertexIdx + 2] = b * pulseIntensity;
+
+              colAttr[lineVertexIdx + 3] = r * pulseIntensity;
+              colAttr[lineVertexIdx + 4] = g * pulseIntensity;
+              colAttr[lineVertexIdx + 5] = b * pulseIntensity;
+
+              lineVertexIdx += 6;
+            }
+          }
+        }
+      };
+
+      updatePodFilaments(leftNodes);
+      updatePodFilaments(rightNodes);
+
+      for (let k = lineVertexIdx; k < maxLines * 6; k++) {
+        posAttr[k] = 0;
+        colAttr[k] = 0;
+      }
+
+      connectionGeom.attributes.position.needsUpdate = true;
+      connectionGeom.attributes.color.needsUpdate = true;
+      connectionGeom.setDrawRange(0, lineVertexIdx / 3);
 
       renderer.render(scene, camera);
 
@@ -540,23 +792,210 @@ export function Hero3DCanvas({ className = '' }: Hero3DCanvasProps) {
       }
     };
 
-    frameId = requestAnimationFrame(animate);
+    const startLoop = () => {
+      if (isLoopRunning) return;
+      isLoopRunning = true;
+      clock.getDelta();
+      if (isSoftwareGl) {
+        afterDraw(animate);
+      } else {
+        frameId = requestAnimationFrame(animate);
+      }
+    };
+
+    const stopLoop = () => {
+      if (!isLoopRunning) return;
+      isLoopRunning = false;
+      if (isSoftwareGl) {
+        window.clearTimeout(frameId);
+      } else {
+        cancelAnimationFrame(frameId);
+      }
+    };
+
+    // Throttled activity notification to eliminate main-thread scroll blocking
+    let activityThrottleTimer: number | null = null;
+    const recordUserActivity = () => {
+      isUserActive = true;
+      if (!isLoopRunning && isIntersecting && isDocumentVisible) {
+        startLoop();
+      }
+      if (inactivityTimer !== null) {
+        window.clearTimeout(inactivityTimer);
+      }
+      inactivityTimer = window.setTimeout(() => {
+        isUserActive = false;
+        stopLoop();
+      }, INACTIVITY_TIMEOUT_MS);
+    };
+
+    const recordThrottledActivity = () => {
+      if (activityThrottleTimer === null) {
+        activityThrottleTimer = window.setTimeout(() => {
+          activityThrottleTimer = null;
+        }, 300);
+        recordUserActivity();
+      }
+    };
+
+    // -------------------------------------------------------------
+    // Desktop Mouse Handlers (Confined to Desktop Screens)
+    // -------------------------------------------------------------
+    const handleDesktopMouseMove = (e: MouseEvent) => {
+      if (profile.isTouch) return;
+      const xRatio = (e.clientX / window.innerWidth) * 2 - 1;
+      const yRatio = -(e.clientY / window.innerHeight) * 2 + 1;
+      interaction.targetX = Math.max(-1, Math.min(1, xRatio));
+      interaction.targetY = Math.max(-1, Math.min(1, yRatio));
+      interaction.spotlightTargetX = interaction.targetX * 5.0;
+      interaction.spotlightTargetY = interaction.targetY * 3.0;
+      recordUserActivity();
+    };
+
+    // -------------------------------------------------------------
+    // Mobile Touch Handlers (Confined strictly to Hero Container)
+    // Avoids document-level touchmove interruption during page scroll
+    // -------------------------------------------------------------
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let isTouchingHero = false;
+
+    const handleHeroTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        isTouchingHero = true;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = performance.now();
+        interaction.touchVelocityX = 0;
+        interaction.touchVelocityY = 0;
+        recordUserActivity();
+      }
+    };
+
+    const handleHeroTouchMove = (e: TouchEvent) => {
+      if (isTouchingHero && e.touches.length === 1) {
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        const dx = (currentX - touchStartX) / (window.innerWidth || 375);
+        const dy = (currentY - touchStartY) / (window.innerHeight || 650);
+
+        // Apply gentle inertial steering vector
+        interaction.touchVelocityX = Math.max(-2.0, Math.min(2.0, dx * 3.0));
+        interaction.touchVelocityY = Math.max(-2.0, Math.min(2.0, -dy * 3.0));
+        recordUserActivity();
+      }
+    };
+
+    const handleHeroTouchEnd = (e: TouchEvent) => {
+      if (isTouchingHero) {
+        isTouchingHero = false;
+        const dt = Math.max(16, performance.now() - touchStartTime);
+        if (e.changedTouches.length > 0) {
+          const endX = e.changedTouches[0].clientX;
+          const endY = e.changedTouches[0].clientY;
+          const vx = ((endX - touchStartX) / dt) * 35;
+          const vy = (-(endY - touchStartY) / dt) * 35;
+          interaction.touchVelocityX = Math.max(-2.5, Math.min(2.5, vx));
+          interaction.touchVelocityY = Math.max(-2.5, Math.min(2.5, vy));
+        }
+      }
+    };
+
+    // Register Desktop vs Mobile Listeners with strictly passive flags
+    if (!profile.isTouch) {
+      window.addEventListener('mousemove', handleDesktopMouseMove, { passive: true });
+    } else {
+      container.addEventListener('touchstart', handleHeroTouchStart, { passive: true });
+      container.addEventListener('touchmove', handleHeroTouchMove, { passive: true });
+      container.addEventListener('touchend', handleHeroTouchEnd, { passive: true });
+      container.addEventListener('touchcancel', handleHeroTouchEnd, { passive: true });
+    }
+
+    // Passive global activity listeners to wake from idle during navigation
+    window.addEventListener('scroll', recordThrottledActivity, { passive: true });
+    window.addEventListener('touchstart', recordThrottledActivity, { passive: true });
+    window.addEventListener('keydown', recordThrottledActivity, { passive: true });
+    window.addEventListener('pointerdown', recordThrottledActivity, { passive: true });
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateResponsiveLayout();
+      recordUserActivity();
+    });
+    resizeObserver.observe(container);
+
+    const handleResize = () => {
+      updateResponsiveLayout();
+      recordUserActivity();
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    // -------------------------------------------------------------
+    // Viewport Visibility Culling (IntersectionObserver)
+    // -------------------------------------------------------------
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        const wasIntersecting = isIntersecting;
+        isIntersecting = entry.isIntersecting;
+
+        if (isIntersecting && !wasIntersecting && isDocumentVisible && isUserActive) {
+          startLoop();
+        } else if (!isIntersecting && wasIntersecting) {
+          stopLoop();
+        }
+      },
+      {
+        root: null,
+        threshold: 0.05,
+        rootMargin: '100px 0px 100px 0px',
+      }
+    );
+    intersectionObserver.observe(container);
+
+    const handleVisibilityChange = () => {
+      isDocumentVisible = !document.hidden;
+      if (isDocumentVisible && isIntersecting && isUserActive) {
+        startLoop();
+      } else {
+        stopLoop();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    recordUserActivity();
 
     // -------------------------------------------------------------
     // Comprehensive Disposal & Cleanup on Unmount
     // -------------------------------------------------------------
     return () => {
-      if (isSoftwareGl) {
-        clearTimeout(frameId);
-      } else {
-        cancelAnimationFrame(frameId);
+      stopLoop();
+
+      if (inactivityTimer !== null) {
+        window.clearTimeout(inactivityTimer);
+      }
+      if (activityThrottleTimer !== null) {
+        window.clearTimeout(activityThrottleTimer);
       }
 
-      window.removeEventListener('mousemove', handlePointerMove);
-      window.removeEventListener('resize', handleResize);
-      resizeObserver.disconnect();
+      if (!profile.isTouch) {
+        window.removeEventListener('mousemove', handleDesktopMouseMove);
+      } else {
+        container.removeEventListener('touchstart', handleHeroTouchStart);
+        container.removeEventListener('touchmove', handleHeroTouchMove);
+        container.removeEventListener('touchend', handleHeroTouchEnd);
+        container.removeEventListener('touchcancel', handleHeroTouchEnd);
+      }
 
-      // Clean up Three.js scene resources
+      window.removeEventListener('scroll', recordThrottledActivity);
+      window.removeEventListener('touchstart', recordThrottledActivity);
+      window.removeEventListener('keydown', recordThrottledActivity);
+      window.removeEventListener('pointerdown', recordThrottledActivity);
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      resizeObserver.disconnect();
+      intersectionObserver.disconnect();
+
       geometriesToDispose.forEach((g) => g.dispose());
       materialsToDispose.forEach((m) => m.dispose());
       roomEnvTexture.dispose();
@@ -566,12 +1005,12 @@ export function Hero3DCanvas({ className = '' }: Hero3DCanvasProps) {
         container.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [isHydrated]);
 
   return (
     <div
       ref={mountRef}
-      className={`hero-3d-scene absolute inset-0 w-full h-full pointer-events-none select-none z-0 overflow-hidden ${className}`}
+      className={`hero-3d-scene absolute inset-0 w-full h-full select-none z-0 overflow-hidden pointer-events-auto touch-pan-y ${className}`}
       aria-hidden="true"
     />
   );

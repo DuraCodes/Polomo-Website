@@ -26,7 +26,11 @@ import { BlurFade } from './components/magicui/blur-fade';
 import { NumberTicker } from './components/magicui/number-ticker';
 import { SpotlightCard } from './components/magicui/spotlight-card';
 import { AnimatedShinyText } from './components/magicui/animated-shiny-text';
-import { Hero3DCanvas } from './components/3d/Hero3DCanvas';
+
+// Dynamic lazy-loading of heavy 3D WebGL hero canvas post-initial-paint
+const Hero3DCanvas = React.lazy(() =>
+  import('./components/3d/Hero3DCanvas').then((mod) => ({ default: mod.Hero3DCanvas }))
+);
 
 export default function App() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -48,10 +52,12 @@ export default function App() {
     }
   };
 
-  // Scrollspy to accurately detect active section for navbar underline
+  // Scrollspy with requestAnimationFrame throttling for pristine 60fps mobile scrolling
   useEffect(() => {
     const sectionIds = ['approach', 'who-it-is-for', 'faq', 'cohort'];
-    const handleScroll = () => {
+    let ticking = false;
+
+    const updateActiveSection = () => {
       const scrollY = window.scrollY;
       const offset = 180;
       let current = '';
@@ -67,10 +73,18 @@ export default function App() {
         }
       }
       setActiveSection(current);
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateActiveSection);
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    updateActiveSection();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -285,19 +299,34 @@ export default function App() {
           {/* Hero */}
           <section className="hero w-full pt-20 pb-12 md:pt-28 md:pb-20 flex flex-col items-center justify-center relative overflow-hidden" aria-labelledby="hero-title">
             {/* Real-Time 3D WebGL Hero Canvas with PBR Glass, Lighting & Parallax Physics */}
-            <Hero3DCanvas />
+            <React.Suspense fallback={<div className="hero-3d-scene absolute inset-0 w-full h-full pointer-events-none select-none z-0 overflow-hidden" aria-hidden="true" />}>
+              <Hero3DCanvas />
+            </React.Suspense>
 
             <div className="hero__content relative z-20 flex flex-col items-center justify-center gap-4 sm:gap-5 md:gap-6 max-w-4xl mx-auto px-4 w-full">
+              {/* Top Announcement Yellow Pill with WCAG AAA Deep Black Contrast & Subtle Pulse Glow Aura */}
               <div className="flex items-center justify-center w-full px-2">
-                <span className="text-[10px] sm:text-xs md:text-[13px] font-black uppercase tracking-wider px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[2px_2px_0_#FFFFFF] text-center max-w-full leading-tight inline-flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
-                  <span>Free 60-Sec Diagnostic</span>
-                  <span>•</span>
-                  <span><NumberTicker value={12} className="font-black text-black" /> Seats Per Pod</span>
-                  <span className="hidden min-[420px]:inline">•</span>
-                  <AnimatedShinyText duration={3} className="hidden min-[420px]:inline text-black font-black">
-                    Zero Passive Lectures
-                  </AnimatedShinyText>
-                </span>
+                <div className="relative inline-flex group cursor-default">
+                  {/* Subtle breathing ambient glow aura */}
+                  <span className="absolute -inset-1 rounded-full bg-[#FFE500]/35 blur-md opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse" aria-hidden="true" />
+                  <span className="relative text-[11px] sm:text-xs md:text-[13px] font-black uppercase tracking-wider px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#FFE500] text-black border-2 border-black shadow-[3px_3px_0_#000000] text-center max-w-full leading-tight inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                    <span className="inline-flex items-center gap-1.5 text-black font-black">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+                      </span>
+                      <span>Free 60-Sec Diagnostic</span>
+                    </span>
+                    <span className="text-black/60 font-black">•</span>
+                    <span className="text-black font-black">
+                      <NumberTicker value={12} className="font-black text-black" /> Seats Per Pod
+                    </span>
+                    <span className="hidden min-[420px]:inline text-black/60 font-black">•</span>
+                    <span className="hidden min-[420px]:inline text-black font-black">
+                      Zero Passive Lectures
+                    </span>
+                  </span>
+                </div>
               </div>
               <h1 id="hero-title" className="sr-only">
                 Stop Learning About Public Speaking. Start Speaking.
@@ -307,41 +336,47 @@ export default function App() {
                 per="word"
                 preset="fade-in-blur"
                 speedReveal={1.2}
-                className="font-black text-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.05] sm:leading-[1.0] lg:leading-[0.96] tracking-[-0.035em] max-w-4xl mx-auto text-white"
+                className="font-black text-center text-3xl sm:text-4xl md:text-5xl lg:text-[62px] leading-[1.06] sm:leading-[1.02] lg:leading-[0.98] tracking-[-0.035em] max-w-4xl mx-auto text-white text-balance"
                 aria-hidden="true"
               >
                 Stop Learning About Public Speaking. Start Speaking.
               </TextEffect>
+
+              {/* Subheadline: Optimized Scannability, High-Contrast Zinc-200, Ergonomic 56ch Measure */}
               <TextEffect
                 as="p"
                 per="line"
                 preset="fade"
                 delay={0.2}
-                className="hero__lede font-editorial text-[#E4E4E7] text-base sm:text-lg lg:text-[19px] max-w-[65ch] mx-auto leading-[1.65] text-center"
+                className="hero__lede text-[#F4F4F5] text-base sm:text-lg lg:text-[19px] max-w-[56ch] mx-auto leading-[1.7] sm:leading-[1.75] text-center font-normal tracking-[-0.01em] text-balance"
               >
                 A practical exposure lab for students, professionals, and founders who freeze under audience scrutiny. Run your free diagnostic, identify your freeze triggers, and unlock your practice pod pass.
               </TextEffect>
 
-              {/* Dual-Action Conversion Console with Magnetic Micro-Interactions */}
-              <div className="hero__actions flex flex-wrap items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto mt-2 sm:mt-3">
+              {/* Dual-Action Conversion Console with Established Visual Hierarchy (Primary vs. Secondary) */}
+              <div className="hero__actions flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 w-full sm:w-auto mt-4 sm:mt-5">
+                {/* Dominant Primary Action: Run Free Diagnostic */}
                 <Magnetic intensity={0.25} range={70} className="w-full sm:w-auto">
                   <button
                     type="button"
-                    className="btn btn--primary w-full sm:w-auto min-h-[48px]"
+                    className="btn btn--primary group w-full sm:w-auto min-h-[52px] px-7 sm:px-8 text-[15px] sm:text-base font-black tracking-tight"
                     onClick={() => scrollToAdmissions()}
                   >
                     <span>Run Free Diagnostic</span>
-                    <ArrowRight className="size-4 stroke-[3]" />
+                    <ArrowRight className="size-4 stroke-[3] transition-transform duration-150 group-hover:translate-x-1" />
                   </button>
                 </Magnetic>
-                <Magnetic intensity={0.25} range={70} className="w-full sm:w-auto">
+
+                {/* Clean High-Contrast Secondary Option: Book 10-Min Free Audit */}
+                <Magnetic intensity={0.2} range={60} className="w-full sm:w-auto">
                   <button
                     type="button"
-                    className="btn btn--dark w-full sm:w-auto min-h-[48px]"
+                    className="btn btn--secondary group w-full sm:w-auto min-h-[52px] px-6 sm:px-7 text-[15px] sm:text-base font-bold tracking-tight"
                     onClick={() => setDiagnosticModalOpen(true)}
                   >
-                    <Radio className="size-4 text-[#00E575] animate-pulse" />
-                    <span>Book 10-Min Free Audit ↗</span>
+                    <span className="size-2 rounded-full bg-[#00E575] shadow-[0_0_8px_#00E575] animate-pulse" />
+                    <span>Book 10-Min Free Audit</span>
+                    <span className="text-white/60 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
                   </button>
                 </Magnetic>
               </div>

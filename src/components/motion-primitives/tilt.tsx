@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   motion,
   useMotionTemplate,
@@ -28,6 +28,21 @@ export function Tilt({
   springOptions,
 }: TiltProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    const checkTouch = () => {
+      setIsTouchDevice(
+        window.matchMedia('(hover: none)').matches ||
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        window.innerWidth < 768
+      );
+    };
+    checkTouch();
+    window.addEventListener('resize', checkTouch, { passive: true });
+    return () => window.removeEventListener('resize', checkTouch);
+  }, []);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -53,7 +68,7 @@ export function Tilt({
   const transform = useMotionTemplate`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
+    if (isTouchDevice || !ref.current) return;
 
     const rect = ref.current.getBoundingClientRect();
     const width = rect.width;
@@ -70,9 +85,24 @@ export function Tilt({
   };
 
   const handleMouseLeave = () => {
+    if (isTouchDevice) return;
     x.set(0);
     y.set(0);
   };
+
+  if (isTouchDevice) {
+    return (
+      <motion.div
+        ref={ref}
+        className={className}
+        style={style}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
