@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowDown } from 'lucide-react';
 
+import { motion, AnimatePresence } from 'motion/react';
+import { SpotlightCard } from './magicui/spotlight-card';
+
 export interface FAQItem {
   id: string;
   question: string;
@@ -123,13 +126,15 @@ export const BrutalistFAQ: React.FC = () => {
           })}
         </div>
 
-        {/* On-Page Accordion Stack - Deep Obsidian Cards with High-Contrast Typography */}
+        {/* On-Page Accordion Stack - Deep Obsidian Cards with High-Contrast Typography & Spotlight */}
         <div className="space-y-3">
           {filteredFaqs.map((faq, index) => {
             const isOpen = activeId === faq.id;
             return (
-              <div
+              <SpotlightCard
                 key={faq.id}
+                spotlightColor="rgba(255, 229, 0, 0.12)"
+                spotlightSize={400}
                 className="border-2 border-white/20 rounded-[18px] overflow-hidden transition-all bg-[#161724] hover:border-white/40 shadow-[3px_3px_0_#000000]"
               >
                 <button
@@ -156,25 +161,37 @@ export const BrutalistFAQ: React.FC = () => {
                     <span className="text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/10 text-neutral-200 border border-white/20 hidden md:inline-block">
                       {faq.tag}
                     </span>
-                    <span
-                      className={`size-7 sm:size-8 rounded-lg border-2 border-white/30 flex items-center justify-center font-black text-base shrink-0 transition-transform duration-200 shadow-[1.5px_1.5px_0_#000] ${
-                        isOpen ? 'bg-[#FFE500] text-black border-black rotate-45' : 'bg-white/15 text-white'
+                    <motion.span
+                      animate={{ rotate: isOpen ? 45 : 0 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      className={`size-7 sm:size-8 rounded-lg border-2 border-white/30 flex items-center justify-center font-black text-base shrink-0 shadow-[1.5px_1.5px_0_#000] ${
+                        isOpen ? 'bg-[#FFE500] text-black border-black' : 'bg-white/15 text-white'
                       }`}
                       aria-hidden="true"
                     >
                       +
-                    </span>
+                    </motion.span>
                   </div>
                 </button>
 
-                {isOpen && (
-                  <div className="px-5 pb-5 pt-3 sm:px-6 sm:pb-6 border-t border-white/10 bg-[#13141E] animate-in fade-in-50 duration-150">
-                    <p className="text-sm sm:text-base lg:text-[16px] text-[#E4E4E7] font-editorial font-normal leading-[1.7] m-0 max-w-[65ch]">
-                      {faq.answer}
-                    </p>
-                  </div>
-                )}
-              </div>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden border-t border-white/10 bg-[#13141E]"
+                    >
+                      <div className="px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
+                        <p className="text-sm sm:text-base lg:text-[16px] text-[#E4E4E7] font-editorial font-normal leading-[1.7] m-0 max-w-[65ch]">
+                          {faq.answer}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </SpotlightCard>
             );
           })}
         </div>

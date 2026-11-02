@@ -21,8 +21,12 @@ import { DiagnosticModal } from './components/DiagnosticModal';
 import { TextEffect } from './components/motion-primitives/text-effect';
 import { AnimatedBackground } from './components/motion-primitives/animated-background';
 import { Tilt } from './components/motion-primitives/tilt';
+import { Magnetic } from './components/motion-primitives/magnetic';
 import { BlurFade } from './components/magicui/blur-fade';
 import { NumberTicker } from './components/magicui/number-ticker';
+import { SpotlightCard } from './components/magicui/spotlight-card';
+import { AnimatedShinyText } from './components/magicui/animated-shiny-text';
+import { Hero3DCanvas } from './components/3d/Hero3DCanvas';
 
 export default function App() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -196,13 +200,15 @@ export default function App() {
               </li>
             </ul>
             <div className="nav__actions">
-              <button
-                type="button"
-                className="btn btn--primary nav__btn hidden lg:inline-flex"
-                onClick={() => scrollToAdmissions()}
-              >
-                Free Diagnostic
-              </button>
+              <Magnetic intensity={0.25} range={60} className="hidden lg:inline-flex">
+                <button
+                  type="button"
+                  className="btn btn--primary nav__btn"
+                  onClick={() => scrollToAdmissions()}
+                >
+                  Free Diagnostic
+                </button>
+              </Magnetic>
               <button
                 type="button"
                 className={`chm-27__plate nav__plate-toggle inline-flex lg:hidden ${menuChecked ? 'is-checked' : ''}`}
@@ -277,89 +283,9 @@ export default function App() {
         <div className="stack">
 
           {/* Hero */}
-          <section className="hero pt-20 pb-12 md:pt-28 md:pb-20 flex flex-col items-center justify-center relative overflow-hidden" aria-labelledby="hero-title">
-            {/* Desktop Hero Shapes - Framed along perimeter to never overlap copy */}
-            <div className="hero__shapes hero__shapes--desktop pointer-events-none select-none z-0" aria-hidden="true">
-              <span
-                className="shape shape--circle"
-                style={{ left: '-100px', top: '-40px', width: '220px', height: '220px', background: '#FF0000', opacity: 0.45 }}
-              />
-              <svg
-                className="shape"
-                style={{ left: '40px', top: '10px', width: '150px', height: '160px', opacity: 0.45 }}
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-              >
-                <polygon points="50,0 100,38 81,100 19,100 0,38" fill="#FFE500" />
-              </svg>
-              <span
-                className="shape shape--circle"
-                style={{ right: '-40px', top: '-25px', width: '200px', height: '200px', background: '#8fd4ee', opacity: 0.65 }}
-              />
-              <span
-                className="shape"
-                style={{ right: '20px', top: '40%', width: '120px', height: '120px', background: '#FFE500', transform: 'rotate(14deg)', opacity: 0.65, borderRadius: '14px' }}
-              />
-              <svg
-                className="shape"
-                style={{ left: '20px', top: '40%', width: '130px', height: '140px', opacity: 0.65 }}
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-              >
-                <polygon points="0,0 100,48 12,100" fill="#00E575" />
-              </svg>
-              <svg
-                className="shape"
-                id="star"
-                style={{ right: '40px', bottom: '24px', width: '130px', height: '130px', opacity: 0.55 }}
-                viewBox="-50 -50 100 100"
-              >
-                <polygon fill="#FF4071" points={starPoints} />
-              </svg>
-              <span
-                className="shape shape--circle"
-                style={{ left: '-40px', bottom: '20px', width: '130px', height: '130px', background: '#FF4071', opacity: 0.45 }}
-              />
-              <span
-                className="shape shape--circle"
-                style={{ left: '50px', bottom: '12px', width: '90px', height: '90px', background: '#FF3B30', opacity: 0.35 }}
-              />
-            </div>
-
-            {/* Mobile Hero Shapes - Proportionally scaled and framed along perimeter to never obstruct text copy */}
-            <div className="hero__shapes hero__shapes--mobile pointer-events-none select-none z-0" aria-hidden="true">
-              {/* Top Left Yellow Angle */}
-              <svg
-                className="shape"
-                style={{ left: '-10px', top: '-10px', width: '60px', height: '64px', opacity: 0.45 }}
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-              >
-                <polygon points="0,0 100,28 65,100 0,72" fill="#FFE500" />
-              </svg>
-              {/* Top Right Arctic Cyan Circle */}
-              <span
-                className="shape shape--circle"
-                style={{ right: '-16px', top: '10px', width: '60px', height: '60px', background: '#8FD4EE', opacity: 0.55 }}
-              />
-              {/* Bottom Left Green Accent */}
-              <svg
-                className="shape"
-                style={{ left: '-10px', bottom: '10px', width: '54px', height: '58px', opacity: 0.5 }}
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-              >
-                <polygon points="0,0 100,48 12,100" fill="#00E575" />
-              </svg>
-              {/* Bottom Right Hot Pink Star */}
-              <svg
-                className="shape"
-                style={{ right: '-12px', bottom: '10px', width: '58px', height: '58px', opacity: 0.45 }}
-                viewBox="-50 -50 100 100"
-              >
-                <polygon fill="#FF4071" points={starPoints} />
-              </svg>
-            </div>
+          <section className="hero w-full pt-20 pb-12 md:pt-28 md:pb-20 flex flex-col items-center justify-center relative overflow-hidden" aria-labelledby="hero-title">
+            {/* Real-Time 3D WebGL Hero Canvas with PBR Glass, Lighting & Parallax Physics */}
+            <Hero3DCanvas />
 
             <div className="hero__content relative z-20 flex flex-col items-center justify-center gap-4 sm:gap-5 md:gap-6 max-w-4xl mx-auto px-4 w-full">
               <div className="flex items-center justify-center w-full px-2">
@@ -368,7 +294,9 @@ export default function App() {
                   <span>•</span>
                   <span><NumberTicker value={12} className="font-black text-black" /> Seats Per Pod</span>
                   <span className="hidden min-[420px]:inline">•</span>
-                  <span className="hidden min-[420px]:inline">Zero Passive Lectures</span>
+                  <AnimatedShinyText duration={3} className="hidden min-[420px]:inline text-black font-black">
+                    Zero Passive Lectures
+                  </AnimatedShinyText>
                 </span>
               </div>
               <h1 id="hero-title" className="sr-only">
@@ -394,24 +322,28 @@ export default function App() {
                 A practical exposure lab for students, professionals, and founders who freeze under audience scrutiny. Run your free diagnostic, identify your freeze triggers, and unlock your practice pod pass.
               </TextEffect>
 
-              {/* Dual-Action Conversion Console (neobrutalism.dev hierarchy) */}
+              {/* Dual-Action Conversion Console with Magnetic Micro-Interactions */}
               <div className="hero__actions flex flex-wrap items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto mt-2 sm:mt-3">
-                <button
-                  type="button"
-                  className="btn btn--primary w-full sm:w-auto min-h-[48px]"
-                  onClick={() => scrollToAdmissions()}
-                >
-                  <span>Run Free Diagnostic</span>
-                  <ArrowRight className="size-4 stroke-[3]" />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn--dark w-full sm:w-auto min-h-[48px]"
-                  onClick={() => setDiagnosticModalOpen(true)}
-                >
-                  <Radio className="size-4 text-[#00E575] animate-pulse" />
-                  <span>Book 10-Min Free Audit ↗</span>
-                </button>
+                <Magnetic intensity={0.25} range={70} className="w-full sm:w-auto">
+                  <button
+                    type="button"
+                    className="btn btn--primary w-full sm:w-auto min-h-[48px]"
+                    onClick={() => scrollToAdmissions()}
+                  >
+                    <span>Run Free Diagnostic</span>
+                    <ArrowRight className="size-4 stroke-[3]" />
+                  </button>
+                </Magnetic>
+                <Magnetic intensity={0.25} range={70} className="w-full sm:w-auto">
+                  <button
+                    type="button"
+                    className="btn btn--dark w-full sm:w-auto min-h-[48px]"
+                    onClick={() => setDiagnosticModalOpen(true)}
+                  >
+                    <Radio className="size-4 text-[#00E575] animate-pulse" />
+                    <span>Book 10-Min Free Audit ↗</span>
+                  </button>
+                </Magnetic>
               </div>
             </div>
           </section>
@@ -432,39 +364,69 @@ export default function App() {
               </div>
 
               <div className="approach__cards">
-                <article className="card card--sky">
-                  <span className="card__dot" aria-hidden="true"></span>
-                  <div className="card__body">
-                    <h3 className="card__title tracking-[-0.025em] font-black">Daily Speaking Reps</h3>
-                    <p className="card__text font-editorial text-[15px] sm:text-[16px] text-[#181820] leading-relaxed max-w-[55ch]">You get micro-opportunities to speak every single day. This constant frequency builds instant habit and eliminates overthinking.</p>
-                  </div>
-                  <a className="pill" href="#cohort">
-                    <span>Daily reps</span>
-                    <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </a>
-                </article>
+                <Tilt rotationFactor={6} isRevese={true} className="h-full">
+                  <SpotlightCard
+                    spotlightColor="rgba(255, 255, 255, 0.45)"
+                    spotlightSize={320}
+                    className="card card--sky h-full"
+                  >
+                    <span className="card__dot" aria-hidden="true"></span>
+                    <div className="card__body">
+                      <h3 className="card__title tracking-[-0.025em] font-black">Daily Speaking Reps</h3>
+                      <p className="card__text font-editorial text-[15px] sm:text-[16px] text-[#181820] leading-relaxed max-w-[55ch]">You get micro-opportunities to speak every single day. This constant frequency builds instant habit and eliminates overthinking.</p>
+                    </div>
+                    <div className="pt-4 mt-auto">
+                      <Magnetic intensity={0.25} range={50}>
+                        <a className="pill" href="#cohort">
+                          <span>Daily reps</span>
+                          <ArrowRight className="size-3.5 stroke-[2.5]" />
+                        </a>
+                      </Magnetic>
+                    </div>
+                  </SpotlightCard>
+                </Tilt>
 
-                <article className="card card--green">
-                  <div className="card__body">
-                    <h3 className="card__title tracking-[-0.025em] font-black">Progressive Exposure Pods</h3>
-                    <p className="card__text font-editorial text-[15px] sm:text-[16px] text-[#181820] leading-relaxed max-w-[55ch]">You are placed into small, supportive peer groups led by dedicated facilitators, ensuring you are never thrown into the deep end alone.</p>
-                  </div>
-                  <a className="pill" href="#cohort">
-                    <span>Join a pod</span>
-                    <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </a>
-                </article>
+                <Tilt rotationFactor={6} isRevese={true} className="h-full">
+                  <SpotlightCard
+                    spotlightColor="rgba(255, 255, 255, 0.45)"
+                    spotlightSize={320}
+                    className="card card--green h-full"
+                  >
+                    <div className="card__body">
+                      <h3 className="card__title tracking-[-0.025em] font-black">Progressive Exposure Pods</h3>
+                      <p className="card__text font-editorial text-[15px] sm:text-[16px] text-[#181820] leading-relaxed max-w-[55ch]">You are placed into small, supportive peer groups led by dedicated facilitators, ensuring you are never thrown into the deep end alone.</p>
+                    </div>
+                    <div className="pt-4 mt-auto">
+                      <Magnetic intensity={0.25} range={50}>
+                        <a className="pill" href="#cohort">
+                          <span>Join a pod</span>
+                          <ArrowRight className="size-3.5 stroke-[2.5]" />
+                        </a>
+                      </Magnetic>
+                    </div>
+                  </SpotlightCard>
+                </Tilt>
 
-                <article className="card card--orange">
-                  <div className="card__body">
-                    <h3 className="card__title tracking-[-0.025em] font-black">Real-World and Virtual Stages</h3>
-                    <p className="card__text font-editorial text-[15px] sm:text-[16px] text-[#181820] leading-relaxed max-w-[55ch]">You practice across both virtual environments and physical spaces—stepping onto real stages, managing eye contact, and projecting your voice in front of live audiences.</p>
-                  </div>
-                  <a className="pill" href="#cohort">
-                    <span>Real stages</span>
-                    <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </a>
-                </article>
+                <Tilt rotationFactor={6} isRevese={true} className="h-full">
+                  <SpotlightCard
+                    spotlightColor="rgba(255, 255, 255, 0.45)"
+                    spotlightSize={320}
+                    className="card card--orange h-full"
+                  >
+                    <div className="card__body">
+                      <h3 className="card__title tracking-[-0.025em] font-black">Real-World and Virtual Stages</h3>
+                      <p className="card__text font-editorial text-[15px] sm:text-[16px] text-[#181820] leading-relaxed max-w-[55ch]">You practice across both virtual environments and physical spaces—stepping onto real stages, managing eye contact, and projecting your voice in front of live audiences.</p>
+                    </div>
+                    <div className="pt-4 mt-auto">
+                      <Magnetic intensity={0.25} range={50}>
+                        <a className="pill" href="#cohort">
+                          <span>Real stages</span>
+                          <ArrowRight className="size-3.5 stroke-[2.5]" />
+                        </a>
+                      </Magnetic>
+                    </div>
+                  </SpotlightCard>
+                </Tilt>
               </div>
             </div>
           </section>
@@ -656,12 +618,16 @@ export default function App() {
                 )}
               </div>
 
-              {/* Desktop 3-Card Grid - Clear, readable typography matching Our Approach (active on >= 1024px) */}
+              {/* Desktop 3-Card Grid with Magic UI Spotlight and Tilt */}
               <div className="hidden lg:grid lg:grid-cols-3 gap-5 lg:gap-6 w-full">
                 
                 {/* Persona 1: Students & Graduates */}
                 <Tilt rotationFactor={6} isRevese={true} className="h-full">
-                  <article className="relative flex flex-col justify-between bg-[#C7D2FE] border-[3px] border-black text-[#111118] rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] h-full shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                  <SpotlightCard
+                    spotlightColor="rgba(255, 0, 0, 0.2)"
+                    spotlightSize={340}
+                    className="relative flex flex-col justify-between bg-[#C7D2FE] border-[3px] border-black text-[#111118] rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] h-full shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200"
+                  >
                     <span
                       className="card__dot"
                       aria-hidden="true"
@@ -697,22 +663,28 @@ export default function App() {
                     </div>
 
                     <div className="pt-4 mt-auto">
-                      <button
-                        type="button"
-                        onClick={() => scrollToAdmissions('student')}
-                        className="pill cursor-pointer text-sm font-bold py-2 px-4"
-                        style={{ marginTop: 0 }}
-                      >
-                        <span>Student track</span>
-                        <ArrowRight className="size-4 stroke-[2.5]" />
-                      </button>
+                      <Magnetic intensity={0.25} range={50}>
+                        <button
+                          type="button"
+                          onClick={() => scrollToAdmissions('student')}
+                          className="pill cursor-pointer text-sm font-bold py-2 px-4"
+                          style={{ marginTop: 0 }}
+                        >
+                          <span>Student track</span>
+                          <ArrowRight className="size-4 stroke-[2.5]" />
+                        </button>
+                      </Magnetic>
                     </div>
-                  </article>
+                  </SpotlightCard>
                 </Tilt>
 
                 {/* Persona 2: Professionals & Seekers */}
                 <Tilt rotationFactor={6} isRevese={true} className="h-full">
-                  <article className="relative flex flex-col justify-between bg-[#FFE500] border-[3px] border-black text-[#111118] rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] h-full shadow-[4px_4px_0_#000] lg:[transform:rotate(1.2deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                  <SpotlightCard
+                    spotlightColor="rgba(0, 0, 0, 0.14)"
+                    spotlightSize={340}
+                    className="relative flex flex-col justify-between bg-[#FFE500] border-[3px] border-black text-[#111118] rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] h-full shadow-[4px_4px_0_#000] lg:[transform:rotate(1.2deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200"
+                  >
                     <span
                       className="card__dot"
                       aria-hidden="true"
@@ -748,22 +720,28 @@ export default function App() {
                     </div>
 
                     <div className="pt-4 mt-auto">
-                      <button
-                        type="button"
-                        onClick={() => scrollToAdmissions('professional')}
-                        className="pill cursor-pointer text-sm font-bold py-2 px-4"
-                        style={{ marginTop: 0 }}
-                      >
-                        <span>Join a pod</span>
-                        <ArrowRight className="size-4 stroke-[2.5]" />
-                      </button>
+                      <Magnetic intensity={0.25} range={50}>
+                        <button
+                          type="button"
+                          onClick={() => scrollToAdmissions('professional')}
+                          className="pill cursor-pointer text-sm font-bold py-2 px-4"
+                          style={{ marginTop: 0 }}
+                        >
+                          <span>Join a pod</span>
+                          <ArrowRight className="size-4 stroke-[2.5]" />
+                        </button>
+                      </Magnetic>
                     </div>
-                  </article>
+                  </SpotlightCard>
                 </Tilt>
 
                 {/* Persona 3: Founders & Creators */}
                 <Tilt rotationFactor={6} isRevese={true} className="h-full">
-                  <article className="relative flex flex-col justify-between bg-[#FF3366] border-[3px] border-black text-white rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] h-full shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200">
+                  <SpotlightCard
+                    spotlightColor="rgba(255, 255, 255, 0.28)"
+                    spotlightSize={340}
+                    className="relative flex flex-col justify-between bg-[#FF3366] border-[3px] border-black text-white rounded-[20px] p-5 lg:p-6 min-h-[310px] lg:min-h-[330px] h-full shadow-[4px_4px_0_#000] lg:[transform:rotate(-1deg)] hover:lg:[transform:rotate(0deg)_scale(1.02)] transition-all duration-200"
+                  >
                     <span
                       className="card__dot"
                       aria-hidden="true"
@@ -799,17 +777,19 @@ export default function App() {
                     </div>
 
                     <div className="pt-4 mt-auto">
-                      <button
-                        type="button"
-                        onClick={() => scrollToAdmissions('founder')}
-                        className="pill cursor-pointer text-sm font-bold py-2 px-4"
-                        style={{ marginTop: 0 }}
-                      >
-                        <span>Explore stages</span>
-                        <ArrowRight className="size-4 stroke-[2.5]" />
-                      </button>
+                      <Magnetic intensity={0.25} range={50}>
+                        <button
+                          type="button"
+                          onClick={() => scrollToAdmissions('founder')}
+                          className="pill cursor-pointer text-sm font-bold py-2 px-4"
+                          style={{ marginTop: 0 }}
+                        >
+                          <span>Explore stages</span>
+                          <ArrowRight className="size-4 stroke-[2.5]" />
+                        </button>
+                      </Magnetic>
                     </div>
-                  </article>
+                  </SpotlightCard>
                 </Tilt>
 
               </div>

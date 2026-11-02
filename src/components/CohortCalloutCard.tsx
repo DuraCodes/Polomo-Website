@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, CheckCircle2, User, Mail, Phone, MessageSquare, Zap } from 'lucide-react';
 import { NumberTicker } from './magicui/number-ticker';
+import { BorderBeam } from './magicui/border-beam';
+import { Magnetic } from './motion-primitives/magnetic';
 
 export interface CohortCalloutCardProps {
   cohortStatus?: 'DIAGNOSTIC' | 'OPEN' | 'WAITLIST';
@@ -191,15 +193,17 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
 
             {/* The Bridge into WhatsApp Community */}
             <div className="pt-5 flex justify-center">
-              <a
-                href={whatsappInviteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-full border-2 border-black bg-[#25D366] hover:bg-[#20ba59] text-black font-black text-sm sm:text-base uppercase tracking-wider shadow-[4px_4px_0_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all w-full sm:w-auto text-center min-h-[48px]"
-              >
-                <MessageSquare className="size-5 stroke-[3]" />
-                <span>Open WhatsApp &amp; Join Practice Pod ↗</span>
-              </a>
+              <Magnetic intensity={0.25} range={80}>
+                <a
+                  href={whatsappInviteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-full border-2 border-black bg-[#25D366] hover:bg-[#20ba59] text-black font-black text-sm sm:text-base uppercase tracking-wider shadow-[4px_4px_0_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all w-full sm:w-auto text-center min-h-[48px]"
+                >
+                  <MessageSquare className="size-5 stroke-[3]" />
+                  <span>Open WhatsApp &amp; Join Practice Pod ↗</span>
+                </a>
+              </Magnetic>
             </div>
 
             <div className="mt-4 pt-3 border-t border-black/10 text-center sm:text-right">
@@ -213,11 +217,12 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
             </div>
           </div>
         ) : (
-          /* Main 3-Step Diagnostic Terminal (Less is More) */
           <form
             onSubmit={handleSubmit}
-            className="border-[3px] border-black bg-white rounded-2xl p-5 sm:p-8 lg:p-9 shadow-[6px_6px_0_#000000] sm:shadow-[8px_8px_0_#000000] relative text-[#111118]"
+            className="border-[3px] border-black bg-white rounded-2xl p-5 sm:p-8 lg:p-9 shadow-[6px_6px_0_#000000] sm:shadow-[8px_8px_0_#000000] relative overflow-hidden text-[#111118]"
           >
+            {/* Main 3-Step Diagnostic Terminal with Magic UI BorderBeam */}
+            <BorderBeam size={220} duration={6} colorFrom="#FFE500" colorVia="#00E575" colorTo="#FF3366" />
             {/* 1. Track Selector */}
             <div className="mb-5">
               <label className="text-xs sm:text-sm font-black uppercase tracking-wider text-[#0A0A0C] mb-2.5 block">
@@ -350,13 +355,15 @@ export const CohortCalloutCard: React.FC<CohortCalloutCardProps> = ({
 
             {/* Submit Action */}
             <div className="pt-5 border-t-2 border-black/10 flex justify-center">
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center gap-2.5 px-10 py-4 rounded-full border-2 border-black bg-[#FFE500] hover:bg-[#25D366] text-black font-black text-sm sm:text-base uppercase tracking-wider shadow-[4px_4px_0_#000] hover:translate-x-[-1.5px] hover:translate-y-[-1.5px] hover:shadow-[6px_6px_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#000] w-full sm:w-auto cursor-pointer transition-all min-h-[50px]"
-              >
-                <span>Generate Diagnostic &amp; Claim Pod Pass</span>
-                <ArrowRight className="size-4 stroke-[3]" />
-              </button>
+              <Magnetic intensity={0.2} range={80} className="w-full sm:w-auto flex justify-center">
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-2.5 px-10 py-4 rounded-full border-2 border-black bg-[#FFE500] hover:bg-[#25D366] text-black font-black text-sm sm:text-base uppercase tracking-wider shadow-[4px_4px_0_#000] hover:translate-x-[-1.5px] hover:translate-y-[-1.5px] hover:shadow-[6px_6px_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#000] w-full sm:w-auto cursor-pointer transition-all min-h-[50px]"
+                >
+                  <span>Generate Diagnostic &amp; Claim Pod Pass</span>
+                  <ArrowRight className="size-4 stroke-[3]" />
+                </button>
+              </Magnetic>
             </div>
 
           </form>

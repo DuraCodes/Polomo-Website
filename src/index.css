@@ -179,7 +179,8 @@ button, a, input, select {
   display: grid;
   place-items: center;
   min-width: 44px;
-  height: 34px;
+  min-height: 44px;
+  height: 100%;
   padding: 0 10px;
   border: 0;
   background: transparent;
@@ -614,8 +615,9 @@ button, a, input, select {
 /* Floating header plate toggle button */
 .nav__plate-toggle {
   display: none;
-  min-height: 38px;
-  padding: 0 10px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
   border-width: 2.5px;
   box-shadow: 3px 3px 0 var(--ink);
   border-radius: 4px;
@@ -896,8 +898,7 @@ main {
 }
 .approach {
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -910,6 +911,12 @@ main {
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
+}
+@media (min-width: 1024px) {
+  .approach {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
 }
 .approach__inner {
   width: 100%;
@@ -1006,7 +1013,8 @@ main {
   align-items: center;
   gap: 8px;
   margin-top: 24px;
-  padding: 7px 16px;
+  min-height: 44px;
+  padding: 8px 18px;
   border-radius: 8px;
   border: 2px solid #111118;
   background: #FFFFFF;
@@ -1177,8 +1185,9 @@ main {
     height: 28px;
   }
   .nav__plate-toggle {
-    min-height: 36px;
-    padding: 0 10px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 12px;
     gap: 6px;
   }
   .nav__plate-toggle .chm-27__lbl {
